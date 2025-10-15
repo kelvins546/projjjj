@@ -1,0 +1,53 @@
+
+.confirmOverlay {
+  position: fixed;
+  inset: 0;               
+  display: flex;
+  justify-content: center;  
+  align-items: center;      
+  background: rgba(0,0,0,0.25);
+  z-index: 9999;
+  pointer-events: auto;
+  padding: 20px;             
+  box-sizing: border-box;   
+}
+
+.confirm-modal-box {
+    background: #fff;
+    padding: 15px;
+    border-radius: 8px;
+    min-width: 180px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.confirm-modal-box h2 {
+    font-size: 20px;
+    text-shadow: none;
+    
+}
+
+.confirm-modal-box p {
+    font-size: 15px;
+    font-weight: 200;
+}
+
+.confirm-btn {
+    background: #248041;
+    width: 150px;
+}
+
+.cancel {
+    background: transparent;
+    color: black;
+    width: 150px;
+    border: 1px black solid;
+}
+
+.confirm-box-buttons{
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}

@@ -1,0 +1,106 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Boldonse&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter&display=swap');
+
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Poppins', sans-serif; 
+}
+
+.header {
+  position: sticky;
+  top: 0;
+  left: 0;
+  width: 100%;
+  padding: 15px 30px;
+  background-color: #FFFF;
+  display: flex;
+  align-items: center;
+  z-index: 99999;
+  color: black;
+  box-shadow: 0 3px 5px rgba(0,0,0,.25);
+}
+
+.profile {
+  background-color: black;
+  height: 50px;
+  width: 50px;
+  margin-left: auto;
+  border-radius: 50%; 
+  cursor: pointer;
+}
+
+
+
+/* -------- RESPONSIVE -------- */
+@media (max-width: 992px) {
+  header {
+    flex-wrap: wrap; 
+    padding: 15px 0px;
+  }
+
+
+  img {
+    height: 40px;
+    width: 40px;
+    display: inline-block;
+  }
+
+}
+
+@media (max-width: 600px) {
+  .header {
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    padding: 15px 20px;
+    text-align: center;
+  }
+
+  .logos {
+    flex-direction: row;
+    justify-content: center;
+    gap: 5px;
+    margin-bottom: 10px;
+  }
+
+  img {
+    height: 50px;
+    width: 50px;
+  }
+
+  .h1 {
+    font-size: 0.1em;
+    text-align: center;
+    width: 100%;
+    line-height: 1.4;
+    font-family: 'Inter', sans-serif;
+    font-weight: 500;
+    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.2);
+    margin-left: 0;
+  }
+}
+
+.logos{
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+}
+img {
+    height: 75px;
+    width: 75px;
+    display: inline-block;
+}
+
+h1 {
+  font-family: 'Inter',sans-serif;
+  font-weight: 450;
+  text-shadow: 
+  2px 2px 4px rgba(0, 0, 0, 0.3);
+  font-size: 30px;
+  margin-left: 15px;
+}
+

@@ -1,0 +1,428 @@
+.gradingContainer {
+  padding: 80px 40px;
+  background-color: #fff;
+}
+
+.gradingContainer h2 {
+  font-size: 26px;
+  font-weight: 600;
+  margin-bottom: 20px;
+}
+
+.gradingSearchSection {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  padding: 30px;
+}
+
+.gradingSearch {
+  display: flex;
+  align-items: center;
+  background-color: #eee;
+  border-radius: 25px;
+  padding: 20px 15px;
+  width: 1000px;
+  height: 40px;
+}
+
+.gradingSearch i {
+  color: #666;
+  margin-right: 8px;
+}
+
+.gradingSearch input {
+  border: none;
+  background: transparent;
+  outline: none;
+  width: 100%;
+}
+
+.gradingSorter {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 20px;
+  margin-bottom: 25px;
+}
+
+.gradingSorter > div {
+  display: flex;
+  flex-direction: column;
+  min-width: 180px;
+}
+
+.gradingSorter label {
+  font-size: 14px;
+  font-weight: 500;
+  margin-bottom: 6px;
+  color: #333;
+}
+
+.gradingTableContainer {
+  overflow-x: auto;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+  padding: 15px 20px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.gradingTableHeader {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.gradingTableHeader label {
+  font-size: 14px;
+  color: #333;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.gradingTableHeader input[type='checkbox'] {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+}
+
+.gradingTableContainer table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 14px;
+  border: 1px solid #bcbcbc;
+}
+
+.gradingTableContainer th,
+.gradingTableContainer td {
+  border: 1px solid #bcbcbc;
+  padding: 10px 14px;
+  vertical-align: middle;
+}
+
+.gradingTableContainer th {
+  background-color: #e8e8e8;
+  font-weight: 600;
+  color: #333;
+  text-align: left;
+}
+
+.gradingTableContainer tr:nth-child(even) {
+  background-color: #fafafa;
+}
+
+.status {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 500;
+  text-align: center;
+  min-width: 140px;
+}
+
+.status.submitted {
+  color: #007bff;
+  border: 1px solid #007bff;
+  background-color: #f0f7ff;
+}
+
+.status.approved {
+  color: #28a745;
+  border: 1px solid #28a745;
+  background-color: #f6fff6;
+}
+
+.encoding {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 500;
+  min-width: 100px;
+  text-align: center;
+}
+
+.encoding.unlocked {
+  color: #e6a100;
+  border: 1px solid #e6a100;
+  background-color: #fff8e1;
+}
+
+.encoding.locked {
+  color: #d9534f;
+  border: 1px solid #d9534f;
+  background-color: #fff5f5;
+}
+
+.setLockGradeLevel {
+  position: absolute;
+}
+
+@media (max-width: 768px) {
+  .gradingTableHeader {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .gradingTableContainer table {
+    font-size: 12px;
+  }
+}
+
+.massLockOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  z-index: 2000;
+  animation: fadeIn 0.2s ease-in-out;
+  padding: 0px 0px 10px 10px;
+}
+
+.massLockModal {
+  background-color: #fff;
+  border-radius: 10px;
+  padding: 25px 30px;
+  width: 340px;
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
+  text-align: center;
+  align-self: last baseline;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.massLockModal h2 {
+  font-size: 20px;
+  font-weight: 700;
+  margin-bottom: 10px;
+}
+
+.massLockModal p {
+  font-size: 14px;
+  color: #555;
+  margin-bottom: 20px;
+}
+
+.lockDuration {
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+  justify-content: center;
+}
+
+.calendar {
+  height: 40px;
+  width: 250px;
+  background-color: #fff;
+  border: none;
+  border-radius: 5px;
+  padding: 10px;
+  font-size: 14px;
+  font-family: inherit;
+  color: #333;
+  cursor: pointer;
+  outline: none;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+}
+
+.massLockOptions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  text-align: left;
+  margin-bottom: 20px;
+  padding-left: 10px;
+}
+
+.massLockOptions label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 15px;
+  cursor: pointer;
+}
+
+.massLockOptions input {
+  color: #1e7b34;
+}
+
+.massLockActions {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.massLockActions button {
+  flex: 1;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.cancelBtn {
+  background: #fff;
+  border: 1px solid #ccc;
+  color: #333;
+}
+
+.cancelBtn:hover {
+  background: #f2f2f2;
+}
+
+.lockBtn {
+  background: #28a745;
+  border: none;
+  color: white;
+}
+
+.lockBtn:hover {
+  background: #1f8a39;
+}
+
+.unlockConfirmation {
+  padding: 20px;
+  width: 400px;
+}
+
+.notifMessage {
+  display: flex;
+  flex-direction: column;
+}
+
+.manageEncodingOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(30, 30, 30, 0.4);
+  display: flex;
+  z-index: 99999;
+  display: flex;
+  justify-content: right;
+}
+
+.manageEncodingModal {
+  background: #fff;
+  border-radius: 10px;
+  width: 700px;
+  padding: 25px 30px;
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+  position: relative;
+}
+
+.backButton {
+  width: 100%;
+  display: flex;
+  flex-direction: row-reverse;
+}
+
+.backButton i {
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.backButton i:hover {
+  color: #176628;
+}
+.teacherInfoContainer {
+  display: flex;
+  gap: 10px;
+}
+
+.teacherInfoCardHeader.grade7 {
+  height: 20px;
+  background-color: #248041;
+  width: 300px;
+  border-top-left-radius: 12px;
+  border-top-right-radius: 12px;
+}
+
+.teacherInfoCard {
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  border-radius: 12px;
+}
+
+.teacherInfoCardData {
+  padding: 10px;
+}
+
+.statusTagsCard {
+  display: flex;
+  flex-direction: column;
+  height: 50px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  border-radius: 12px;
+  padding: 10px;
+  gap: 10px;
+  width: 100%;
+}
+
+.encodingAccessBox {
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  padding: 15px 20px;
+  margin-top: 15px;
+}
+
+.encodingAccessBox h3 {
+  margin-bottom: 10px;
+}
+
+.encodingActionBtns {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 15px;
+  justify-content: end;
+}
+
+.manageEncodingDateInputs {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 15px;
+}
+
+.manageEncodingDateInputs label {
+  display: block;
+  font-weight: 500;
+  margin-bottom: 5px;
+}
+
+.manageEncodingMessageBox textarea {
+  width: 100%;
+  height: 70px;
+  padding: 8px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  resize: none;
+}
+
+.manageEncodingNotifyBox {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.manageEncodingButtonContainer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 15px;
+}

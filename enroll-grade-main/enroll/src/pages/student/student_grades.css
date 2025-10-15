@@ -1,0 +1,76 @@
+.studentGradesContainer {
+    padding: 50px 30px 0px 30px;
+    display: flex;
+    flex-direction: column;
+}
+
+.syGradeSorter {
+    width: 100%;
+}
+
+.sorter {
+    display: flex;
+    flex-direction: column;
+}
+
+.sroter label {
+    font-size: 14px;
+    font-weight: 500;
+    color: #333;
+}
+
+.gradesTableArea {
+    display: flex;
+    width: 100%;
+    justify-content: center;
+    align-items: center;
+}
+
+.gradesTableContainer {
+    background-color: #2B70294D;
+    padding: 10px;
+    border-radius: 15px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    width: fit-content;
+}
+
+.gradesTable table {
+    width: 1100px; 
+    border-collapse: collapse;
+    background-color: white;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.gradesTable th {
+    background-color: #e6e6e6;
+    padding: 10px;
+    text-align: center;
+    font-weight: bold;
+    border: 1px solid #999;
+}
+
+.gradesTable td {
+    border: 1px solid #999;
+    padding: 8px 12px;
+    text-align: center;
+    text-align: left;
+}
+
+.gradesTable em {
+    font-style: italic;
+    color: #333;
+}
+
+.averageRow td {
+    font-weight: bold;
+    background-color: #f8f8f8;
+    text-align: end;
+}
+
+.average {
+    text-align: center;
+}

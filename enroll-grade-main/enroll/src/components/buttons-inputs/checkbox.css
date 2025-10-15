@@ -1,0 +1,11 @@
+.green-checkbox {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+  accent-color: #28a745;
+}
+
+.green-checkbox:checked {
+  background-color: #28a745;
+  border-color: #28a745;
+}

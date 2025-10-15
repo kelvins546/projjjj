@@ -1,0 +1,366 @@
+.sectionList {
+  padding: 80px 40px;
+  background-color: #fff;
+}
+
+.sectionListSorter,
+.studentListSorter {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 20px;
+  margin-top: 20px;
+  margin-bottom: 25px;
+}
+
+.sectionListSearch,
+.studentListSearch {
+  display: flex;
+  align-items: center;
+  background-color: #eee;
+  border-radius: 25px;
+  padding: 20px 15px;
+  width: 700px;
+  max-width: 400px;
+  height: 40px;
+  margin-top: 15px;
+}
+
+.sectionListSearch i,
+.studentListSearch i {
+  color: #666;
+  margin-right: 8px;
+}
+
+.sectionListSearch input,
+.studentListSearch input {
+  border: none;
+  background: transparent;
+  outline: none;
+  width: 100%;
+}
+
+.sectionListSort,
+.studentListSort {
+  display: flex;
+  flex-direction: column;
+}
+
+.sectionListSorter label,
+.studentListSorter label {
+  font-size: 14px;
+  font-weight: 500;
+  color: #333;
+}
+
+.sectionListCards {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+  width: 100%;
+}
+
+.sectionListCard {
+  display: flex;
+  justify-content: center;
+  background: #c6d7c0;
+  border-radius: 12px;
+  text-align: center;
+  padding: 30px;
+  color: #222;
+  box-shadow: inset 0 4px 8px rgba(0, 0, 0, 0.15);
+  width: 400px;
+  height: 160px;
+  transition: 0.5s ease;
+}
+
+.sectionListCard:hover {
+  transform: scale(1.05);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+
+.sectionListCard h2 {
+  font-size: 2rem;
+  margin-bottom: 8px;
+}
+
+.sectionListCard p {
+  font-size: 1rem;
+}
+
+.sectionListTableContainer {
+  overflow-x: auto;
+  background: #fff;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+}
+
+.sectionListTableContainer table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: Arial, sans-serif;
+  font-size: 14px;
+  text-align: left;
+  border: 1px solid #ccc;
+}
+
+.sectionListTableContainer thead th {
+  background-color: #d9d9d9;
+  font-weight: bold;
+  padding: 10px 14px;
+  border: 1px solid #ccc;
+  color: #222;
+  text-align: left;
+  vertical-align: middle;
+}
+
+.sectionListTableContainer thead tr:first-child th[colspan] {
+  text-align: center;
+}
+
+.sectionListTableContainer tbody td {
+  border: 1px solid #ccc;
+  padding: 10px 14px;
+  color: #222;
+  vertical-align: middle;
+}
+
+.sectionListTableContainer tbody tr:nth-child(even) {
+  background-color: #fafafa;
+}
+
+.sectionListTableContainer tbody tr:hover {
+  background-color: #f3f3f3;
+  transition: background-color 0.2s ease-in-out;
+}
+
+.button-container {
+  width: 100%;
+  display: flex;
+  justify-content: end;
+  padding: 20px;
+}
+
+.addNewSection {
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
+  width: 400px;
+}
+
+.back i {
+  width: 100%;
+  display: flex;
+}
+
+.addNewSectionInput {
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+  padding: 10px 20px;
+}
+
+.addNewSectionInput input {
+  background-color: #fff;
+  border: none;
+  border-radius: 5px;
+  padding: 10px;
+  font-size: 14px;
+  font-family: inherit;
+  color: #333;
+  cursor: pointer;
+  outline: none;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  cursor: text;
+}
+
+.addNewSectionInput label {
+  font-size: 14px;
+  font-weight: 500;
+  color: #333;
+}
+
+.buttonContainer {
+  display: flex;
+  width: 100%;
+  justify-content: center;
+  gap: 5px;
+}
+
+/*students list*/
+
+.studentList {
+  padding: 80px 40px;
+  background-color: #fff;
+}
+
+.studentListCards {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  width: 100%;
+  padding: 20px;
+}
+
+.studentListCard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  border: #222 0.5px solid;
+  padding: 30px;
+  border-radius: 12px;
+  box-shadow: inset 0 4px 8px rgba(0, 0, 0, 0.15);
+  transition: 0.5s ease;
+}
+
+.grade7 {
+  background-color: #2480414d;
+}
+
+.grade7:hover,
+.grade8:hover,
+.grade9:hover,
+.grade10:hover {
+  transform: scale(1.05);
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+
+.grade8 {
+  background-color: #fff8334d;
+}
+
+.grade9 {
+  background-color: #e443434d;
+}
+
+.grade10 {
+  background-color: #3498db80;
+}
+
+.studentListCard h2 {
+  font-size: 2rem;
+  margin-bottom: 8px;
+}
+
+.studentListCard p {
+  font-size: 1rem;
+}
+
+.studentListTableContainer {
+  overflow-x: auto;
+  background: #fff;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+}
+
+.studentListTableContainer table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: Arial, sans-serif;
+  font-size: 14px;
+  text-align: left;
+  border: 1px solid #ccc;
+}
+
+.studentListTableContainer thead th {
+  background-color: #e0e0e0;
+  font-weight: bold;
+  padding: 10px 14px;
+  border: 1px solid #ccc;
+  color: #222;
+}
+
+.studentListTableContainer tbody td {
+  border: 1px solid #ccc;
+  padding: 10px 14px;
+  color: #222;
+}
+
+.studentListTableContainer tbody tr:nth-child(even) {
+  background-color: #fafafa;
+}
+
+.studentListTableContainer tbody tr:hover {
+  background-color: #f3f3f3;
+  transition: background-color 0.2s ease-in-out;
+}
+
+.studentListTableContainer {
+  overflow-x: auto;
+  background: #fff;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+}
+
+.studentListTableContainer table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+  text-align: left;
+  border: 1px solid #ccc;
+}
+
+.studentListTableContainer th,
+.studentListTableContainer td {
+  border: 1px solid #ccc;
+  padding: 10px 14px;
+  vertical-align: middle;
+  color: #222;
+}
+
+.studentListTableContainer thead th {
+  background-color: #d9d9d9;
+  font-weight: bold;
+}
+
+.studentListTableContainer tbody tr:nth-child(even) {
+  background-color: #fafafa;
+}
+
+.studentListTableContainer tbody tr:hover {
+  background-color: #f3f3f3;
+  transition: background-color 0.2s ease-in-out;
+}
+
+.overrideStudent,
+.overrideSection {
+  border-radius: 12px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+  overflow: hidden;
+}
+
+.overrideStudentHeader,
+.overrideSectionHeader {
+  background-color: #fde69c;
+  height: 55px;
+  width: 100%;
+}
+
+.overrideSelection {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  padding: 20px;
+  text-align: left;
+}
+
+.overrideSelection select {
+  width: 100%;
+}
+
+.overrideSelection label {
+  font-size: 14px;
+  font-weight: 500;
+  color: #333;
+}
+
+.sectionApply,
+.studentApply {
+  width: 400px;
+  padding: 20px;
+}

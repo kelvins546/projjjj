@@ -1,0 +1,95 @@
+.mainContent {
+  background: #fff;
+  min-height: 100vh;
+}
+
+.profileTitle {
+  text-align: center;
+  font-weight: bold;
+  margin-top: 32px;
+  font-family: Inter, sans-serif;
+}
+
+.profileContainer {
+  background: #fbc74f37;
+  border-radius: 10px;
+  padding: 30px 40px;
+  max-width: 1050px;
+  margin: 28px auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.profileForm {
+  flex: 1;
+}
+
+.formRow {
+  display: flex;
+  gap: 20px;
+  margin-bottom: 18px;
+}
+
+.formColumn {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.suffixColumn {
+  width: 100px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.profileInput {
+  width: 100%;
+  padding: 7px 10px;
+  font-size: 1em;
+  border-radius: 4px;
+  border: 1px solid #e0e0e0;
+  background: #fff;
+  margin-top: 2px;
+}
+
+.changePasswordBtn {
+  background: #338144;
+  color: #fff;
+  border-radius: 7px;
+  border: none;
+  padding: 10px 38px;
+  font-weight: 600;
+  font-size: 15px;
+  cursor: pointer;
+  margin-top: 10px;
+}
+
+.profilePictureContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 210px;
+}
+
+.profilePicture {
+  width: 130px;
+  height: 148px;
+  border-radius: 7px;
+  object-fit: cover;
+  margin-bottom: 16px;
+  box-shadow: 0 2px 10px #0002;
+}
+
+.uploadButton {
+  background: #338144;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 29px;
+  font-weight: 600;
+  font-size: 16px;
+  cursor: pointer;
+}
