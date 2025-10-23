@@ -1,0 +1,433 @@
+.dashboard-container {
+  align-items: center;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  align-items: center;
+  justify-content: center;
+  display: flex;
+  background-color: white;
+  padding-top: 20px;
+  flex-direction: column;
+  padding-bottom: 50px;
+  border: 2px springgreen solid;
+}
+
+select {
+  height: 40px;
+  width: 250px;
+}
+
+.enrollmentOverview {
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  justify-content: center;
+}
+
+.overview {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
+  gap: 30px;
+}
+
+.sort-SY {
+  display: flex;
+  flex-direction: column;
+  padding: 50px 20px 20px 20px;
+}
+
+.sort-SY select,
+.sort-Grade select {
+  height: 40px;
+  width: 250px;
+  background-color: #fff;
+  border: none;
+  border-radius: 5px;
+  padding: 10px;
+  font-size: 14px;
+  font-family: inherit;
+  color: #333;
+  cursor: pointer;
+  outline: none;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+}
+
+.sort-SY select:hover,
+.sort-Grade select:hover {
+  border-color: #fbc84f;
+  box-shadow: 0 0 0 1px rgba(251, 200, 79, 0.3);
+}
+
+.sort-SY option,
+.sort-Grade option {
+  padding: 10px;
+  border-radius: 5px;
+}
+
+.sort-Grade {
+  display: flex;
+  flex-direction: row;
+  gap: 100px;
+}
+
+.sort-Grade h1 {
+  font-size: 25px;
+  height: 100%;
+  padding-top: 15px;
+}
+
+.sorter-Grade {
+  display: flex;
+  flex-direction: column;
+}
+
+.enrollment-stat-cards {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 20px;
+  font-size: 2rem;
+}
+
+.card {
+  width: 300px;
+  text-align: center;
+  padding: 30px;
+  background-color: #2b70294d;
+  border-radius: 10px;
+}
+
+.enroll_chart {
+  height: inherit;
+  width: 100%;
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.chart {
+  background-color: blue;
+  height: 150px;
+  width: 150px;
+  border-radius: 90px;
+}
+
+/*Student Distribution*/
+.studentDistribution {
+  display: flex;
+  width: 100%;
+  padding-top: 50px;
+}
+
+.studentDistributionP1 {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 20px;
+}
+
+.gradeSection_sorter {
+  display: flex;
+  flex-direction: row;
+  gap: 20px;
+}
+
+.table-container {
+  width: 100%;
+  display: flex;
+  margin-top: 20px;
+}
+
+.table1 {
+  border-collapse: collapse;
+  width: 60%;
+  font-family: Arial, sans-serif;
+  font-size: 14px;
+  text-align: left;
+  border: 1px solid #999;
+}
+
+.table1 th,
+.table1 td {
+  border: 1px solid #999;
+  padding: 8px 12px;
+}
+
+.table1 thead th {
+  background-color: #e0e0e0;
+  font-weight: bold;
+}
+
+.table1 tbody tr:nth-child(even) {
+  background-color: #fafafa;
+}
+
+.table1 tbody tr:hover {
+  background-color: #f3f3f3;
+}
+
+.table1 td {
+  color: #222;
+}
+
+.studentDistributionP2 {
+  box-sizing: border-box;
+  width: 100%;
+  border: purple 1px dashed;
+}
+
+/*Faculty Assignment*/
+.facultyAssignment {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  padding: 20px;
+  gap: 50px;
+  padding-top: 50px;
+}
+
+.facultyAssignment h1 {
+  font-size: 25px;
+}
+
+.facultyAssignmentP1 {
+  display: flex;
+  width: 100%;
+}
+
+.teachersSummary {
+  width: 60%;
+}
+
+.teacherLoadSummary {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+  gap: 20px;
+}
+
+.overloadedTeacher {
+  width: 400px;
+}
+
+.overloadedTeacher h2 {
+  font-size: 2rem;
+  margin-bottom: 8px;
+}
+
+.vacantCompliance {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  width: 400px;
+}
+
+.complianceStatContainer {
+  display: flex;
+  justify-content: center;
+  gap: 30px;
+}
+
+.teachersPerGrade {
+  border: greenyellow 1px dashed;
+  width: 100%;
+}
+
+.facultyAssignmentSorter {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.facultyAssignment-search-sort {
+  display: flex;
+}
+
+.facultyAssignmentSearch {
+  display: flex;
+  align-items: center;
+  background-color: #eee;
+  border-radius: 25px;
+  padding: 20px 15px;
+  width: 700px;
+  max-width: 400px;
+  height: 40px;
+}
+
+.facultyAssignmentSearch i {
+  color: #666;
+  margin-right: 8px;
+}
+
+.facultyAssignmentSearch input {
+  border: none;
+  background: transparent;
+  outline: none;
+  width: 100%;
+}
+
+.sorter-grade,
+.sorter-subject,
+.sorter-section {
+  display: flex;
+  flex-direction: column;
+}
+
+.facultyAssignmentP2 {
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  gap: 20px;
+}
+
+.facultyAssignment-search-sort {
+  display: flex;
+  gap: 30px;
+}
+
+.facultyAssignmentTable {
+  width: 100%;
+}
+
+.faculty-periods-table {
+  border-collapse: collapse;
+  width: 100%;
+  font-family: Arial, sans-serif;
+  font-size: 14px;
+  text-align: left;
+  border: 1px solid #999;
+}
+
+.faculty-periods-table th,
+.faculty-periods-table td {
+  border: 1px solid #999;
+  padding: 8px 12px;
+}
+
+.faculty-periods-table thead th {
+  background-color: #e0e0e0;
+  font-weight: bold;
+}
+
+.faculty-periods-table tbody tr:nth-child(even) {
+  background-color: #fafafa;
+}
+
+.faculty-periods-table tbody tr:hover {
+  background-color: #f3f3f3;
+}
+
+.faculty-periods-table td {
+  color: #222;
+}
+
+.workChart {
+  border: 1px darksalmon dashed;
+  width: 100%;
+}
+
+/*Grading Summary*/
+.gradingSummary {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  width: 100%;
+  padding-top: 50px;
+}
+
+.gradingSummaryP1 {
+  display: flex;
+  gap: 20px;
+  width: 100%;
+  padding: 20px;
+}
+
+.gradingSummaryP2 {
+  display: flex;
+  gap: 20px;
+  width: 100%;
+  padding: 20px;
+  align-items: center;
+  justify-content: center;
+}
+
+.teacher-grade-submission {
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
+  align-content: center;
+  text-align: center;
+  align-items: center;
+  width: 400px;
+}
+
+.teacher-grade-submission h2 {
+  font-size: 2rem;
+  margin-bottom: 8px;
+}
+
+.statContainer {
+  display: flex;
+  flex-direction: row;
+}
+
+.gradingSummaryP3 {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  padding: 20px;
+}
+
+.passingRateTitle {
+  width: 100%;
+  text-align: center;
+  padding: 20px;
+}
+
+.passingRateChart {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 50px;
+  padding: 50px;
+}
+
+.gradingSummaryP4 {
+  display: flex;
+  flex-direction: row;
+}
+
+.topSections {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  padding: 20px;
+}
+
+.topSectionsSorter {
+  display: flex;
+  flex-direction: row;
+  gap: 20px;
+}
+
+.gradingSummaryQuarterSort,
+.gradingSummaryGradeSort {
+  display: flex;
+  flex-direction: column;
+}
+
+.averageGradeChart {
+  width: 100%;
+  border: dashed orange 1px;
+}

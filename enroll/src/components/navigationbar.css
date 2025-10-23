@@ -1,0 +1,131 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+.nav-bar {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: fixed;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.7);
+  z-index: 1000;
+}
+
+.navigation-bar {
+  width: 100%;
+  background-color: #507e5e;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+}
+
+.nav-item {
+  position: relative;
+  padding: 16px 30px;
+  color: white;
+  margin-left: 25px;
+  text-decoration: none;
+  cursor: pointer;
+  font-family: 'Inter';
+  font-size: 18px;
+  font-weight: 600;
+  transition: color 0.3s ease;
+}
+
+.nav-item::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 0;
+  height: 3px;
+  background: #fbc84f;
+  border-radius: 3px;
+  transition: width 0.4s ease;
+}
+
+.nav-item:hover {
+  color: #fbc84f;
+}
+
+.nav-item:hover::after {
+  width: 100%;
+}
+
+.nav-item.active {
+  color: #fbc84f;
+}
+
+.nav-item.active::after {
+  width: 100%;
+}
+
+.dashboard-sub-nav {
+  width: 100%;
+  align-items: center;
+  display: flex;
+  justify-content: flex-start;
+  background-color: #fde69c;
+  position: sticky;
+  top: 159px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.sub-nav-item {
+  position: relative;
+  padding: 10px 30px;
+  color: black;
+  margin-left: 25px;
+  text-decoration: none;
+  cursor: pointer;
+  font-family: 'Inter';
+  font-size: 14px;
+  font-weight: 600;
+  transition: color 0.3s ease;
+  z-index: 900;
+}
+
+.sub-nav-item::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 0;
+  height: 3px;
+  background: #248041;
+  border-radius: 3px;
+  transition: width 0.4s ease;
+}
+
+.sub-nav-item:hover {
+  color: #248041;
+}
+
+.sub-nav-item:hover::after {
+  width: 100%;
+}
+
+.sub-nav-item.active {
+  color: #248041;
+}
+
+.sub-nav-item.active::after {
+  width: 100%;
+}
+
+@media (max-width: 768px) {
+  .navigation-bar {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 10px 20px;
+    height: auto;
+  }
+
+  .nav-item {
+    margin: 8px 0;
+    height: 100%;
+  }
+}

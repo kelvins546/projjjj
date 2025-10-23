@@ -1,0 +1,287 @@
+.userManagementContainer {
+  padding: 80px 40px;
+}
+
+.userManageSorter {
+  display: flex;
+  gap: 20px;
+}
+
+.userManageSort {
+  display: flex;
+  flex-direction: column;
+}
+
+.userManageBtnContainer {
+  display: flex;
+  flex: 1;
+  width: 100%;
+}
+
+.userSelectAll {
+  flex: 1;
+  align-items: center;
+  display: flex;
+  gap: 10px;
+}
+
+.userSelectAll label {
+  font-size: 14px;
+  color: #333;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.userSelectAll i {
+  color: #c03939;
+  padding-left: 30px;
+  justify-content: center;
+}
+
+.userSelectAll i:hover {
+  cursor: pointer;
+  color: #e44343;
+  transform: scale(1.03);
+}
+
+.userManageBtns {
+  flex: 1;
+  display: flex;
+  gap: 20px;
+  justify-content: flex-end;
+}
+
+.userManageBtnContainer input[type='checkbox'] {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+}
+
+.userManageSearch {
+  display: flex;
+  align-items: center;
+  background-color: #eee;
+  border-radius: 25px;
+  padding: 20px 15px;
+  width: 700px;
+  max-width: 400px;
+  height: 40px;
+  margin-top: 15px;
+}
+
+.userManageSearch i {
+  color: #666;
+  margin-right: 8px;
+}
+
+.userManageSearch input {
+  border: none;
+  background: transparent;
+  outline: none;
+  width: 100%;
+}
+
+.userManageSort {
+  transition: all 0.3s ease;
+}
+
+.userManageSort select {
+  transition: opacity 0.3s ease;
+}
+
+.userManageTableContainer {
+  background: #2b70294d;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  padding: 10px;
+  gap: 20px;
+}
+
+.userManageTableContainer {
+  overflow-x: auto;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+  padding: 15px 20px;
+  width: 100%;
+  box-sizing: border-box;
+  margin-top: 20px;
+}
+
+.userManageTableContainer table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 14px;
+  border: 1px solid #bcbcbc;
+}
+
+.userManageTableContainer th,
+.userManageTableContainer td {
+  border: 1px solid #bcbcbc;
+  padding: 10px 14px;
+  vertical-align: middle;
+}
+
+.userManageTableContainer th {
+  background-color: #e8e8e8;
+  font-weight: 600;
+  color: #333;
+  text-align: left;
+}
+
+.userManageTableContainer tr:nth-child(even) {
+  background-color: #fafafa;
+}
+
+.userManageTableContainer td.actionsCell {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.userManageTableContainer td.actionsCell button {
+  flex: 1;
+  min-width: 70px;
+  padding: 6px 12px;
+  border: none;
+  border-radius: 6px;
+  color: white;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.actionButtons {
+  display: flex;
+  gap: 16px;
+}
+
+.removeBtn {
+  background-color: #c03939;
+}
+
+.removeBtn:hover {
+  background-color: #e44343;
+}
+
+.deleteConfirmation,
+.addConfirmation {
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 400px;
+}
+
+.confirmDelBtn,
+.confirmAddBtn {
+  display: flex;
+  gap: 16px;
+}
+
+.addNewUser {
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
+  gap: 20px;
+}
+
+.addNewUserBackButton {
+  display: flex;
+}
+
+.addNewUserBackButton i:hover {
+  color: #248041;
+  transition: 0.2s;
+  cursor: pointer;
+}
+
+.addNewUserInput {
+  display: flex;
+  gap: 10px;
+}
+
+.suffix {
+  width: 50px;
+}
+
+.newUserInput {
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+}
+
+.addNewInputs {
+  padding: 50px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.addNewInputs input {
+  background-color: #fff;
+  border: none;
+  border-radius: 5px;
+  padding: 10px;
+  font-size: 14px;
+  font-family: inherit;
+  color: #333;
+  cursor: pointer;
+  outline: none;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+}
+
+.notifMessage {
+  display: flex;
+  flex-direction: column;
+}
+select {
+  background-color: #fff;
+  border: none;
+  border-radius: 5px;
+  padding: 10px;
+  font-size: 14px;
+  font-family: inherit;
+  color: #333;
+  cursor: pointer;
+  outline: none;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+}
+
+select:hover {
+  border-color: #fbc84f;
+  box-shadow: 0 0 0 1px rgba(251, 200, 79, 0.3);
+}
+
+button {
+  background-color: #248041;
+  color: white;
+  border: none;
+  padding: 6px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+button:hover {
+  transform: scale(1.02);
+  background-color: #2fa74e;
+}
+
+input[type='checkbox'] {
+  accent-color: #28a745;
+  cursor: pointer;
+}
+
+input[type='checkbox']:checked {
+  background-color: #28a745;
+  border-color: #28a745;
+}

@@ -1,0 +1,55 @@
+.masterListOverlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.4);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 99999;
+    padding: 20px;
+    backdrop-filter: blur(2px);
+}
+
+.masterListContainer {
+    background: white;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 800px;
+    max-height: 90vh;
+    overflow-y: auto;
+    padding: 20px;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+}
+
+.title {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.studentList {
+    display: flex;
+    justify-content: space-between;
+    gap: 20px;
+}
+
+.maleStudents,
+.femaleStudents {
+    flex: 1;
+    padding: 10px;
+    text-align: start;
+}
+
+.maleStudents h2,
+.femaleStudents h2 {
+    text-align: center;
+    margin-bottom: 10px;
+    text-align: start;
+}
+
+.masterListBtns {
+    align-items: end;
+    margin-top: 20px;
+    width: 100%;
+    justify-content: end;
+    text-align: end;
+}

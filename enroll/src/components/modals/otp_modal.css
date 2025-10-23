@@ -1,0 +1,100 @@
+.otp-modal-overlay {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: rgba(0,0,0,0.25);
+    z-index: 10;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+.otpBox {
+    width: 500px;
+    height: 450px;
+    /*max-width: 95%;*/
+    background-color: #FFFFFF;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    border-radius: 12px;
+    display: flex;
+    text-align: center;
+    flex-direction: column;
+    padding: 20px;
+    position: relative;
+}
+
+.otpBox h2 {
+    font-size: 22px;
+    padding-top: 50px;
+}
+
+.otpBox p{
+    font-size: 15px;
+}
+
+.otp_Input {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    gap: 25px;
+    padding: 50px 5px 10px 5px;
+}
+
+.otp_Input input {
+    height: 70px;
+    width: 50px;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 45px;
+    
+}
+
+.verifyButton {
+    padding-top: 40px;
+    justify-content: center;
+    display: flex;
+    width: 100%;
+}
+
+.verifyButton button {
+    background: #248041;
+    color: #FFFFFF;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    width: 200px;
+    height: 40px;
+    font-family: 'Inter';
+    font-size: 16px;
+}
+
+.otpBox p,
+.otpBox h2 {
+    text-shadow: none;
+}
+
+.otpBox a{
+    cursor: pointer;
+}
+
+.otpBox a:hover {
+    text-decoration: underline;    
+}
+
+.back {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center ;
+  position: absolute;
+}
+
+.back i {
+  cursor: pointer;
+  font-size: 20px;
+}
+
+.back i:hover {
+    color: #248041;
+}

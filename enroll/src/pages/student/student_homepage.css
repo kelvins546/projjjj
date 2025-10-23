@@ -1,0 +1,78 @@
+.studentHomepageContainer {
+    padding: 70px 30px 0px 30px;
+    display: flex;
+    flex-direction: column;
+}
+
+.studentWelcoming p{
+    font-size: 18px;
+    font-style: italic;
+}
+
+.studentCard {
+    background: linear-gradient(to bottom, #6EA67C, #D7F9DB);
+    width: 100%;
+    display: flex;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.30);
+}
+
+.studentCard h2 {
+    text-shadow: none;
+    font-size: 19px;
+    font-weight: 650;
+}
+
+.studentCard p {
+    font-size: 17.5px;
+    font-weight: 450;
+}
+
+.studentDataContainer {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+
+.studentData {
+    display: flex;
+    gap: 10px;
+}
+
+.noticeBoxContainer {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding-top: 50px;
+}
+
+.noticeBox {
+    width: 1200px;
+    height: 300px;
+    text-align: left;
+    background-color: #fbc74f37;
+    border-radius: 10px;
+}
+
+.notice{
+    padding: 50px 120px 0px 60px;
+}
+
+.noticeBox button {
+    background: #248041;
+    color: #FFFFFF;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    width: fit-content;
+    height: 40px;
+    font-family: 'Inter';
+    font-size: 16px;
+}
+
+.buttonContainer {
+    padding: 30px 25px;
+    display: flex;
+    justify-content: flex-end;
+}
