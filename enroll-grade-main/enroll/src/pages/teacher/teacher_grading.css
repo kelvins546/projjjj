@@ -1,0 +1,171 @@
+.teacherGradingContainer {
+    display: flex;
+    flex-direction: column;
+    padding: 50px 30px;
+    gap: 50px;
+    
+}
+
+.sorters {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.search {
+    display: flex;
+    align-items: center;
+    background-color: #eee;
+    border-radius: 25px;
+    padding: 20px 15px;
+    width: 700px;
+    max-width: 400px;
+    height: 40px;
+    margin-top: 15px;
+}
+
+.search i {
+    color: #666;
+    margin-right: 8px;
+}
+
+.search input {
+    border: none;
+    background: transparent;
+    outline: none;
+    width: 100%;
+}
+
+.sorter {
+    display: flex;
+    flex-direction: column;
+}
+
+.archive {
+    width: 100%;
+    align-items: center;
+    text-align: center;
+    justify-content: end;
+    justify-items: center;
+    display: flex;
+
+}
+
+.archive i {
+    font-size: 20px;
+    text-align: center;
+}
+
+.gradingArea {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+}
+
+.gradingCard {
+    display: flex;
+    width: 80%;
+    background: linear-gradient(to bottom, #f2b63f, #f9e4b2);
+    padding: 20px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.30);
+    border-radius: 12px;
+}
+
+.gradingDataContainer {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+
+.gradingData {
+    display: flex;
+    gap: 10px;
+}
+
+.gradingCard h2 {
+    text-shadow: none;
+    font-size: 19px;
+    font-weight: 650;
+}
+
+.gradingCard p {
+    font-size: 17.5px;
+    font-weight: 450;
+}
+
+.buttonContainer {
+    padding: 0;
+    display: flex;
+    align-items: flex-end;
+}
+
+.viewGrade {
+    padding: 20px;
+}
+
+.gradesTable table {
+  border-collapse: collapse;
+  width: 100%;
+  max-width: 1100px;
+  background: #fff;
+  font-family: Arial, sans-serif;
+  font-size: 14px;
+}
+
+.gradesTable th,
+.gradesTable td {
+  border: 1px solid #999;
+  padding: 8px 12px;
+  text-align: left;
+}
+
+.gradesTable th {
+  background-color: #f1d29f;
+  text-align: center;
+  font-weight: bold;
+}
+
+.gradesTable thead th[colspan="4"] {
+  background-color: #f1d29f;
+}
+
+.encodeBtns {
+    padding: 20px;
+    display: flex;
+    justify-content: end;
+    gap: 20px;
+}
+
+.encodeBtns .import {
+    background-color: #f2b63f;
+}
+
+.encodeBtns .import:hover {
+    background-color: #ebbe65;
+}
+
+.confirmSubmit {
+    width: 400px;
+    padding: 20px;
+}
+
+.btnContainer {
+    gap: 10px;
+    display: flex;
+}
+
+.btnContainer .cancel {
+    background-color: transparent;
+    border: 1px solid black;
+    color: black;
+}
+
+.btnContainer .cancel:hover {
+    background-color: transparent;
+    border: 1px solid black;
+    color: black;
+}
+
+

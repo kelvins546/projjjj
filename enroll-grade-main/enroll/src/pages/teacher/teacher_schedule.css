@@ -1,0 +1,23 @@
+.teacherScheduleContainer {
+    display: flex;
+    flex-direction: column;
+    padding: 20px 30px;
+    text-align: center;
+    gap: 20px;
+}
+
+.teacherScheduleContainer h2 {
+    font-size: 30px;
+}
+
+.scheduleArea {
+    padding: 20px;
+    width: 100%;
+    justify-content: center;
+    display: flex;
+    align-items: center;
+}
+
+.scheduleContainer {
+    width: 70%;
+}

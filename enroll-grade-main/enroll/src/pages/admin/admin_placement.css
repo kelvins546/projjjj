@@ -1,3 +1,7 @@
+/* ===========================
+   Section List (original)
+   =========================== */
+
 .sectionList {
   padding: 80px 40px;
   background-color: #fff;
@@ -20,8 +24,8 @@
   background-color: #eee;
   border-radius: 25px;
   padding: 20px 15px;
-  width: 700px;
-  max-width: 400px;
+  width: min(100%, 700px);
+  max-width: none;
   height: 40px;
   margin-top: 15px;
 }
@@ -187,142 +191,185 @@
   gap: 5px;
 }
 
-/*students list*/
+/* ===========================
+   Student List (enforced)
+   =========================== */
 
 .studentList {
-  padding: 80px 40px;
-  background-color: #fff;
+  padding: 80px 40px !important;
+  background-color: #fff !important;
 }
 
-.studentListCards {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 20px;
-  width: 100%;
-  padding: 20px;
+/* Cards row aligned like Section List */
+.studentList .studentListCards {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  gap: 20px !important;
+  width: 100% !important;
+  padding: 0 !important;
 }
 
 .studentListCard {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 5px;
-  border: #222 0.5px solid;
-  padding: 30px;
-  border-radius: 12px;
-  box-shadow: inset 0 4px 8px rgba(0, 0, 0, 0.15);
-  transition: 0.5s ease;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 5px !important;
+  border: #222 0.5px solid !important;
+  padding: 30px !important;
+  border-radius: 12px !important;
+  box-shadow: inset 0 4px 8px rgba(0, 0, 0, 0.15) !important;
+  transition: 0.5s ease !important;
 }
 
 .grade7 {
-  background-color: #2480414d;
+  background-color: #2480414d !important;
+}
+.grade8 {
+  background-color: #fff8334d !important;
+}
+.grade9 {
+  background-color: #e443434d !important;
+}
+.grade10 {
+  background-color: #3498db80 !important;
 }
 
 .grade7:hover,
 .grade8:hover,
 .grade9:hover,
 .grade10:hover {
-  transform: scale(1.05);
-  cursor: pointer;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
-}
-
-.grade8 {
-  background-color: #fff8334d;
-}
-
-.grade9 {
-  background-color: #e443434d;
-}
-
-.grade10 {
-  background-color: #3498db80;
+  transform: scale(1.05) !important;
+  cursor: pointer !important;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15) !important;
 }
 
 .studentListCard h2 {
-  font-size: 2rem;
-  margin-bottom: 8px;
+  font-size: 2rem !important;
+  margin-bottom: 8px !important;
 }
-
 .studentListCard p {
-  font-size: 1rem;
+  font-size: 1rem !important;
 }
 
-.studentListTableContainer {
-  overflow-x: auto;
-  background: #fff;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+/* Filters row: same flex, wrap behavior as Section List */
+.studentList .studentListSorter {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  align-items: center !important;
+  gap: 20px !important;
+  margin-top: 20px !important;
+  margin-bottom: 25px !important;
+  grid-template-columns: unset !important; /* neutralize any grid */
 }
 
-.studentListTableContainer table {
-  width: 100%;
-  border-collapse: collapse;
-  font-family: Arial, sans-serif;
-  font-size: 14px;
-  text-align: left;
-  border: 1px solid #ccc;
+/* Search sizing and growth */
+.studentList .studentListSearch {
+  display: flex !important;
+  align-items: center !important;
+  background-color: #eee !important;
+  border-radius: 25px !important;
+  padding: 20px 15px !important;
+  width: min(100%, 700px) !important;
+  max-width: none !important;
+  height: 40px !important;
+  margin-top: 15px !important;
+  flex: 1 1 520px !important;
 }
 
-.studentListTableContainer thead th {
-  background-color: #e0e0e0;
-  font-weight: bold;
-  padding: 10px 14px;
-  border: 1px solid #ccc;
-  color: #222;
+.studentList .studentListSearch i {
+  color: #666 !important;
+  margin-right: 8px !important;
 }
 
-.studentListTableContainer tbody td {
-  border: 1px solid #ccc;
-  padding: 10px 14px;
-  color: #222;
+.studentList .studentListSearch input {
+  border: none !important;
+  background: transparent !important;
+  outline: none !important;
+  width: 100% !important;
 }
 
-.studentListTableContainer tbody tr:nth-child(even) {
-  background-color: #fafafa;
+/* Selects keep compact basis */
+.studentList .studentListSort {
+  display: flex !important;
+  flex-direction: column !important;
+  flex: 0 0 200px !important;
 }
 
-.studentListTableContainer tbody tr:hover {
-  background-color: #f3f3f3;
-  transition: background-color 0.2s ease-in-out;
+.studentList .studentListSorter label {
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  color: #333 !important;
 }
 
-.studentListTableContainer {
-  overflow-x: auto;
-  background: #fff;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+/* Table container: mirror Section List table */
+.studentList .studentListTableContainer {
+  display: block !important;
+  width: 100% !important;
+  max-width: none !important;
+  float: none !important;
+  margin: 0 !important;
+  overflow-x: auto !important;
+  background: #fff !important;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05) !important;
 }
 
-.studentListTableContainer table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 14px;
-  text-align: left;
-  border: 1px solid #ccc;
+.studentList .studentListTableContainer table {
+  width: 100% !important;
+  border-collapse: collapse !important;
+  font-family: Arial, sans-serif !important;
+  font-size: 14px !important;
+  text-align: left !important;
+  border: 1px solid #ccc !important;
+  table-layout: auto !important;
+  min-width: 900px !important;
 }
 
-.studentListTableContainer th,
-.studentListTableContainer td {
-  border: 1px solid #ccc;
-  padding: 10px 14px;
-  vertical-align: middle;
-  color: #222;
+.studentList .studentListTableContainer thead th {
+  background-color: #d9d9d9 !important;
+  font-weight: bold !important;
+  padding: 10px 14px !important;
+  border: 1px solid #ccc !important;
+  color: #222 !important;
+  text-align: left !important;
+  vertical-align: middle !important;
 }
 
-.studentListTableContainer thead th {
-  background-color: #d9d9d9;
-  font-weight: bold;
+.studentList .studentListTableContainer tbody td {
+  border: 1px solid #ccc !important;
+  padding: 10px 14px !important;
+  color: #222 !important;
+  vertical-align: middle !important;
 }
 
-.studentListTableContainer tbody tr:nth-child(even) {
-  background-color: #fafafa;
+.studentList .studentListTableContainer th,
+.studentList .studentListTableContainer td {
+  white-space: nowrap !important;
 }
 
-.studentListTableContainer tbody tr:hover {
-  background-color: #f3f3f3;
-  transition: background-color 0.2s ease-in-out;
+.studentList .studentListTableContainer tbody tr:nth-child(even) {
+  background-color: #fafafa !important;
 }
+
+.studentList .studentListTableContainer tbody tr:hover {
+  background-color: #f3f3f3 !important;
+  transition: background-color 0.2s ease-in-out !important;
+}
+
+/* Pagination: full width under the table */
+.studentList .pagination-bar {
+  width: 100% !important;
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  gap: 12px !important;
+  padding: 20px 0 !important;
+}
+
+/* ===========================
+   Modals (original)
+   =========================== */
 
 .overrideStudent,
 .overrideSection {
@@ -363,4 +410,23 @@
 .studentApply {
   width: 400px;
   padding: 20px;
+}
+
+/* ===========================
+   Responsive tweaks
+   =========================== */
+
+@media (max-width: 1024px) {
+  .studentList .studentListSearch {
+    flex: 1 1 100% !important;
+  }
+  .studentList .studentListSort {
+    flex: 1 1 220px !important;
+  }
+}
+
+@media (max-width: 640px) {
+  .studentList .studentListSort {
+    flex: 1 1 100% !important;
+  }
 }

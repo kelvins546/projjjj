@@ -68,24 +68,31 @@ export const Admin_Placement = () => {
         .from('sections')
         .select(
           `
-          section_id,
-          name,
-          grade_level,
-          adviser_id,
-          adviser:teachers!sections_adviser_id_fkey(
-            teacher_id,
-            user:users!teachers_user_id_fkey(
-              first_name,
-              last_name
-            )
+        section_id,
+        name,
+        grade_level,
+        is_star,
+        adviser_id,
+        adviser:teachers!sections_adviser_id_fkey(
+          teacher_id,
+          user:users!teachers_user_id_fkey(
+            first_name,
+            last_name
           )
-        `
+        )
+      `
         )
         .order('name');
       if (error) throw error;
       setSections(data || []);
     } catch (e) {
-      console.error('Failed to load sections:', e);
+      console.error(
+        'Failed to load sections:',
+        e?.message,
+        e?.details,
+        e?.hint,
+        e?.code
+      );
       setSections([]);
     } finally {
       setLoadingSections(false);
@@ -131,50 +138,175 @@ export const Admin_Placement = () => {
   };
 
   // Fetch students and embed their section plus adviser (teacher -> user); normalize a flat adviser_full_name
+  // src/pages/admin/Admin_Placement.jsx
+  // Safe mode: two queries + client merge
+  // src/pages/admin/Admin_Placement.jsx
+  // Replace loadStudents in src/pages/admin/Admin_Placement.jsx
+
   const loadStudents = async () => {
     setLoadingStudents(true);
     try {
-      const { data, error } = await supabase.from('students').select(`
-          student_id,
-          first_name,
-          last_name,
-          gender,
-          student_sections:student_sections(
-            section:sections(
-              name,
-              grade_level,
-              adviser:teachers!sections_adviser_id_fkey(
-                user:users!teachers_user_id_fkey(first_name, last_name)
-              )
-            )
-          )
-        `);
-      if (error) throw error;
+      // 1) Base: ALL students
+      const { data: stuRows, error: eS } = await supabase
+        .from('students')
+        .select('student_id, user_id, gender, applicant_id, enrollment_id');
+      if (eS) throw eS;
+      if (!stuRows?.length) {
+        setStudents([]);
+        return;
+      }
 
-      const normalized = (data || []).map((s) => {
-        const rel = Array.isArray(s.student_sections)
-          ? s.student_sections[0]
-          : s.student_sections;
+      const studentIds = stuRows.map((s) => s.student_id);
+      const userIds = [
+        ...new Set(stuRows.map((s) => s.user_id).filter(Boolean)),
+      ];
+      const applicantIds = [
+        ...new Set(stuRows.map((s) => s.applicant_id).filter(Boolean)),
+      ];
+
+      // 2) Users for names
+      const { data: userRows, error: eU } = await supabase
+        .from('users')
+        .select('user_id, first_name, last_name')
+        .in('user_id', userIds);
+      if (eU) throw eU;
+      const usersById = new Map((userRows || []).map((u) => [u.user_id, u]));
+
+      // 3) Sections per student (include is_star)
+      const { data: secRel, error: eSec } = await supabase
+        .from('student_sections')
+        .select(
+          `
+        student_id,
+        school_year,
+        section:sections(
+          section_id,
+          name,
+          grade_level,
+          is_star,       
+          adviser_id
+        )
+      `
+        )
+        .in('student_id', studentIds);
+      if (eSec) throw eSec;
+
+      const sectionsByStudent = new Map();
+      const adviserIds = new Set();
+      for (const rel of secRel || []) {
+        const list = sectionsByStudent.get(rel.student_id) || [];
+        list.push(rel);
+        sectionsByStudent.set(rel.student_id, list);
+        const advId = rel?.section?.adviser_id;
+        if (advId) adviserIds.add(advId);
+      }
+
+      // 4) Adviser resolution (teachers -> users)
+      let teacherRows = [];
+      if (adviserIds.size) {
+        const { data: tRows, error: tErr } = await supabase
+          .from('teachers')
+          .select('teacher_id, user_id')
+          .in('teacher_id', Array.from(adviserIds));
+        if (tErr) throw tErr;
+        teacherRows = tRows || [];
+      }
+      const adviserUserIds = Array.from(
+        new Set(teacherRows.map((t) => t.user_id).filter(Boolean))
+      );
+      let adviserUsers = [];
+      if (adviserUserIds.length) {
+        const { data: uRows, error: uErr } = await supabase
+          .from('users')
+          .select('user_id, first_name, last_name')
+          .in('user_id', adviserUserIds);
+        if (uErr) throw uErr;
+        adviserUsers = uRows || [];
+      }
+      const usersByUserId = new Map(adviserUsers.map((u) => [u.user_id, u]));
+      const teacherNameById = new Map(
+        teacherRows.map((t) => {
+          const u = usersByUserId.get(t.user_id);
+          return [
+            t.teacher_id,
+            u ? `${u.first_name || ''} ${u.last_name || ''}`.trim() : '',
+          ];
+        })
+      );
+
+      // 5) Enrollment fallback (unchanged)
+      let enrByApplicant = new Map();
+      if (applicantIds.length) {
+        const { data: enrRows, error: eE } = await supabase
+          .from('enrollments')
+          .select('applicant_id, school_year, grade_level, status')
+          .in('applicant_id', applicantIds);
+        if (eE) throw eE;
+
+        const latest = new Map();
+        for (const e of enrRows || []) {
+          const key = e.applicant_id;
+          const prev = latest.get(key);
+          if (!prev) latest.set(key, e);
+          else {
+            const curSY = String(e.school_year || '');
+            const prevSY = String(prev.school_year || '');
+            if (curSY.localeCompare(prevSY) > 0) latest.set(key, e);
+          }
+        }
+        enrByApplicant = latest;
+      }
+
+      // 6) Normalize
+      const normalized = (stuRows || []).map((s) => {
+        const user = usersById.get(s.user_id) || {};
+        const rels = (sectionsByStudent.get(s.student_id) || []).sort((a, b) =>
+          String(b?.school_year || '').localeCompare(
+            String(a?.school_year || '')
+          )
+        );
+        const rel = rels[0] || null;
         const sec = rel?.section || null;
-        const advUser = sec?.adviser?.user || null;
+
+        const fromSection = Number(sec?.grade_level);
+        const enrRaw = s.applicant_id
+          ? enrByApplicant.get(s.applicant_id)?.grade_level
+          : null;
+        const enrNum = (() => {
+          const m = String(enrRaw ?? '').match(/\d+/);
+          return m ? Number(m[0]) : NaN;
+        })();
+        const grade_level = Number.isFinite(fromSection)
+          ? fromSection
+          : Number.isFinite(enrNum)
+            ? enrNum
+            : '';
+
+        const adviser_full_name = sec?.adviser_id
+          ? teacherNameById.get(sec.adviser_id) || ''
+          : '';
+
         return {
           student_id: s.student_id,
-          first_name: s.first_name || '',
-          last_name: s.last_name || '',
+          first_name: user.first_name || '',
+          last_name: user.last_name || '',
           gender: s.gender || '—',
-          grade_level:
-            typeof sec?.grade_level === 'number' ? sec.grade_level : '',
+          grade_level,
           section: sec?.name || '',
-          adviser_full_name: advUser
-            ? `${advUser.first_name || ''} ${advUser.last_name || ''}`.trim()
-            : '',
-          is_star: false,
+          adviser_full_name,
+          is_star: !!sec?.is_star, // drives "Yes"/"No"
         };
       });
 
       setStudents(normalized);
     } catch (e) {
-      console.error('Failed to load students:', e);
+      console.error(
+        'Failed to load students:',
+        e?.message,
+        e?.details,
+        e?.hint,
+        e?.code
+      );
       setStudents([]);
     } finally {
       setLoadingStudents(false);
@@ -964,6 +1096,7 @@ export const Admin_Placement = () => {
             <div className="studentList">
               <h2>Student List</h2>
 
+              {/* Student List cards */}
               <div className="studentListCards">
                 {GRADES.map((g) => (
                   <div
@@ -974,11 +1107,13 @@ export const Admin_Placement = () => {
                     <h2>
                       {
                         students.filter(
-                          (s) => Number(s.grade_level) === g.value
+                          (s) =>
+                            Number(s.grade_level) === g.value &&
+                            !(s.section || '').trim()
                         ).length
                       }
                     </h2>
-                    <p>Assigned Students</p>
+                    <p>Without Sections</p>
                   </div>
                 ))}
               </div>
