@@ -3,23 +3,30 @@ import { ReusableModalBox } from '../../components/modals/Reusable_Modal';
 import './scheduling_card.css';
 import { supabase } from '../../supabaseClient';
 
-// Weekly-fixed slots (Mon–Thu label, Fri label, and storage key)
+// Combined schedule for non-advisory teachers (can teach any grade)
 const scheduleRows = [
-  ['6:00 - 6:45', '6:00 - 6:40', '6:00-6:45'],
-  ['6:45 - 7:30', '6:40 - 7:20', '6:45-7:30'],
-  ['7:30 - 8:15', '7:20 - 8:00', '7:30-8:15'],
-  ['8:15 - 9:00', '8:00 - 8:40', '8:15-9:00'],
-  ['9:00 - 9:20', '8:40 - 9:00', '8:40-9:00'], // Recess (exclude in this card)
-  ['9:20 - 10:05', '9:00 - 9:40', '9:00-9:20'],
-  ['10:05 - 10:50', '9:40 - 10:20', '9:20-10:05'],
-  ['10:50 - 11:35', '10:20 - 11:00', '10:05-10:50'],
-  ['11:35 - 12:20', '11:00 - 11:40', '10:50-11:35'],
-  ['', '11:40 - 12:20', '11:35-12:20'], // HGP (exclude in this card)
+  // Morning slots (Grades 7 & 9)
+  ['6:00 - 6:45 (G7/9)', '6:00 - 6:40 (G7/9)', '6:00-6:45'],
+  ['6:45 - 7:30 (G7/9)', '6:40 - 7:20 (G7/9)', '6:45-7:30'],
+  ['7:30 - 8:15 (G7/9)', '7:20 - 8:00 (G7/9)', '7:30-8:15'],
+  ['8:15 - 9:00 (G7/9)', '8:00 - 8:40 (G7/9)', '8:15-9:00'],
+  ['9:20 - 10:05 (G7/9)', '9:00 - 9:40 (G7/9)', '9:20-10:05'],
+  ['10:05 - 10:50 (G7/9)', '9:40 - 10:20 (G7/9)', '10:05-10:50'],
+  ['10:50 - 11:35 (G7/9)', '10:20 - 11:00 (G7/9)', '10:50-11:35'],
+
+  // Afternoon slots (Grades 8 & 10)
+  ['12:30 - 1:15 (G8/10)', '12:30 - 1:10 (G8/10)', '12:30-1:15'],
+  ['1:15 - 2:00 (G8/10)', '1:10 - 1:50 (G8/10)', '1:15-2:00'],
+  ['2:00 - 2:45 (G8/10)', '1:50 - 2:30 (G8/10)', '2:00-2:45'],
+  ['2:45 - 3:30 (G8/10)', '2:30 - 3:10 (G8/10)', '2:45-3:30'],
+  ['3:50 - 4:35 (G8/10)', '3:30 - 4:10 (G8/10)', '3:50-4:35'],
+  ['4:35 - 5:20 (G8/10)', '4:10 - 4:50 (G8/10)', '4:35-5:20'],
+  ['5:20 - 6:05 (G8/10)', '4:50 - 5:30 (G8/10)', '5:20-6:05'],
+  ['6:05 - 6:50 (G8/10)', '5:30 - 6:10 (G8/10)', '6:05-6:50'],
 ];
 
-// Exclude Recess and HGP rows in this view
-const excludedKeys = new Set(['8:40-9:00', '11:35-12:20']);
-const visibleRows = scheduleRows.filter(([, , key]) => !excludedKeys.has(key));
+// No filtering needed - all slots visible for non-advisory
+const visibleRows = scheduleRows;
 
 export const Scheduling_Card_NoAdvisory = ({
   search = '',
@@ -31,14 +38,12 @@ export const Scheduling_Card_NoAdvisory = ({
   const [showSuccessNotif, setShowSuccessNotif] = useState(false);
   const [activeTeacherId, setActiveTeacherId] = useState(null);
 
-  // Non-advisory teachers across all grades
-  const [teachers, setTeachers] = useState([]); // teacher rows with department + user
-  const [teacherGrades, setTeacherGrades] = useState({}); // { teacher_id: number[] }
+  const [teachers, setTeachers] = useState([]);
+  const [teacherGrades, setTeacherGrades] = useState({});
   const [sectionsPerTeacher, setSectionsPerTeacher] = useState({});
   const [loading, setLoading] = useState(true);
   const [errMsg, setErrMsg] = useState('');
 
-  // DnD
   const onDragStart = (event, timeKey) => {
     event.dataTransfer.setData('sectionKey', timeKey);
     event.dataTransfer.effectAllowed = 'move';
@@ -68,58 +73,51 @@ export const Scheduling_Card_NoAdvisory = ({
         setLoading(true);
         setErrMsg('');
 
-        // Optional narrowing by subject/section from teacher_subjects
-        let ts = supabase.from('teacher_subjects').select(`
-            teacher_id,
-            subject_id,
-            section_id,
-            section:sections(grade_level, name)
-          `);
-        if (subjectId) ts = ts.eq('subject_id', Number(subjectId));
-        if (sectionId) ts = ts.eq('section_id', Number(sectionId));
-        const { data: teachSec, error: tsErr } = await ts;
-        if (tsErr) throw tsErr; // server-side narrowing using eq() filters
-
-        // Candidate teacher_ids (or empty list if no TS rows)
-        const candidateIds = Array.from(
-          new Set((teachSec || []).map((r) => r.teacher_id))
-        );
-
-        // Fetch only teachers with no advisory (advisory_section_id IS NULL)
-        let tQuery = supabase
+        // Fetch ALL teachers with no advisory (advisory_section_id IS NULL)
+        const { data: tRows, error: tErr } = await supabase
           .from('teachers')
           .select(
             `
-            teacher_id,
-            position,
-            degree,
-            major,
-            minor,
-            post_grad,
-            course,
-            is_active,
-            department:departments(name, code),
-            user:users(first_name, last_name)
-          `
+        teacher_id,
+        position,
+        degree,
+        major,
+        minor,
+        post_grad,
+        course,
+        is_active,
+        department:departments(name, code),
+        user:users(first_name, last_name)
+      `
           )
-          .is('advisory_section_id', null);
-        if (candidateIds.length) tQuery = tQuery.in('teacher_id', candidateIds);
-        const { data: tRows, error: tErr } = await tQuery;
-        if (tErr) throw tErr; // select + is()/in() per Supabase docs
+          .is('advisory_section_id', null)
+          .eq('is_active', true);
+        if (tErr) throw tErr;
 
         const nonAdvisoryIds = (tRows || []).map((t) => t.teacher_id);
 
-        // Build map of taught grades per teacher from teachSec
+        // Get their teaching assignments (if any) to show grades
+        const { data: teachSec, error: tsErr } = await supabase
+          .from('teacher_subjects')
+          .select(
+            `
+        teacher_id,
+        section:sections(grade_level, name)
+      `
+          )
+          .in('teacher_id', nonAdvisoryIds);
+        if (tsErr) throw tsErr;
+
+        // Build map of taught grades per teacher
         const gradesMap = {};
         (teachSec || []).forEach(({ teacher_id, section }) => {
-          if (!nonAdvisoryIds.includes(teacher_id)) return;
           const g = Number(section?.grade_level);
           if (!Number.isFinite(g)) return;
           if (!gradesMap[teacher_id]) gradesMap[teacher_id] = new Set();
           gradesMap[teacher_id].add(g);
         });
 
-        // Seed weekly map per teacher with visible slot keys only (no Recess/HGP labels)
+        // Seed weekly map per teacher
         const blankWeekly = () =>
           Object.fromEntries(visibleRows.map(([, , k]) => [k, '']));
         const seeded = {};
@@ -128,7 +126,7 @@ export const Scheduling_Card_NoAdvisory = ({
           seeded[t.teacher_id] = m;
         });
 
-        // Hydrate from teacher_schedules for these teachers
+        // Hydrate from teacher_schedules
         if (nonAdvisoryIds.length) {
           const { data: schedRows, error: sErr } = await supabase
             .from('teacher_schedules')
@@ -139,7 +137,6 @@ export const Scheduling_Card_NoAdvisory = ({
           (schedRows || []).forEach(
             ({ teacher_id, slot_key, section_name }) => {
               if (!seeded[teacher_id]) return;
-              if (excludedKeys.has(slot_key)) return; // ignore Recess/HGP persists for this view
               seeded[teacher_id][slot_key] = section_name || '';
             }
           );
@@ -148,7 +145,6 @@ export const Scheduling_Card_NoAdvisory = ({
         if (mounted) {
           setTeachers(tRows || []);
           setSectionsPerTeacher(seeded);
-          // Convert sets to arrays for render
           const asObj = {};
           Object.entries(gradesMap).forEach(([tid, set]) => {
             asObj[tid] = Array.from(set).sort((a, b) => a - b);
@@ -167,7 +163,7 @@ export const Scheduling_Card_NoAdvisory = ({
     return () => {
       mounted = false;
     };
-  }, [subjectId, sectionId]); // refetch when server-side filters change
+  }, [subjectId, sectionId]);
 
   const openModalFor = (teacher_id) => {
     setActiveTeacherId(teacher_id);
@@ -182,7 +178,6 @@ export const Scheduling_Card_NoAdvisory = ({
     return arr.length ? `G${arr.join(', G')}` : '—';
   };
 
-  // Client-side department + name filter
   const filteredTeachers = useMemo(() => {
     const q = (search || '').trim().toLowerCase();
     return (teachers || []).filter((t) => {
@@ -202,7 +197,7 @@ export const Scheduling_Card_NoAdvisory = ({
     try {
       const current = sectionsPerTeacher[activeTeacherId] || {};
       const rows = Object.entries(current)
-        .filter(([, section]) => !!section) // no special cases needed since Recess/HGP absent
+        .filter(([, section]) => !!section)
         .map(([slot_key, section_name]) => ({
           teacher_id: activeTeacherId,
           slot_key,
@@ -258,7 +253,6 @@ export const Scheduling_Card_NoAdvisory = ({
 
   return (
     <>
-      {/* Cards grid */}
       <div className="faculty-cards-grid">
         {filteredTeachers.map((t) => {
           const weekly = sectionsPerTeacher[t.teacher_id] || {};
@@ -279,7 +273,6 @@ export const Scheduling_Card_NoAdvisory = ({
                   <strong>Grades:</strong> {gradesList(t.teacher_id)}
                 </p>
 
-                {/* Preview: only first 2 visible time slots */}
                 <table className="faculty-schedule">
                   <thead>
                     <tr>
@@ -306,7 +299,7 @@ export const Scheduling_Card_NoAdvisory = ({
                 <div className="buttonContainerCard">
                   <button
                     className="edit-btn"
-                    onClick={() => setShowEditModal(true)}
+                    onClick={() => openModalFor(t.teacher_id)}
                   >
                     Edit
                   </button>
@@ -317,7 +310,6 @@ export const Scheduling_Card_NoAdvisory = ({
         })}
       </div>
 
-      {/* Edit modal (weekly-fixed, Recess/HGP removed) */}
       <ReusableModalBox
         show={showEditModal}
         onClose={() => setShowEditModal(false)}
@@ -406,7 +398,6 @@ export const Scheduling_Card_NoAdvisory = ({
         </div>
       </ReusableModalBox>
 
-      {/* Success notification */}
       <ReusableModalBox
         show={showSuccessNotif}
         onClose={() => setShowSuccessNotif(false)}

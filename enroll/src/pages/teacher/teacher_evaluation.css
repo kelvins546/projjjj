@@ -62,13 +62,86 @@
   font-weight: bold;
 }
 
-.evaluationTable thead th[colspan="4"] {
+.evaluationTable thead th[colspan='4'] {
   background-color: #f1d29f;
 }
 
-.evaluationBtns  {
+.evaluationBtns {
   display: flex;
   justify-content: end;
   align-items: end;
   width: 100%;
+}
+.evaluationArea {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 20px;
+  padding: 20px 40px;
+}
+
+.subjectCard {
+  background: white;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: box-shadow 0.3s ease;
+}
+
+.subjectCard:hover {
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.subjectCardContent {
+  padding: 20px;
+  background: #f8f9fa;
+}
+
+.subjectCardContent h3 {
+  margin: 0 0 10px 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+}
+
+.subjectCardContent p {
+  margin: 0;
+  font-size: 14px;
+  color: #666;
+}
+
+.subjectCardButtons {
+  display: flex;
+  border-top: 1px solid #e0e0e0;
+}
+
+.subjectCardButtons button {
+  flex: 1;
+  padding: 12px;
+  border: none;
+  background: white;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: background 0.2s ease;
+}
+
+.subjectCardButtons button:first-child {
+  border-right: 1px solid #e0e0e0;
+}
+
+.viewGradesBtn {
+  color: #007bff;
+}
+
+.viewGradesBtn:hover {
+  background: #f0f7ff;
+}
+
+.approveGradesBtn {
+  color: #28a745;
+}
+
+.approveGradesBtn:hover {
+  background: #f6fff6;
 }

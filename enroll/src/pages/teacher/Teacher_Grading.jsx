@@ -54,22 +54,19 @@ export const Teacher_Grading = () => {
   const [search, setSearch] = useState('');
   const [grade, setGrade] = useState('');
   const [subjectId, setSubjectId] = useState('');
-
   const [loading, setLoading] = useState(false);
   const [teacherId, setTeacherId] = useState(null);
   const [teacherDept, setTeacherDept] = useState({ id: null, name: '—' });
-
   const [classes, setClasses] = useState([]);
   const [selectedClass, setSelectedClass] = useState(null);
-
   const [showViewCard, setShowviewCard] = useState(false);
   const [showEncodeGrade, setShowEncodeGrade] = useState(false);
   const [showSubmitConfirm, setShowSubmitConfirm] = useState(false);
   const [showSubmitNotif, setShowSubmitNotif] = useState(false);
-
   const [rosterLoading, setRosterLoading] = useState(false);
   const [roster, setRoster] = useState([]);
   const [gradeMap, setGradeMap] = useState({});
+  const [encodingAllowed, setEncodingAllowed] = useState({});
 
   useEffect(() => {
     let mounted = true;
@@ -82,12 +79,7 @@ export const Teacher_Grading = () => {
         if (uidNum == null || Number.isNaN(uidNum)) return;
         const { data: trow } = await supabase
           .from('teachers')
-          .select(
-            `
-            teacher_id,
-            department:departments(department_id, name)
-          `
-          )
+          .select(`teacher_id, department:departments(department_id, name)`)
           .eq('user_id', uidNum)
           .single();
         if (!mounted) return;
@@ -112,19 +104,7 @@ export const Teacher_Grading = () => {
         const { data: schedRows, error: sErr } = await supabase
           .from('teacher_schedules')
           .select(
-            `
-            slot_key,
-            section_name,
-            section_id,
-            teacher_subject_id,
-            section:sections(
-              grade_level,
-              name,
-              adviser_id,
-              section_id,
-              room_label
-            )
-          `
+            `slot_key, section_name, section_id, teacher_subject_id, section:sections(grade_level, name, adviser_id, section_id, room_label)`
           )
           .eq('teacher_id', teacherId);
         if (sErr) throw sErr;
@@ -231,6 +211,21 @@ export const Teacher_Grading = () => {
           };
         });
 
+        const { data: encodingData } = await supabase
+          .from('encoding_windows')
+          .select('grade_level, start_date, end_date, is_locked, quarter')
+          .eq('school_year', STATIC_SY);
+
+        const nowISO = new Date().toISOString().slice(0, 10);
+        const allowed = {};
+        (encodingData || []).forEach((w) => {
+          if (!allowed[w.grade_level]) allowed[w.grade_level] = {};
+          const isAllowed =
+            !w.is_locked && nowISO >= w.start_date && nowISO <= w.end_date;
+          allowed[w.grade_level][w.quarter] = isAllowed;
+        });
+        setEncodingAllowed(allowed);
+
         if (mounted) setClasses(built);
       } catch (e) {
         console.error(e);
@@ -287,9 +282,7 @@ export const Teacher_Grading = () => {
       .eq('section_id', klass.section_id)
       .eq('school_year', STATIC_SY)
       .limit(1);
-
     if (existing && existing.length) return existing[0].teacher_subject_id;
-
     const { data: subj } = await supabase
       .from('subjects')
       .select('subject_id')
@@ -298,7 +291,6 @@ export const Teacher_Grading = () => {
       .limit(1);
     const subject_id = subj && subj.length ? subj[0].subject_id : null;
     if (!subject_id) return null;
-
     const { data: created } = await supabase
       .from('teacher_subjects')
       .insert({
@@ -309,10 +301,7 @@ export const Teacher_Grading = () => {
         is_hgp: false,
       })
       .select();
-
-    const tsid =
-      created && created.length ? created[0].teacher_subject_id : null;
-    return tsid;
+    return created && created.length ? created[0].teacher_subject_id : null;
   };
 
   const loadRosterAndGrades = async (klass) => {
@@ -323,37 +312,27 @@ export const Teacher_Grading = () => {
       const { data: studs } = await supabase
         .from('students')
         .select(
-          `
-          student_id,
-          lrn,
-          first_name,
-          last_name,
-          student_sections:student_sections!inner(section_id, school_year)
-        `
+          `student_id, lrn, first_name, last_name, student_sections:student_sections!inner(section_id, school_year)`
         )
         .eq('student_sections.section_id', klass.section_id)
         .eq('student_sections.school_year', STATIC_SY)
         .order('last_name', { ascending: true });
-
       const rosterList = (studs || []).map((s) => ({
         student_id: s.student_id,
         lrn: s.lrn || '',
         first_name: s.first_name || '',
         last_name: s.last_name || '',
       }));
-
       const { data: gRows } = await supabase
         .from('grades')
         .select('student_id, quarter, grade')
         .eq('teacher_subject_id', tsId || -1)
         .eq('school_year', STATIC_SY);
-
       const map = {};
       (gRows || []).forEach((r) => {
         if (!map[r.student_id]) map[r.student_id] = {};
         map[r.student_id][Number(r.quarter)] = Number(r.grade);
       });
-
       setRoster(rosterList);
       setGradeMap(map);
     } catch (e) {
@@ -381,13 +360,16 @@ export const Teacher_Grading = () => {
       (x) => typeof x === 'number'
     );
     if (!arr.length) return '—';
-    const avg = arr.reduce((a, b) => a + b, 0) / arr.length;
-    return Math.round(avg);
+    return Math.round(arr.reduce((a, b) => a + b, 0) / arr.length);
   };
 
-  const computeRemarks = (finalVal) => {
-    if (typeof finalVal !== 'number') return '—';
-    return finalVal >= 75 ? 'Passed' : 'Failed';
+  const computeRemarks = (finalVal) =>
+    typeof finalVal !== 'number' ? '—' : finalVal >= 75 ? 'Passed' : 'Failed';
+
+  const isQuarterLocked = (quarter) => {
+    if (!selectedClass?.grade_level) return true;
+    const gradeLevel = selectedClass.grade_level;
+    return !(encodingAllowed[gradeLevel]?.[quarter] === true);
   };
 
   const submitGrades = async () => {
@@ -401,14 +383,12 @@ export const Teacher_Grading = () => {
         localStorage.getItem('user_id') ?? localStorage.getItem('app_user_id');
       const uidNum = idStr != null ? Number(idStr) : null;
       const studentIds = roster.map((r) => r.student_id);
-
       await supabase
         .from('grades')
         .delete()
         .eq('teacher_subject_id', selectedClass.teacher_subject_id)
         .eq('school_year', STATIC_SY)
         .in('student_id', studentIds);
-
       const rows = [];
       for (const s of roster) {
         const r = gradeMap[s.student_id] || {};
@@ -436,6 +416,33 @@ export const Teacher_Grading = () => {
       setShowSubmitNotif(true);
     } catch (e) {
       console.error(e);
+    }
+  };
+
+  const removeAllGrades = async () => {
+    if (!selectedClass?.teacher_subject_id) {
+      alert('No class selected');
+      return;
+    }
+    const confirmDelete = window.confirm(
+      `WARNING: This will DELETE ALL grades for this class!\n\nSection: ${selectedClass.section_name}\nSubject: ${selectedClass.subject_name}\n\nAre you sure?`
+    );
+    if (!confirmDelete) return;
+    try {
+      const studentIds = roster.map((r) => r.student_id);
+      const { error } = await supabase
+        .from('grades')
+        .delete()
+        .eq('teacher_subject_id', selectedClass.teacher_subject_id)
+        .eq('school_year', STATIC_SY)
+        .in('student_id', studentIds);
+      if (error) throw error;
+      setGradeMap({});
+      alert('All grades removed successfully!');
+      await loadRosterAndGrades(selectedClass);
+    } catch (e) {
+      console.error('Remove grades error:', e);
+      alert('Failed to remove grades: ' + e.message);
     }
   };
 
@@ -474,9 +481,7 @@ export const Teacher_Grading = () => {
               )
                 .sort((a, b) => Number(a) - Number(b))
                 .map((g) => (
-                  <option key={g} value={g}>
-                    {`Grade ${g}`}
-                  </option>
+                  <option key={g} value={g}>{`Grade ${g}`}</option>
                 ))}
             </select>
           </div>
@@ -505,7 +510,6 @@ export const Teacher_Grading = () => {
               </div>
             </div>
           )}
-
           {!loading &&
             visible.map((c) => (
               <div className="gradingCard" key={c.class_key}>
@@ -668,6 +672,7 @@ export const Teacher_Grading = () => {
                               min="0"
                               max="100"
                               value={row[1] ?? ''}
+                              disabled={isQuarterLocked(1)}
                               onChange={(e) =>
                                 updateGradeCell(s.student_id, 1, e.target.value)
                               }
@@ -679,6 +684,7 @@ export const Teacher_Grading = () => {
                               min="0"
                               max="100"
                               value={row[2] ?? ''}
+                              disabled={isQuarterLocked(2)}
                               onChange={(e) =>
                                 updateGradeCell(s.student_id, 2, e.target.value)
                               }
@@ -690,6 +696,7 @@ export const Teacher_Grading = () => {
                               min="0"
                               max="100"
                               value={row[3] ?? ''}
+                              disabled={isQuarterLocked(3)}
                               onChange={(e) =>
                                 updateGradeCell(s.student_id, 3, e.target.value)
                               }
@@ -701,6 +708,7 @@ export const Teacher_Grading = () => {
                               min="0"
                               max="100"
                               value={row[4] ?? ''}
+                              disabled={isQuarterLocked(4)}
                               onChange={(e) =>
                                 updateGradeCell(s.student_id, 4, e.target.value)
                               }
@@ -719,6 +727,16 @@ export const Teacher_Grading = () => {
             </div>
             <div className="encodeBtns">
               <button className="import">Import CSV</button>
+              <button
+                onClick={removeAllGrades}
+                style={{
+                  backgroundColor: '#dc3545',
+                  color: 'white',
+                  border: 'none',
+                }}
+              >
+                Remove All Grades
+              </button>
               <button onClick={() => setShowSubmitConfirm(true)}>Submit</button>
             </div>
           </div>

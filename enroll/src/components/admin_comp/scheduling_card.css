@@ -1,24 +1,17 @@
-/* Responsive grid container matching your JSX class */
 .faculty-cards-grid {
-  display: grid; /* use CSS Grid for card layout */
-  grid-template-columns: repeat(
-    auto-fit,
-    minmax(320px, 1fr)
-  ); /* responsive columns */
-  gap: 16px; /* uniform spacing between cards */
-  align-items: stretch; /* equal height rows */
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 16px;
+  align-items: stretch;
 }
 
-/* OPTIONAL: force exactly 4 columns on very wide screens (remove if not needed) */
 @media (min-width: 1400px) {
   .faculty-cards-grid {
     grid-template-columns: repeat(4, 1fr);
   }
 }
 
-/* Card */
 .faculty-card {
-  /* let the grid track define width; avoid fixed width that can block wrapping */
   width: auto;
   background: #fff;
   border-radius: 10px;
@@ -27,20 +20,17 @@
   font-family: 'Inter', sans-serif;
   color: #222;
   transition: 0.5s ease;
-  box-sizing: border-box; /* safer sizing */
+  box-sizing: border-box;
 }
 
-/* Remove old bottom margins if any; rely on grid gap */
 .faculty-card:not(:last-child) {
   margin-bottom: 0;
 }
 
-/* Hover */
 .faculty-card:hover {
   transform: scale(1.03);
 }
 
-/* Header bars per grade */
 .faculty_card_header_grade7 {
   background-color: #248041;
   height: 40px;
