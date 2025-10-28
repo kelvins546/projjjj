@@ -1,0 +1,78 @@
+.enrollmentForecast,
+.dropoutTrend,
+.gradePerformance {
+  padding: 80px 40px;
+  background-color: #fff;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.sorter {
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
+}
+
+.statChartContainer {
+  width: 100%;
+  display: flex;
+  gap: 30px;
+}
+
+.cardSection {
+  width: 100%;
+}
+
+.gradePerformanceCard,
+.dropoutTrendCard,
+.enrollmentForecastCard {
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+  width: 400px;
+  padding: 20px;
+  border: 1px solid black;
+  border-radius: 12px;
+}
+
+.gradePerformanceCard p,
+.dropoutTrendCard p,
+.enrollmentForecastCard p {
+  font-size: 16px;
+}
+
+.gradePerformanceCard h2,
+.dropoutTrendCard h2,
+.enrollmentForecastCard h2 {
+  color: #c38900;
+  font-size: 35px;
+}
+
+.yearStat {
+  font-weight: 700;
+}
+
+.enrollmentForecastGraph,
+.dropoutTrendGraph {
+  padding: 5px;
+  border: 1px dashed salmon;
+  width: 100%;
+}
+
+.gradePerformanceTable {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+.gradePerformanceTable table {
+  border-collapse: collapse;
+  width: 100%;
+  text-align: left;
+  border: 1px solid #000;
+}
+
+.gradePerformanceTable th,
+.gradePerformanceTable td {
+  border-bottom: 1px solid black;
+  padding: 10px;
+}

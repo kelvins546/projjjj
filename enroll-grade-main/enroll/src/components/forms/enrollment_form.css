@@ -1,0 +1,554 @@
+.studentInfoContainer {
+  padding: 20px;
+}
+
+.studentInfoContainer h1 {
+  text-align: start;
+  font-size: 25px;
+  text-shadow: none;
+  font-weight: 600;
+}
+
+.studentInfoContainer p {
+  text-align: start;
+  font-size: 20px;
+  padding-left: 70px;
+  text-shadow: none;
+  font-weight: 550;
+}
+
+.student_Infos,
+.address_Infos,
+.health_Infos {
+  display: flex;
+  flex-direction: column;
+  padding: 10px 100px 10px 100px;
+}
+
+.first {
+  width: 49.5%;
+}
+
+.student_Info,
+.address_Info,
+.health_Info {
+  display: flex;
+  gap: 16px;
+}
+
+.student_Info2 {
+  width: 50%;
+  display: flex;
+  gap: 16px;
+}
+
+.student_Info label,
+.health_Info label,
+.address_Info label {
+  display: block;
+  margin-bottom: 4px;
+  text-align: left;
+}
+
+.inputGroup {
+  display: flex;
+  flex-direction: column;
+}
+
+.inputGroup input,
+.inputGroup select {
+  padding: 6px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  height: 40px;
+  display: grid;
+  width: 300px;
+  margin-bottom: 20px;
+  background-color: #fff;
+    border: none;
+    border-radius: 5px;
+    padding: 10px;
+    font-size: 14px;
+    font-family: inherit;
+    color: #333;
+    cursor: pointer;
+    outline: none;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+  
+}
+
+.suffix input {
+  width: 70px;
+}
+
+.indigenous {
+  width: 25%;
+}
+
+.buttons_Container {
+  display: flex;
+  margin-top: 30px;
+}
+
+.buttons {
+  display: flex;
+  gap: 30px;
+  margin-left: auto;
+}
+
+.buttons button {
+  background: #248041;
+  color: #ffffff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  width: 200px;
+  height: 40px;
+  font-family: 'Inter';
+  font-size: 16px;
+}
+
+.buttons button:hover {
+  background: #1e6b36;
+}
+
+/*Page 2*/
+
+.guardianInfoContainer {
+  padding: 20px;
+}
+
+.guardian_Infos,
+.guardian_Address_Infos,
+.emergency_Infos {
+  display: flex;
+  flex-direction: column;
+  padding: 10px 100px 10px 100px;
+}
+
+.guardian_Info,
+.guardian_Address_Info,
+.emergency_Info {
+  display: flex;
+  gap: 16px;
+}
+
+.guardian_Info label,
+.guardian_Address_Info label,
+.emergency_Info label {
+  display: block;
+  margin-bottom: 4px;
+  text-align: left;
+}
+
+.guardianInfoContainer {
+  padding: 20px;
+}
+
+.guardianInfoContainer h1 {
+   text-align: start;
+  font-size: 25px;
+  text-shadow: none;
+  font-weight: 600;
+}
+
+.guardianInfoContainer p {
+  text-align: start;
+  font-size: 20px;
+  padding-left: 70px;
+}
+
+/*Page 3*/
+
+.academicBackgroundContainer {
+  padding: 20px;
+}
+
+.academicBackgroundContainer h1 {
+   text-align: start;
+  font-size: 25px;
+  text-shadow: none;
+  font-weight: 600;
+}
+
+.academicBackgroundContainer p {
+  text-align: start;
+  font-size: 20px;
+  padding-left: 60px;
+}
+
+.former_School_Infos,
+.last_School_Infos,
+.average_Infos {
+  display: flex;
+  flex-direction: column;
+  padding: 10px 100px 10px 100px;
+}
+
+.former_School_Info,
+.last_School_Info,
+.average_Info {
+  display: flex;
+  gap: 16px;
+}
+
+.former_School_Info,
+.last_School_Info,
+.average_Info {
+  display: flex;
+  gap: 16px;
+}
+
+.former_School_Info label,
+.last_School_Info label,
+.average_Info label {
+  display: block;
+  margin-bottom: 4px;
+  text-align: left;
+}
+
+.document_Infos {
+  display: flex;
+  padding: 10px 0px 10px 70px;
+  gap: 16px;
+}
+
+.document_Labels {
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+  gap: 40px;
+}
+
+.document_Upload_Buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.upload-btn-PSA,
+.upload-btn-Card,
+.upload-btn-SF10,
+.upload-btn-ID {
+  display: inline-block;
+  background: #248041;
+  color: #ffffff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  width: 200px;
+  height: 40px;
+  font-family: 'Inter';
+  font-size: 16px;
+  line-height: 40px;
+  text-align: center;
+  transition: background 0.2s ease;
+}
+
+.upload-btn-PSA:hover,
+.upload-btn-Card:hover,
+.upload-btn-SF10:hover,
+.upload-btn-ID:hover {
+  background: #1e6b36;
+}
+
+/*Page 4*/
+
+.agreementContainer {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+}
+
+.agreementContainer p {
+  text-align: start;
+  font-size: 20px;
+  padding-left: 20px;
+}
+
+.agreement {
+  font-family: Arial, sans-serif;
+  font-size: 15px;
+  line-height: 1.6;
+  color: #000;
+  text-align: start;
+}
+
+.agreement ol {
+  padding-left: 20px;
+}
+
+.agreement li {
+  margin-bottom: 10px;
+}
+
+.agreement ul {
+  list-style-type: disc;
+  margin: 5px 0 15px 20px;
+}
+
+.agreement strong {
+  display: block;
+  margin-bottom: 5px;
+}
+
+.acknowledge_Infos {
+  padding: 20px;
+}
+
+.acknowledge_Info {
+  text-align: left;
+  display: flex;
+  gap: 15px;
+}
+
+.acknowledge_Info input {
+  height: 20px;
+  width: 20px;
+  transform: translateY(5px);
+}
+
+.upload_ID {
+  display: flex;
+  flex-direction: row;
+  text-align: left;
+  gap: 16px;
+  padding: 20px;
+}
+
+.id_Select {
+  display: flex;
+  gap: 20px;
+}
+
+.id_Select select {
+  height: 40px;
+  width: 250px;
+  background-color: #fff;
+  border: none;
+  border-radius: 5px;
+  padding: 10px;
+  font-size: 14px;
+  font-family: inherit;
+  color: #333;
+  cursor: pointer;
+  outline: none;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+}
+
+.id_Select label {
+  transform: translateY(5px);
+}
+
+.upload-btn-Gov-ID {
+  display: inline-block;
+  background: #248041;
+  color: #ffffff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  width: 200px;
+  height: 40px;
+  font-family: 'Inter';
+  font-size: 16px;
+  line-height: 40px;
+  text-align: center;
+  transition: background 0.2s ease;
+}
+
+.upload-btn-Gov-ID:hover {
+  background: #1e6b36;
+}
+
+.error {
+  color: #d32f2f !important;
+  font-size: 12px !important;
+  margin-top: 4px !important;
+  display: block !important;
+  background: none !important;
+  width: 100% !important;
+  position: static !important;
+  padding: 0 !important;
+  box-sizing: border-box !important;
+  z-index: auto !important;
+}
+
+/* Responsive Design */
+/* Base styles (leave your existing as-is) */
+
+/* Add this below your existing CSS to make the layout fully responsive */
+@media (max-width: 1100px) {
+
+  .student_Infos,
+  .address_Infos,
+  .health_Infos,
+  .guardian_Infos,
+  .guardian_Address_Infos,
+  .emergency_Infos,
+  .former_School_Infos,
+  .last_School_Infos,
+  .average_Infos {
+    padding: 10px 40px 10px 40px;
+  }
+
+  .studentInfoContainer p,
+  .guardianInfoContainer p,
+  .academicBackgroundContainer p {
+    padding-left: 30px;
+    font-size: 18px;
+  }
+}
+
+@media (max-width: 750px) {
+
+  .student_Infos,
+  .address_Infos,
+  .health_Infos,
+  .guardian_Infos,
+  .guardian_Address_Infos,
+  .emergency_Infos,
+  .former_School_Infos,
+  .last_School_Infos,
+  .average_Infos {
+    padding: 8px 8vw;
+  }
+
+  .studentInfoContainer,
+  .guardianInfoContainer,
+  .academicBackgroundContainer,
+  .agreementContainer {
+    padding: 7px;
+  }
+
+  .studentInfoContainer h1,
+  .guardianInfoContainer h1,
+  .academicBackgroundContainer h1 {
+    font-size: 19px;
+  }
+
+  .studentInfoContainer p,
+  .guardianInfoContainer p,
+  .academicBackgroundContainer p {
+    font-size: 15px;
+    padding-left: 12px;
+  }
+
+  .student_Info2,
+  .first {
+    width: 100%;
+  }
+}
+
+@media (max-width: 650px) {
+
+  .student_Info,
+  .address_Info,
+  .health_Info,
+  .guardian_Info,
+  .guardian_Address_Info,
+  .emergency_Info,
+  .former_School_Info,
+  .last_School_Info,
+  .average_Info,
+  .upload_ID {
+    flex-direction: column;
+    gap: 10px;
+    width: 100%;
+  }
+
+  .inputGroup input,
+  .inputGroup select {
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+    font-size: 15px;
+  }
+
+  .suffix input {
+    width: 80px;
+    min-width: 0;
+  }
+
+  .indigenous {
+    width: 100%;
+  }
+
+  .document_Infos {
+    flex-direction: column;
+    padding: 10px 0 10px 0;
+    gap: 12px;
+  }
+
+  .document_Labels {
+    gap: 20px;
+  }
+
+  .document_Upload_Buttons {
+    gap: 10px;
+  }
+
+  .upload-btn-PSA,
+  .upload-btn-Card,
+  .upload-btn-SF10,
+  .upload-btn-ID,
+  .upload-btn-Gov-ID {
+    width: 100%;
+    font-size: 15px;
+    min-width: 0;
+  }
+
+  .id_Select select {
+    width: 100%;
+  }
+
+  .buttons {
+    gap: 10px;
+    flex-direction: column;
+    margin-left: 0;
+    width: 100%;
+    align-items: stretch;
+  }
+
+  .buttons button {
+    width: 100%;
+    min-width: 0;
+    font-size: 15px;
+  }
+
+  .agreementContainer p,
+  .agreement {
+    font-size: 13px;
+    padding-left: 0;
+  }
+
+  .acknowledge_Infos {
+    padding: 10px;
+  }
+
+  .acknowledge_Info {
+    flex-direction: column;
+    gap: 8px;
+    font-size: 13px;
+  }
+
+  .upload_ID {
+    gap: 8px;
+    padding: 10px;
+  }
+}
+
+@media (max-width: 400px) {
+
+  .studentInfoContainer h1,
+  .guardianInfoContainer h1,
+  .academicBackgroundContainer h1 {
+    font-size: 14px;
+  }
+
+  .agreementContainer p,
+  .agreement {
+    font-size: 11px;
+  }
+}
