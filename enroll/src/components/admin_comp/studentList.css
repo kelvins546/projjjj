@@ -5,6 +5,8 @@
 .studentList {
   padding: 80px 40px;
   background-color: #fff;
+  display: flex;
+  flex-direction: column;
 }
 
 .studentList h2 {
@@ -67,12 +69,15 @@
 .grade7 {
   background-color: rgba(36, 128, 65, 0.3);
 }
+
 .grade8 {
   background-color: rgba(255, 248, 51, 0.3);
 }
+
 .grade9 {
   background-color: rgba(228, 67, 67, 0.3);
 }
+
 .grade10 {
   background-color: rgba(52, 152, 219, 0.5);
 }
@@ -217,47 +222,16 @@
 .studentList .studentListTableContainer {
   width: 100%;
   overflow-x: auto;
-  background: #fff;
+  background-color: #F5F6F6;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.08);
   border-radius: 8px;
   margin-bottom: 20px;
+  border-radius: 12px;
+  padding: 20px;
 }
 
 .studentList .studentListTableContainer table {
-  width: 100%;
-  border-collapse: collapse;
-  font-family: Arial, sans-serif;
-  font-size: 14px;
-  text-align: left;
-  border: 1px solid #ddd;
   min-width: 900px;
-}
-
-.studentList .studentListTableContainer thead th {
-  background-color: #d9d9d9;
-  font-weight: 600;
-  padding: 12px 14px;
-  border: 1px solid #ccc;
-  color: #222;
-  text-align: left;
-  vertical-align: middle;
-  white-space: nowrap;
-}
-
-.studentList .studentListTableContainer tbody td {
-  border: 1px solid #ddd;
-  padding: 10px 14px;
-  color: #333;
-  vertical-align: middle;
-}
-
-.studentList .studentListTableContainer tbody tr:nth-child(even) {
-  background-color: #fafafa;
-}
-
-.studentList .studentListTableContainer tbody tr:hover {
-  background-color: #f0f0f0;
-  transition: background-color 0.2s ease-in-out;
 }
 
 .studentList .studentListTableContainer tbody button {

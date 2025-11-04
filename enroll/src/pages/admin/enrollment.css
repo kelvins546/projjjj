@@ -222,7 +222,7 @@ a:hover {
 }
 
 .pager-page.active {
-  background: #2d7a32; /* match your primary green */
+  background: #2d7a32;
   color: #fff;
   border-color: #2d7a32;
 }
@@ -232,14 +232,12 @@ a:hover {
   background: #f2f2f2;
 }
 
-/* Ellipsis */
 .pager-ellipsis {
   padding: 0 6px;
   color: #666;
   user-select: none;
 }
 
-/* Responsive tweak for narrow widths */
 @media (max-width: 768px) {
   .pagination-bar {
     flex-wrap: wrap;
@@ -253,7 +251,7 @@ a:hover {
   }
 }
 .pager-btn ion-icon {
-  font-size: 18px; /* tweak 16–20px to taste */
+  font-size: 18px;
   vertical-align: middle;
 }
 
@@ -262,4 +260,151 @@ a:hover {
   align-items: center;
   justify-content: center;
   gap: 4px;
+}
+/* ============ Notify button (Actions column) ============ */
+.notify-btn {
+  appearance: none;
+  border: 1px solid #f59e0b;
+  background: #f59e0b;
+  color: #1f2937;
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-size: 13px;
+  line-height: 1;
+  cursor: pointer;
+  transition:
+    box-shadow 120ms ease,
+    transform 60ms ease,
+    background 120ms ease;
+}
+.notify-btn:hover {
+  background: #f8b14a;
+  border-color: #f8b14a;
+  box-shadow: 0 2px 8px rgba(245, 158, 11, 0.35);
+}
+.notify-btn:active {
+  transform: translateY(1px);
+}
+.notify-btn:focus-visible {
+  outline: 2px solid #f59e0b;
+  outline-offset: 2px;
+}
+
+.accept-btn {
+  appearance: none;
+  border: 1px solid #16a34a;
+  background: #16a34a;
+  color: #ffffff;
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-size: 13px;
+  line-height: 1;
+  cursor: pointer;
+  transition:
+    box-shadow 120ms ease,
+    transform 60ms ease,
+    background 120ms ease;
+}
+.accept-btn:hover {
+  background: #20b558;
+  border-color: #20b558;
+  box-shadow: 0 2px 8px rgba(22, 163, 74, 0.35);
+}
+.accept-btn:active {
+  transform: translateY(1px);
+}
+.accept-btn:focus-visible {
+  outline: 2px solid #16a34a;
+  outline-offset: 2px;
+}
+
+.modal-btn {
+  appearance: none;
+  border: 1px solid #cbd5e1;
+  background: #ffffff;
+  color: #0f172a;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 14px;
+  cursor: pointer;
+  transition:
+    background 120ms ease,
+    box-shadow 120ms ease,
+    transform 60ms ease;
+}
+.modal-btn:hover {
+  background: #f8fafc;
+  box-shadow: 0 1px 4px rgba(2, 6, 23, 0.15);
+}
+.modal-btn.primary {
+  border-color: #2563eb;
+  background: #2563eb;
+  color: #ffffff;
+}
+.modal-btn.primary:hover {
+  background: #2b74ff;
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.35);
+}
+.modal-btn:active {
+  transform: translateY(1px);
+}
+.modal-btn:disabled,
+.modal-btn.primary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.reusable-modal-backdrop,
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+.reusable-modal-card,
+.modal-card {
+  width: min(520px, 92vw);
+  max-height: 88vh;
+  overflow: auto;
+  background: #ffffff;
+  color: #0f172a;
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow:
+    0 20px 48px rgba(2, 6, 23, 0.25),
+    0 4px 12px rgba(2, 6, 23, 0.18);
+}
+
+.notify-group {
+  display: grid;
+  gap: 8px;
+  margin-top: 12px;
+}
+.notify-notes {
+  margin-top: 12px;
+}
+.notify-notes textarea {
+  width: 100%;
+  min-height: 96px;
+  resize: vertical;
+}
+
+.enrollment-table td .accept-btn,
+.enrollment-table td .notify-btn {
+  white-space: nowrap;
+}
+
+button:focus-visible,
+a:focus-visible,
+input[type='radio']:focus-visible,
+input[type='checkbox']:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid #2563eb;
+  outline-offset: 2px;
 }

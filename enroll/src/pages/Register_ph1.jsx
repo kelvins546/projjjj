@@ -259,9 +259,11 @@ export const Register_ph1 = () => {
                       value={formData.lastName}
                       onChange={handleInputChange}
                     />
-                    {errorMessages.lastName && (
-                      <p className="error">{errorMessages.lastName}</p>
-                    )}
+                    <div className="errorContainer">
+                      {errorMessages.lastName && (
+                        <p className="error">{errorMessages.lastName}</p>
+                      )}
+                    </div>
                   </div>
 
                   <div className="inputGroup1">
@@ -274,9 +276,11 @@ export const Register_ph1 = () => {
                       value={formData.firstName}
                       onChange={handleInputChange}
                     />
-                    {errorMessages.firstName && (
-                      <p className="error">{errorMessages.firstName}</p>
-                    )}
+                    <div className="errorContainer">
+                      {errorMessages.firstName && (
+                        <p className="error">{errorMessages.firstName}</p>
+                      )}
+                    </div>
                   </div>
 
                   <div className="inputGroup1">
@@ -288,9 +292,11 @@ export const Register_ph1 = () => {
                       value={formData.middleName}
                       onChange={handleInputChange}
                     />
-                    {errorMessages.middleName && (
-                      <p className="error">{errorMessages.middleName}</p>
-                    )}
+                    <div className="errorContainer">
+                      {errorMessages.middleName && (
+                        <p className="error">{errorMessages.middleName}</p>
+                      )}
+                    </div>
                   </div>
 
                   <div className="inputGroup1">
@@ -304,9 +310,11 @@ export const Register_ph1 = () => {
                       value={formData.suffix}
                       onChange={handleInputChange}
                     />
-                    {errorMessages.suffix && (
-                      <p className="error">{errorMessages.suffix}</p>
-                    )}
+                    <div className="errorContainer">
+                      {errorMessages.suffix && (
+                        <p className="error">{errorMessages.suffix}</p>
+                      )}
+                    </div>
                   </div>
                 </div>
 
@@ -321,9 +329,11 @@ export const Register_ph1 = () => {
                       value={formData.birthDate}
                       onChange={handleInputChange}
                     />
-                    {errorMessages.birthDate && (
-                      <p className="error">{errorMessages.birthDate}</p>
-                    )}
+                    <div className="errorContainer">
+                      {errorMessages.birthDate && (
+                        <p className="error">{errorMessages.birthDate}</p>
+                      )}
+                    </div>
                   </div>
 
                   <div className="inputGroup2">
@@ -337,9 +347,11 @@ export const Register_ph1 = () => {
                       value={formData.email}
                       onChange={handleInputChange}
                     />
-                    {errorMessages.email && (
-                      <p className="error">{errorMessages.email}</p>
-                    )}
+                    <div className="errorContainer">
+                      {errorMessages.email && (
+                        <p className="error">{errorMessages.email}</p>
+                      )}
+                    </div>
                   </div>
                 </div>
 
@@ -354,9 +366,11 @@ export const Register_ph1 = () => {
                       value={formData.password}
                       onChange={handleInputChange}
                     />
-                    {errorMessages.password && (
-                      <p className="error">{errorMessages.password}</p>
-                    )}
+                    <div className="errorContainer">
+                      {errorMessages.password && (
+                        <p className="error">{errorMessages.password}</p>
+                      )}
+                    </div>
 
                     <i
                       className={`fa ${showPassword ? 'fa-eye' : 'fa-eye-slash'}`}
@@ -365,7 +379,7 @@ export const Register_ph1 = () => {
                       style={{
                         position: 'absolute',
                         right: '12px',
-                        top: '45%',
+                        top: '30%',
                         transform: 'translateY(50%)',
                         fontSize: '17px',
                         color: showPassword ? '#248041' : '#555',
@@ -374,7 +388,6 @@ export const Register_ph1 = () => {
                       }}
                       title={showPassword ? 'Hide password' : 'Show password'}
                     ></i>
-
                   </div>
 
                   <div className="inputGroup3" style={{ position: 'relative' }}>
@@ -398,7 +411,7 @@ export const Register_ph1 = () => {
                       style={{
                         position: 'absolute',
                         right: '12px',
-                        top: '45%',
+                        top: '30%',
                         transform: 'translateY(50%)',
                         fontSize: '17px',
                         color: showConfirmPassword ? '#248041' : '#555',
@@ -411,10 +424,8 @@ export const Register_ph1 = () => {
                           : 'Show confirm password'
                       }
                     />
-
                   </div>
                 </div>
-
 
                 <div className="button1">
                   <button
@@ -428,11 +439,10 @@ export const Register_ph1 = () => {
               </form>
             </div>
           </div>
-          <div className='backToLogin'>
-            <p>Already have an account? { }
-              <Link to="/">
-                Login here.
-              </Link>
+          <div className="backToLogin">
+            <p>
+              Already have an account? {}
+              <Link to="/">Login here.</Link>
             </p>
           </div>
         </div>

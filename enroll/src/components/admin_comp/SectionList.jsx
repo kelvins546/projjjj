@@ -84,7 +84,7 @@ const SectionList = () => {
       setRemovingTeachers(false);
     }
   };
-
+  const SY = '2025-2026';
   const loadSections = async () => {
     setLoadingSections(true);
     try {
@@ -99,30 +99,28 @@ const SectionList = () => {
         adviser_id,
         adviser:teachers!sections_adviser_id_fkey(
           teacher_id,
-          user:users!teachers_user_id_fkey(
-            first_name,
-            last_name
-          )
-        )
+          user:users!teachers_user_id_fkey(first_name,last_name)
+        ),
+        students_count:student_sections!left(count)
       `
         )
-        .order('name');
+        .eq('student_sections.school_year', SY) // filter only the child rows counted
+        .order('name', { ascending: true });
       if (error) throw error;
-      setSections(data || []);
+
+      const withCounts = (data || []).map((s) => ({
+        ...s,
+        num_students: s.students_count?.[0]?.count ?? 0, // flatten aggregate
+      }));
+
+      setSections(withCounts);
     } catch (e) {
-      console.error(
-        'Failed to load sections:',
-        e?.message,
-        e?.details,
-        e?.hint,
-        e?.code
-      );
+      console.error('Failed to load sections:', e?.message);
       setSections([]);
     } finally {
       setLoadingSections(false);
     }
   };
-
   const loadAvailableTeachers = async () => {
     setLoadingTeachers(true);
     try {

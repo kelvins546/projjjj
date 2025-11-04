@@ -1,0 +1,176 @@
+.facultyAssignmentContainer {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  gap: 16px;
+  padding: 60px 14px;
+}
+
+.facultyAssignment h2 {
+  font-size: 25px;
+}
+
+.teacherLoad {
+  display: flex;
+  width: 100%;
+}
+
+.teacherLoadSummary {
+  width: 100%;
+  padding: 16px;
+  padding-bottom: 0;
+  display: flex;
+  gap: 16px;
+}
+
+.facultyAssignmentSorter {
+  display: flex;
+  flex-direction: row !important;
+}
+
+.overloadedTeacher {
+  width: 500px !important;
+  text-align: center;
+  padding: 30px;
+  background-color: #F5F6F6 !important;
+  border-radius: 10px;
+  transition: 0.5s ease;
+  position: relative;
+}
+
+.teachersPerGradeContainer {
+  width: 700px !important;
+  text-align: center;
+  padding: 30px;
+  background-color: #F5F6F6 !important;
+  border-radius: 10px;
+  transition: 0.5s ease;
+  position: relative;
+  padding: 20px;
+}
+
+.recalMsg {
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  color: #334155;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.chartTitle {
+  top: 0;
+  position: absolute;
+  padding-top: 10px;
+  color: #334155;
+  width: 100%;
+}
+
+.chartTitle h2 {
+  font-size: 16px;
+  font-family: 'Poppins', sans-serif;
+  color: #334155;
+  font-weight: 600;
+}
+
+.sort {
+  font-weight: 600;
+}
+
+.sort label {
+  display: block;
+  font-size: 0.85rem;
+  color: #444;
+  margin-bottom: 5px;
+}
+
+
+.faculty-periods-table th {
+  border: 1px dashed #ccc;
+  text-align: center;
+  font-size: 0.9rem;
+}
+
+.facultyAssignmentTable {
+  display: flex;
+  flex-direction: column !;
+}
+
+.facultyAssignmentTableContainer {
+  width: 100%;
+
+  background-color: #F5F6F6;
+  border-bottom-left-radius: 12px;
+  border-bottom-right-radius: 12px;
+  border-top-right-radius: 12px;
+  padding: 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 0 auto;
+}
+
+
+.facultyAssignmentP2 {
+  width: 100%;
+  gap: 0px;
+  display: flex;
+  flex-direction: column !important;
+  padding: 16px;
+}
+
+.facultyAssignmentSorter {
+  display: flex;
+  background-color: #F5F6F6;
+  flex-direction: column;
+  gap: 20px;
+  border-top-right-radius: 12px;
+  border-top-left-radius: 12px;
+  align-items: center;
+  width: fit-content;
+  padding: 10px 16px;
+}
+
+.sort select {
+  width: 250px;
+}
+
+.facultyAssignment-search-sort {
+  display: flex;
+}
+
+.facultyAssignmentSearch {
+  display: flex;
+  align-items: center;
+  background-color: #eee;
+  border-radius: 25px;
+  padding: 12px 18px;
+  height: 45px;
+  flex: 1 1 400px;
+  min-width: 280px;
+  max-width: 600px;
+  transform: translateY(26.5%);
+}
+
+.facultyAssignmentSearch i {
+  color: #666;
+  margin-right: 10px;
+  font-size: 16px;
+}
+
+.facultyAssignmentSearch input {
+  border: none;
+  background: transparent;
+  outline: none;
+  width: 100%;
+  font-size: 14px;
+  color: #333;
+}
+
+
+
+.facultyAssignment-search-sort {
+  display: flex;
+  gap: 30px;
+}

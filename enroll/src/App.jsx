@@ -20,14 +20,14 @@ import { Teacher_Homepage } from './pages/teacher/Teacher_Homepage';
 import { Teacher_Grading } from './pages/teacher/Teacher_Grading';
 import { Teacher_Evaluation } from './pages/teacher/Teacher_Evaluation';
 import { Teacher_Schedule } from './pages/teacher/Teacher_Schedule';
-
+import ResetPassword from './pages/ResetPassword';
 function App() {
   return (
     <Routes>
       {/* Public routes */}
       <Route path="/" element={<Landing_page />} />
       <Route path="Register_ph1" element={<Register_ph1 />} />
-
+      <Route path="/reset-password" element={<ResetPassword />} />
       {/* Protected routes for applicants only */}
       <Route element={<ProtectedRoute allowRoles={['applicant']} />}>
         <Route path="Applicant_Homepage" element={<Applicant_Homepage />} />

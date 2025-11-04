@@ -1,0 +1,96 @@
+.gradingSummaryContainer {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    padding: 60px 14px;
+}
+
+.gradingSummaryP1,
+.gradingSummaryP2,
+.gradingSummaryP3,
+.gradingSummaryP4 {}
+
+.gradingSummaryP1 {
+    display: flex;
+}
+
+.sorter1 {
+    padding: 16px;
+    display: flex;
+    flex-direction: row;
+    gap: 20px;
+}
+
+.encodingStatus {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    align-items: center;
+    margin-left: auto;
+    padding: 10px;
+}
+
+.encodingStat {
+    display: block;
+    font-size: 0.85rem;
+    color: #444;
+    margin-bottom: 5px;
+    font-weight: 600 !important;
+}
+
+.encodingStatus p {
+    display: block;
+    font-size: 0.85rem;
+    margin-bottom: 5px;
+    font-weight: 400;
+}
+
+.gradingSummaryP2 {
+    display: flex;
+    flex-direction: row;
+    padding: 16px;
+    gap: 16px;
+}
+
+.teacherGradeStatContainer {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.teacherGradeStat {
+    display: flex;
+    gap: 16px;
+}
+
+.teacher-grade-submission {
+    width: 300px !important;
+    text-align: center;
+    padding: 10px;
+    background-color: #F5F6F6 !important;
+    border-radius: 10px;
+    transition: 0.5s ease;
+    position: relative;
+}
+
+.passingRateContainer {
+    display: flex;
+    flex-direction: column;
+}
+
+.passingRate {
+    width: 616px !important;
+    text-align: center;
+    padding: 10px;
+    background-color: #F5F6F6 !important;
+    border-radius: 10px 10px 0px 10px;
+    transition: 0.5s ease;
+    position: relative;
+}
+
+.topSectionTableContainer {
+    padding: 40px 10px 20px 10px;
+    background-color: #F5F6F6;
+    position: relative;
+    border-radius: 10px;
+}

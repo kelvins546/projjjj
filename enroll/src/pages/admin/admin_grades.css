@@ -61,10 +61,10 @@
 
 .gradingTableContainer {
   overflow-x: auto;
-  background: #fff;
-  border-radius: 8px;
+  background-color: #F5F6F6;
+    border-radius: 12px;
+    padding: 20px;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
-  padding: 15px 20px;
   width: 100%;
   box-sizing: border-box;
 }
@@ -91,31 +91,25 @@
   cursor: pointer;
 }
 
-.gradingTableContainer table {
+.grading-table {
   width: 100%;
   border-collapse: collapse;
-  text-align: left;
-  font-size: 14px;
-  border: 1px solid #bcbcbc;
+  table-layout: fixed;
 }
 
-.gradingTableContainer th,
-.gradingTableContainer td {
-  border: 1px solid #bcbcbc;
-  padding: 10px 14px;
-  vertical-align: middle;
+.grading-table th,
+.grading-table td {
+  padding: 6px 10px;
+}
+.grading-table th.column1,
+.grading-table td.column1 {
+  width: 35px;
+  text-align: center;
+  padding: 4px;
 }
 
-.gradingTableContainer th {
-  background-color: #e8e8e8;
-  font-weight: 600;
-  color: #333;
-  text-align: left;
-}
 
-.gradingTableContainer tr:nth-child(even) {
-  background-color: #fafafa;
-}
+
 
 .status {
   display: inline-block;

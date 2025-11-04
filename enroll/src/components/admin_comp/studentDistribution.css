@@ -1,7 +1,8 @@
 .studentDistributionContainer {
     display: flex;
     width: 100%;
-    padding: 0px 0px;
+    padding: 0px 30px;
+    flex-direction: column;
 }
 
 .sorter {
@@ -10,7 +11,7 @@
 }
 
 .gradeDistributionContainer {
-  background: #fff;
+  background: #F5F6F6;
   border-radius: 10px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
   padding: 20px 25px;
@@ -27,33 +28,11 @@
   margin-bottom: 15px;
 }
 
-.gradeDistributionTable {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 14px;
-}
-
 .gradeDistributionTable th,
 .gradeDistributionTable td {
-  border: 1px solid #dcdcdc;
   padding: 10px 14px;
-  text-align: left;
 }
 
-.gradeDistributionTable th {
-  background-color: #e8e8e8;
-  color: #333;
-  font-weight: 600;
-}
-
-.gradeDistributionTable tr:nth-child(even) {
-  background-color: #f9f9f9;
-}
-
-.gradeDistributionTable tr:hover {
-  background-color: #f1f8f3;
-  transition: background-color 0.2s;
-}
 
 .sortableHeader {
   cursor: pointer;

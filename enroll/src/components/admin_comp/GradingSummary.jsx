@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { supabase } from '../../supabaseClient';
+import './gradingsummary.css';
 import {
   BarChart,
   Bar,
@@ -10,6 +11,8 @@ import {
   Legend,
   ResponsiveContainer,
 } from 'recharts';
+import { GridLoader } from 'react-spinners';
+import { LoadingPopup } from '../loaders/LoadingPopup';
 
 const STATIC_SY = '2025-2026';
 const PASSING_THRESHOLD = 75; // configurable
@@ -43,6 +46,8 @@ const GradingSummary = ({ activeSection = 'gradingSummary' }) => {
   const [passingByGrade, setPassingByGrade] = useState([]); // [{gradeLabel, pass, fail, passPct}]
   const [topSections, setTopSections] = useState([]); // [{section_id, section_name, grade_level, avg}]
   const [quarterLocked, setQuarterLocked] = useState(false);
+  const [showExport, setShowExport] = useState(false);
+  const [showExportTopSection, setShowExportTopSection] = useState(false);
 
   useEffect(() => {
     let mounted = true;
@@ -148,14 +153,15 @@ const GradingSummary = ({ activeSection = 'gradingSummary' }) => {
           });
 
         // 6) Top sections by average grade (use separate quarter/grade filter controls)
-        const tqNum = toQuarterNum(topSectionQuarter);
+        const tqNum = toQuarterNum(gradingSummaryQuarter);
         const ts2 =
           ts?.filter((r) => {
-            if (!topSectionGrade) return true;
+            if (!gradingSummaryGrade) return true;
             const gl = Number(r?.section?.grade_level);
             const label = Number.isFinite(gl) ? `Grade ${gl}` : '';
-            return label === topSectionGrade;
+            return label === gradingSummaryGrade;
           }) || [];
+
         const ts2Ids = ts2.map((r) => r.teacher_subject_id);
 
         let grades2 = [];
@@ -234,12 +240,8 @@ const GradingSummary = ({ activeSection = 'gradingSummary' }) => {
     return () => {
       mounted = false;
     };
-  }, [
-    gradingSummaryQuarter,
-    gradingSummaryGrade,
-    topSectionQuarter,
-    topSectionGrade,
-  ]);
+  }, [gradingSummaryQuarter, gradingSummaryGrade]);
+
 
   // Charts
   const submissionChart = useMemo(
@@ -301,162 +303,22 @@ const GradingSummary = ({ activeSection = 'gradingSummary' }) => {
   if (activeSection !== 'gradingSummary') return null;
 
   return (
-    <div>
-      <h2>Grading Summary</h2>
-
-      <div className="gradingSummary">
-        <h1>Grade Summary</h1>
-
-        <div
-          className="gradingSummaryP1"
-          style={{
-            display: 'flex',
-            gap: 16,
-            alignItems: 'flex-end',
-            flexWrap: 'wrap',
-          }}
-        >
-          <div className="gradingSummaryQuarterSort">
-            <label>Quarter</label>
-            <select
-              value={gradingSummaryQuarter}
-              onChange={(e) => setGradingSummaryQuarter(e.target.value)}
-            >
-              <option value="" disabled>
-                Quarter
-              </option>
-              <option>1st</option>
-              <option>2nd</option>
-              <option>3rd</option>
-              <option>4th</option>
-            </select>
-          </div>
-
-          <div className="gradingSummaryGradeSort">
-            <label>Select Grade Level</label>
-            <select
-              value={gradingSummaryGrade}
-              onChange={(e) => setGradingSummaryGrade(e.target.value)}
-            >
-              <option value="">All Grade</option>
-              <option>Grade 7</option>
-              <option>Grade 8</option>
-              <option>Grade 9</option>
-              <option>Grade 10</option>
-            </select>
-          </div>
-
-          <div
-            style={{
-              marginLeft: 'auto',
-              fontSize: 13,
-              color: quarterLocked ? '#ef4444' : '#10b981',
-            }}
-          >
-            Window: {quarterLocked ? 'Locked' : 'Open'}
-          </div>
-        </div>
-
-        <div
-          className="gradingSummaryP2"
-          style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}
-        >
-          <div
-            className="card teacher-grade-submission"
-            style={{ padding: 12 }}
-          >
-            <p style={{ marginTop: 0 }}>Teacher Grades Submission</p>
-            <div style={{ width: '100%', height: 200 }}>
-              <ResponsiveContainer>
-                <BarChart
-                  data={submissionChart}
-                  margin={{ top: 10, right: 10, left: 0 }}
-                >
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="name" />
-                  <YAxis allowDecimals={false} />
-                  <Tooltip />
-                  <Legend />
-                  <Bar dataKey="Submitted" fill="#22c55e" />
-                  <Bar dataKey="NotSubmitted" fill="#ef4444" />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-            <div style={{ fontSize: 12, color: '#64748b' }}>
-              {submissionRate.pct}% submitted
-            </div>
-          </div>
-
-          <div
-            className="card teacher-grade-submission"
-            style={{ padding: 12 }}
-          >
-            <p style={{ marginTop: 0 }}>Adviser Grades Verification</p>
-            <div style={{ width: '100%', height: 200 }}>
-              <ResponsiveContainer>
-                <BarChart
-                  data={verificationChart}
-                  margin={{ top: 10, right: 10, left: 0 }}
-                >
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="name" />
-                  <YAxis allowDecimals={false} />
-                  <Tooltip />
-                  <Legend />
-                  <Bar dataKey="Verified" fill="#06b6d4" />
-                  <Bar dataKey="NotVerified" fill="#f59e0b" />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-            <div style={{ fontSize: 12, color: '#64748b' }}>
-              {verificationRate.pct}% verified
-            </div>
-          </div>
-        </div>
-
-        <div className="gradingSummaryP3" style={{ marginTop: 16 }}>
-          <div className="passingRateTitle">
-            <h1>Passing Rate</h1>
-          </div>
-
-          <div style={{ width: '100%', height: 280 }}>
-            <ResponsiveContainer>
-              <BarChart
-                data={passingByGrade}
-                margin={{ top: 10, right: 10, left: 0 }}
-              >
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="gradeLabel" />
-                <YAxis allowDecimals={false} />
-                <Tooltip />
-                <Legend />
-                <Bar dataKey="pass" fill="#16a34a" name="Pass" />
-                <Bar dataKey="fail" fill="#ef4444" name="Fail" />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-
-          <div style={{ display: 'flex', gap: 8 }}>
-            <button onClick={exportPassingCSV}>Export Passing CSV</button>
-          </div>
-        </div>
-
-        <div className="gradingSummaryP4" style={{ marginTop: 16 }}>
-          <div className="topSections" style={{ marginBottom: 8 }}>
-            <div
-              className="topSectionsSorter"
-              style={{
-                display: 'flex',
-                gap: 12,
-                alignItems: 'center',
-                flexWrap: 'wrap',
-              }}
-            >
-              <div className="gradingSummaryQuarterSort">
+    <>
+      <LoadingPopup
+        show={loading}
+        message="Loading Please Wait..."
+        Loader={GridLoader}
+        color="#3FB23F"
+      />
+      <div className='gradingSummaryContainer'>
+        <div className="gradingSummary">
+          <div className="gradingSummaryP1">
+            <div className='sorter1'>
+              <div className="sort">
                 <label>Quarter</label>
                 <select
-                  value={topSectionQuarter}
-                  onChange={(e) => setTopSectionQuarter(e.target.value)}
+                  value={gradingSummaryQuarter}
+                  onChange={(e) => setGradingSummaryQuarter(e.target.value)}
                 >
                   <option value="" disabled>
                     Quarter
@@ -468,11 +330,11 @@ const GradingSummary = ({ activeSection = 'gradingSummary' }) => {
                 </select>
               </div>
 
-              <div className="gradingSummaryGradeSort">
+              <div className="sort">
                 <label>Select Grade Level</label>
                 <select
-                  value={topSectionGrade}
-                  onChange={(e) => setTopSectionGrade(e.target.value)}
+                  value={gradingSummaryGrade}
+                  onChange={(e) => setGradingSummaryGrade(e.target.value)}
                 >
                   <option value="">All Grade</option>
                   <option>Grade 7</option>
@@ -481,52 +343,171 @@ const GradingSummary = ({ activeSection = 'gradingSummary' }) => {
                   <option>Grade 10</option>
                 </select>
               </div>
-
-              <button onClick={exportTopCSV} style={{ marginLeft: 'auto' }}>
-                Export Top Sections CSV
-              </button>
             </div>
 
+            <div className='encodingStatus'
+              style={{ color: quarterLocked ? '#ef4444' : '#10b981', }}>
+              <p className='encodingStat'>Grading Window:</p>
+              <p> {quarterLocked ? 'Locked' : 'Open'}</p>
+            </div>
+          </div>
+
+          <div className="gradingSummaryP2">
+            <div className='teacherGradeStatContainer'>
+              <div className='teacherGradeStat'>
+                <div className="teacher-grade-submission">
+                  <div className='chartTitle'>
+                    <h2 style={{ marginTop: 0 }}>Teacher Grades Submission</h2>
+                  </div>
+
+                  <div style={{ width: '100%', height: 250 }}>
+                    <ResponsiveContainer>
+                      <BarChart
+                        data={submissionChart.map((d) => ({
+                          ...d,
+                          "Not Submitted": d.NotSubmitted,
+                        }))}
+                        margin={{ top: 30, right: 10, left: -20 }}
+                      >
+                        <CartesianGrid strokeDasharray="3 3" />
+                        <XAxis dataKey="name" />
+                        <YAxis allowDecimals={false} />
+                        <Tooltip />
+                        <Legend
+                          payload={[
+                            { value: 'Submitted', type: 'square', color: '#22c55e' },
+                            { value: 'Not Submitted', type: 'square', color: '#ef4444' },
+                          ]}
+                        />
+                        <Bar dataKey="Not Submitted" fill="#ef4444" />
+                        <Bar dataKey="Submitted" fill="#22c55e" />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+                  <div style={{ fontSize: 12, color: '#64748b' }}>
+                    {submissionRate.pct}% submitted
+                  </div>
+                </div>
+                <div className="teacher-grade-submission">
+                  <div className='chartTitle'>
+                    <h2 style={{ marginTop: 0 }}>Adviser Grades Verification</h2>
+                  </div>
+                  <div style={{ width: '100%', height: 250 }}>
+                    <ResponsiveContainer>
+                      <BarChart
+                        data={verificationChart.map((d) => ({
+                          ...d,
+                          "Not Verified": d.NotVerified,
+                        }))}
+                        margin={{ top: 30, right: 10, left: -30 }}
+                      >
+                        <CartesianGrid strokeDasharray="3 3" />
+                        <XAxis dataKey="name" />
+                        <YAxis allowDecimals={false} />
+                        <Tooltip />
+                        <Legend
+                          payload={[
+                            { value: 'Verified', type: 'square', color: '#06b6d4' },
+                            { value: 'Not Verified', type: 'square', color: '#f59e0b' },
+                          ]}
+                        />
+                        <Bar dataKey="Not Verified" fill="#f59e0b" />
+                        <Bar dataKey="Verified" fill="#06b6d4" />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+                  <div style={{ fontSize: 12, color: '#64748b' }}>
+                    {verificationRate.pct}% verified
+                  </div>
+                </div>
+              </div>
+              <div className='passingRateContainer'>
+                <div className="passingRate" style={{ width: '100%', height: 389 }}>
+                  <div className='chartTitle'>
+                    <h2 style={{ marginTop: 0 }}>Passing Rate</h2>
+                    <div className='export' style={{ right: "27px" }}>
+                      <i className='fa fa-ellipsis-h exportElipse' aria-hidden="true" onClick={() => setShowExport((prev) => !prev)} ></i>
+                      {showExport && (
+                        <div className='exportDropdown'>
+                          <button className="dropdownItem" onClick={exportPassingCSV}>
+                            <i className="fa-solid fa-file-export"></i>
+                            Export Passing CSV
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                  <ResponsiveContainer>
+                    <BarChart data={passingByGrade} margin={{ top: 30, right: 10, left: -30 }}>
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis dataKey="gradeLabel" />
+                      <YAxis allowDecimals={false} />
+                      <Tooltip />
+                      <Legend
+                        payload={[
+                          { value: 'Pass', type: 'square', color: '#16a34a' },
+                          { value: 'Fail', type: 'square', color: '#ef4444' },
+                        ]}
+                      />
+                      <Bar dataKey="fail" fill="#ef4444" name="Fail" />
+                      <Bar dataKey="pass" fill="#16a34a" name="Pass" />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+              </div>
+
+            </div>
             <div className="topSectionTable">
-              <div className="table-container">
-                <table className="table1">
-                  <thead>
-                    <tr>
-                      <th>Section</th>
-                      <th>Average</th>
-                      <th>Grade Level</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {topSections.length === 0 && (
-                      <tr>
-                        <td colSpan={3}>No data.</td>
-                      </tr>
+              <div className='topSectionTableContainer'>
+                <div className='chartTitle'>
+                  <h2>Top Sections</h2>
+                  <div className='export' style={{ right: "27px" }}>
+                    <i className='fa fa-ellipsis-h exportElipse' aria-hidden="true" onClick={() => setShowExportTopSection((prev) => !prev)} ></i>
+                    {showExportTopSection && (
+                      <div className='exportDropdown'>
+                        <button className="dropdownItem" onClick={exportTopCSV}>
+                          <i className="fa-solid fa-file-export"></i>
+                          Export Passing CSV
+                        </button>
+                      </div>
                     )}
-                    {topSections.map((r) => (
-                      <tr key={r.section_id}>
-                        <td>{r.section_name}</td>
-                        <td>{r.avg}</td>
-                        <td>{r.grade_level}</td>
+                  </div>
+                </div>
+                <div className="table-container">
+                  <table className="table1">
+                    <thead>
+                      <tr>
+                        <th>Section</th>
+                        <th>Average</th>
+                        <th>Grade Level</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
+                    </thead>
+                    <tbody>
+                      {topSections.length === 0 && (
+                        <tr>
+                          <td colSpan={3}>No data.</td>
+                        </tr>
+                      )}
+                      {topSections.map((r) => (
+                        <tr key={r.section_id}>
+                          <td>{r.section_name}</td>
+                          <td>{r.avg}</td>
+                          <td>{r.grade_level}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+                {loading && (
+                  <div style={{ color: '#64748b', marginTop: 8 }}>Loading…</div>
+                )}
+                {err && <div style={{ color: '#ef4444', marginTop: 8 }}>{err}</div>}
               </div>
             </div>
           </div>
-
-          <div className="averageGradeChart">
-            {/* You can add a per-subject average bar chart here using the same grades source if needed */}
-          </div>
         </div>
-
-        {loading && (
-          <div style={{ color: '#64748b', marginTop: 8 }}>Loading…</div>
-        )}
-        {err && <div style={{ color: '#ef4444', marginTop: 8 }}>{err}</div>}
       </div>
-    </div>
+    </>
   );
 };
 

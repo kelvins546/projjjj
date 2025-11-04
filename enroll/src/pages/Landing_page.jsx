@@ -1,4 +1,5 @@
-import { useState } from 'react';
+// src/pages/Landing_page.jsx
+import React, { useState } from 'react';
 import './landing_page.css';
 import { Header } from '../components/Header';
 import { Footer } from '../components/Footer';
@@ -7,28 +8,29 @@ import { supabase } from '../supabaseClient';
 import { useSession } from '../context/SessionContext';
 import { GridLoader } from 'react-spinners';
 import { LoadingPopup } from '../components/loaders/LoadingPopup';
+import ForgotPasswordModal from '../components/modals/ForgotPasswordModal'; // modal that calls resetPasswordForEmail [web:317]
 
 export const Landing_page = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [form, setForm] = useState({ id: '', password: '' });
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
-  const navigate = useNavigate();
+  const navigate = useNavigate(); // programmatic navigation after login [web:241]
   const { setSession } = useSession();
 
-  const handleInputChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
-  };
+  // Forgot Password modal
+  const [forgotOpen, setForgotOpen] = useState(false); // controls the modal [web:255]
 
-  // Simple identifier helpers
+  const handleInputChange = (e) =>
+    setForm({ ...form, [e.target.name]: e.target.value });
+
   const looksLikeEmail = (v) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
   const looksNumeric = (v) => /^\d+$/.test(v);
 
+  // EXISTING LOGIN (unchanged)
   const handleLogin = async (e) => {
     e.preventDefault();
     setError('');
-
-    // Client-side validation
     const id = (form.id || '').trim();
     const pw = form.password || '';
     if (!id) {
@@ -43,13 +45,12 @@ export const Landing_page = () => {
     try {
       setBusy(true);
 
-      // 1) Locate the user by identifier only (no password yet)
       let query = supabase.from('users').select('*').limit(1);
+      let userRow = null;
 
       if (looksLikeEmail(id)) {
         query = query.eq('email', id);
       } else if (looksNumeric(id)) {
-        // Try applicant_id first, then student_id if needed
         const { data: byApplicant, error: aErr } = await supabase
           .from('users')
           .select('*')
@@ -57,8 +58,8 @@ export const Landing_page = () => {
           .limit(1);
         if (aErr) throw aErr;
         if (byApplicant && byApplicant.length) {
-          query = null; // already found
-          var userRow = byApplicant[0];
+          userRow = byApplicant[0];
+          query = null;
         } else {
           query = supabase
             .from('users')
@@ -67,7 +68,6 @@ export const Landing_page = () => {
             .limit(1);
         }
       } else {
-        // Treat as string ID first (applicant_id), then fallback to email if nothing matches
         query = supabase
           .from('users')
           .select('*')
@@ -85,36 +85,33 @@ export const Landing_page = () => {
         setError('No account found for the provided identifier.');
         return;
       }
-
-      // 2) Check password against stored password_hash directly (your flow)
       if (String(userRow.password_hash) !== String(pw)) {
-        setError('Incorrect password. Please try again.');
+        setError('Incorrect password.');
         return;
       }
 
-      // 3) Establish session and route by role
       setSession(userRow.user_id, userRow.role);
 
       switch (userRow.role) {
         case 'applicant':
           navigate('/Applicant_Homepage');
-          break;
+          break; // [web:241]
         case 'student':
           navigate('/Student_Homepage');
-          break;
+          break; // [web:241]
         case 'adviser':
         case 'teacher':
           navigate('/Teacher_Homepage');
-          break;
+          break; // [web:241]
         case 'dept_head':
           navigate('/DeptHead_Dashboard');
-          break;
+          break; // [web:241]
         case 'principal':
           navigate('/Dashboard');
-          break;
+          break; // [web:241]
         case 'super_admin':
           navigate('/Admin_Dashboard');
-          break;
+          break; // [web:241]
         default:
           setError('Unknown user role. Please contact support.');
           break;
@@ -131,7 +128,7 @@ export const Landing_page = () => {
       <Header />
       <LoadingPopup
         show={busy}
-        message="Signing In..."
+        message="Working..."
         Loader={GridLoader}
         color="#3FB23F"
       />
@@ -140,7 +137,7 @@ export const Landing_page = () => {
           className="landing_page"
           style={{
             backgroundImage:
-              'linear-gradient(rgba(41, 112, 60, 0.5), rgba(41, 112, 60, 0.5)), url("/school.png")',
+              'linear-gradient(rgba(41,112,60,.5), rgba(41,112,60,.5)), url("/school.png")',
           }}
         >
           <div className="container">
@@ -196,14 +193,13 @@ export const Landing_page = () => {
                     />
                     <label>Password</label>
                     <i
-                      className={`fa ${showPassword ?  'fa-eye' : 'fa-eye-slash'}`}
+                      className={`fa ${showPassword ? 'fa-eye' : 'fa-eye-slash'}`}
                       aria-hidden="true"
                       onClick={() => setShowPassword(!showPassword)}
                     />
-
-                    <label>Password</label>
                   </div>
-                  <div className='errorShow'>
+
+                  <div className="errorShow">
                     {error && (
                       <div className="error" role="alert">
                         <p>{error}</p>
@@ -211,30 +207,45 @@ export const Landing_page = () => {
                     )}
                   </div>
 
-
-
                   <div className="passoption">
                     <p>
-                      <a>Forgot Password?</a>
+                      <button
+                        type="button"
+                        onClick={() => setForgotOpen(true)}
+                        style={{
+                          background: 'none',
+                          border: 'none',
+                          color: '#0b73ff',
+                          cursor: 'pointer',
+                          padding: 0,
+                        }}
+                      >
+                        Forgot Password?
+                      </button>
                     </p>
                   </div>
-                  
+
                   <button type="submit" className="btn" disabled={busy}>
                     {busy ? 'Signing in…' : 'Login'}
                   </button>
 
                   <div className="enroll">
                     <p>
-                      Are you an applicant/enrollee? { }
-                      <Link to="/Register_ph1">
-                        Apply/Enroll here.
-                      </Link>
+                      Are you an applicant/enrollee?{' '}
+                      <Link to="/Register_ph1">Apply/Enroll here.</Link>
                     </p>
                   </div>
                 </form>
               </div>
             </div>
           </div>
+
+          {/* Forgot Password Modal: sends Supabase reset email and redirects back to /reset-password */}
+          <ForgotPasswordModal
+            isOpen={forgotOpen}
+            onClose={() => setForgotOpen(false)}
+            redirectPath="/reset-password"
+          />
         </div>
         <Footer />
       </div>

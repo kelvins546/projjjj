@@ -3,7 +3,28 @@
     flex-direction: column;
     width: 100%;
     justify-content: center;
-    padding: 10px 30px;
+    padding: 30px 30px;
+}
+
+.sorter {
+    display: flex !important;
+    flex-direction: row !important;
+    margin-top: 24px;
+    width: 100% !important;
+    gap: 20px;
+    font-weight: 600;
+}
+
+.sort {
+    display: flex;
+    flex-direction: column;
+}
+
+.sort label {
+    display: block;
+    font-size: 0.85rem;
+    color: #444;
+    margin-bottom: 5px;
 }
 
 .enrollment-overview-wrapper select {
@@ -24,7 +45,7 @@
 
 .enrollmentOverviewContent {
     display: flex;
-    gap: 30px;
+    flex-direction: column;
 }
 
 .sort-SY {
@@ -62,24 +83,81 @@
     flex-direction: column;
 }
 
-.enrollment-stat-cards {
+.enrollmentStats {
+    display: flex;
+    gap: 16;
+}
+
+
+.enrollment_Stat_Cards {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.barChartContainer {
+    width: 100%;
+    max-width: 700px;
+    background-color: #F5F6F6;
+    border-radius: 12px;
+    padding: 20px;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    gap: 20px;
-    font-size: 2rem;
-    width: 75%;
+    position: relative;
+}
+
+.chart_Section {
+    width: 100%;
+    display: flex;
+    gap: 16px;
+    padding-left: 16px;
+}
+
+.chart_Section h2 {
+    font-size: 16px;
+    font-family: 'Poppins', sans-serif;
+    color: #334155;
+    font-weight: 600;
+}
+
+.chartTitle {
+    top: 0;
+    position: absolute;
+    padding: 10px;
+
 }
 
 .card {
-    width: 400px !important;
+    width: 300px !important;
     text-align: center;
     padding: 30px;
-    background-color: #2B70294D;
+    background-color: #F5F6F6 !important;
     border-radius: 10px;
     box-shadow: inset 0 4px 8px rgba(0, 0, 0, 0.15);
     transition: 0.5s ease;
+}
+
+.card1 {
+    width: 300px !important;
+    text-align: center;
+    padding: 30px;
+    background-color: #F5F6F6 !important;
+    border-radius: 10px;
+    transition: 0.5s ease;
+}
+
+.cardPending {
+    color: #f59e0b;
+}
+
+.cardEnrolled {
+    color: #22c55e;
+}
+
+.cardConversionRate {
+    color: #3b82f6;
 }
 
 .card:hover {
@@ -87,33 +165,11 @@
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
 }
 
-
-.barChartContainer {
-    width: 100%;
-    max-width: 700px;
-    background-color: #ffffff;
-    border-radius: 12px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-    padding: 20px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    margin: 0 auto;
-}
-
-.chart-section {
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
-
 .tableContainer {
     width: 100%;
     max-width: 700px;
-    background-color: #ffffff;
+    background-color: #F5F6F6;
     border-radius: 12px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
     padding: 20px;
     display: flex;
     justify-content: center;
@@ -122,46 +178,86 @@
 }
 
 .gradeStatsContainer {
-  background: #fff;
-  border-radius: 10px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-  padding: 20px 25px;
-  margin-top: 20px;
-  width: 100%;
-  box-sizing: border-box;
+    background: #F5F6F6;
+    border-radius: 10px;
+    padding: 20px 25px;
+    margin-top: 20px;
+    width: 100%;
+    box-sizing: border-box;
+    position: relative;
 }
 
 .gradeStatsContainer h3 {
-  font-size: 18px;
-  font-weight: 600;
-  color: #248041;
-  margin-bottom: 15px;
+    font-size: 18px;
+    font-weight: 600;
+    color: #334155;
+    margin-bottom: 15px;
 }
 
-.gradeStatsTable {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 14px;
+.facultyAssignmentTable table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: #ffffff;
+    table-layout: fixed;
+    box-shadow: 0 5px 10px rgba(0, 0, 0, 0.05);
+    font-family: 'Mukta', sans-serif;
 }
 
-.gradeStatsTable th,
-.gradeStatsTable td {
-  border: 1px solid #dcdcdc;
-  padding: 10px 14px;
-  text-align: left;
+/* Header row */
+.facultyAssignmentTable thead {
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.08);
 }
 
-.gradeStatsTable th {
-  background-color: #e8e8e8;
-  color: #333;
-  font-weight: 600;
+.facultyAssignmentTable th,
+.facultyAssignmentTable td {
+    padding: 0.8rem 1.5rem;
+    text-align: left;
+    vertical-align: middle;
+    /* ⬅️ keeps "Grade 7" in one line */
 }
 
-.gradeStatsTable tr:nth-child(even) {
-  background-color: #f9f9f9;
+/* Header cells */
+.facultyAssignmentTable th {
+    letter-spacing: 0.05rem;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #334155;
+    background-color: #f9fafb;
+    text-transform: uppercase;
 }
 
-.gradeStatsTable tr:hover {
-  background-color: #f1f8f3;
-  transition: background-color 0.2s;
+.export {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    z-index: 20;
+}
+
+.exportDropdown {
+    margin-top: 8px;
+    background: #ffffff;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    overflow: hidden;
+    animation: dropdownFade 0.25s ease forwards;
+}
+
+.exportDropdown button {
+    font-size: 14px;
+    font-family: 'Poppins';
+}
+
+.exportElipse {
+    font-size: 24px;
+    color: #2b7029;
+    cursor: pointer;
+    transition: transform 0.2s ease, color 0.2s ease;
+}
+
+.exportElipse:hover {
+    transform: scale(1.2);
+  color: #3ba63b;
 }

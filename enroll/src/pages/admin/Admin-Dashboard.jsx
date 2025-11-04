@@ -6,7 +6,7 @@ import EnrollmentOverview from '../../components/admin_comp/EnrollmentOverview';
 import StudentDistribution from '../../components/admin_comp/StudentDistribution';
 import FacultyAssignment from '../../components/admin_comp/FacultyAssignment';
 import GradingSummary from '../../components/admin_comp/GradingSummary';
-import './dashboard.css';
+
 
 export const Admin_Dashboard = () => {
   const [activeSection, setActiveSection] = useState('enrollmentOverview');

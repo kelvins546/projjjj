@@ -70,8 +70,9 @@
   justify-content: flex-start;
   background-color: #fde69c;
   position: sticky;
-  top: 159px;
+  top: 158px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+  z-index: 999;
 }
 
 .sub-nav-item {

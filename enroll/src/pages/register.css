@@ -13,6 +13,10 @@
   align-items: center;
 }
 
+.errorContainer {
+  height: 30px;
+}
+
 .registerBackground {
   background-size: cover;
   background-position: center;
@@ -83,20 +87,20 @@
 .inputGroup1 input,
 .inputGroup2 input,
 .inputGroup3 input {
-    background-color: #fff;
-    border: none;
-    border-radius: 5px;
-    padding: 10px;
-    font-size: 0.9em;
-    font-family: 'Inter';
-    color: #222222;
-    font-weight: 600;
-    font-family: 'Poppins';
-    color: #333;
-    cursor: pointer;
-    outline: none;
-    transition: all 0.2s ease;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+  background-color: #fff;
+  border: none;
+  border-radius: 5px;
+  padding: 10px;
+  font-size: 0.9em;
+  font-family: 'Inter';
+  color: #222222;
+  font-weight: 600;
+  font-family: 'Poppins';
+  color: #333;
+  cursor: pointer;
+  outline: none;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
 }
 
 .inputGroup1 label,

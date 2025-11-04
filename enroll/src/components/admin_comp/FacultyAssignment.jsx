@@ -13,6 +13,9 @@ import {
   Pie,
   Cell,
 } from 'recharts';
+import './facultyassignment.css'
+import { GridLoader } from 'react-spinners';
+import { LoadingPopup } from '../loaders/LoadingPopup';
 
 const STATIC_SY = '2025-2026';
 const DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
@@ -402,99 +405,129 @@ const FacultyAssignment = ({ activeSection = 'facultyAssignment' }) => {
   if (activeSection !== 'facultyAssignment') return null;
 
   return (
-    <div>
-      <h2>Faculty Assignment</h2>
-
+    <>
+     <LoadingPopup
+        show={loading}
+        message="Loading Please Wait..."
+        Loader={GridLoader}
+        color="#3FB23F"
+      />
+    <div className='facultyAssignmentContainer'>
       <div className="facultyAssignment">
-        <h1>Teacher Load Summary</h1>
+        <div className='teacherSummary'>
+          <div className="teacherLoad">
+            <div className="teacherLoadSummary">
+              <div className='teacherLoadContainer'>
+                <div className="overloadedTeacher" style={{ padding: 16, paddingTop: "50px" }}>
+                  <div className='chartTitle'>
+                    <h2 >Teacher Load Summary</h2>
+                  </div>
+                  <div style={{ width: '100%', height: 220 }}>
+                    <ResponsiveContainer>
+                      <PieChart>
+                        <Pie
+                          data={overloadPie}
+                          dataKey="value"
+                          nameKey="name"
+                          innerRadius={60}
+                          outerRadius={90}
+                        >
+                          {overloadPie.map((entry, idx) => (
+                            <Cell
+                              key={`cell-${idx}`}
+                              fill={idx === 0 ? '#ef4444' : '#10b981'}
+                            />
+                          ))}
+                        </Pie>
+                        <Tooltip />
+                        <Legend />
+                      </PieChart>
+                    </ResponsiveContainer>
+                  </div>
+                  <div className="recalMsg">
+                    <span>Mon–Fri reflect current load (periods/day) from teacher loads</span>
+                    <span>Use Recalculate to sync from weekly schedules.</span>
+                  </div>
+                  <button onClick={recalcCurrentLoads} style={{ marginTop: 8 }}>
+                    Recalculate Current Loads
+                  </button>
+                </div>
+              </div>
 
-        <div
-          className="facultyAssignmentP1"
-          style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: 16 }}
-        >
-          <div
-            className="teacherLoadSummary"
-            style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: 16 }}
-          >
-            <div className="card overloadedTeacher" style={{ padding: 12 }}>
-              <h3 style={{ marginTop: 0 }}>Overloaded Teachers</h3>
-              <div style={{ width: '100%', height: 220 }}>
-                <ResponsiveContainer>
-                  <PieChart>
-                    <Pie
-                      data={overloadPie}
-                      dataKey="value"
-                      nameKey="name"
-                      innerRadius={60}
-                      outerRadius={90}
-                    >
-                      {overloadPie.map((entry, idx) => (
-                        <Cell
-                          key={`cell-${idx}`}
-                          fill={idx === 0 ? '#ef4444' : '#10b981'}
+              <div className='teachersPerGradeContainer'>
+                <div className="teachersPerGrade" style={{ padding: 12, width: "100%", }}>
+                  <div className='chartTitle'>
+                    <h2 style={{ marginTop: 0 }}>Teachers per Grade</h2>
+                  </div>
+                  <div style={{ width: "100%", height: 320 }}>
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart
+                        data={teachersPerGradeArr}
+                        margin={{ top: 10, right: 10, left: 0 }}
+                        layout="vertical"
+                      >
+                        <CartesianGrid strokeDasharray="3 3" />
+                        <XAxis type="number" />
+                        <YAxis
+                          dataKey="grade"
+                          type="category"
+                          width={90} // increase if your labels are being cut off
+                          tick={{ fontSize: 13, fill: "#334155", whiteSpace: "nowrap" }}
                         />
-                      ))}
-                    </Pie>
-                    <Tooltip />
-                    <Legend />
-                  </PieChart>
-                </ResponsiveContainer>
-              </div>
-              <div style={{ fontSize: 13, color: '#64748b' }}>
-                Mon–Fri reflect current_load (periods/day) from teacher_loads;
-                use Recalculate to sync from weekly schedules.
-              </div>
-              <button onClick={recalcCurrentLoads} style={{ marginTop: 8 }}>
-                Recalculate Current Loads
-              </button>
-            </div>
 
-            <div className="card teachersPerGrade" style={{ padding: 12 }}>
-              <h3 style={{ marginTop: 0 }}>Teachers per Grade</h3>
-              <div style={{ width: '100%', height: 220 }}>
-                <ResponsiveContainer>
-                  <BarChart
-                    data={teachersPerGradeArr}
-                    margin={{ top: 10, right: 10, left: 0 }}
-                  >
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="grade" />
-                    <YAxis allowDecimals={false} />
-                    <Tooltip />
-                    <Legend />
-                    <Bar dataKey="count" fill="#6366f1" />
-                  </BarChart>
-                </ResponsiveContainer>
+                        <Tooltip />
+                        {/*<Legend />*/}
+                        <Bar
+                          dataKey="count"
+                          isAnimationActive={true}
+                          animationBegin={0}
+                          animationDuration={1000}
+                          animationEasing="ease-in-out"
+                        >
+                          {teachersPerGradeArr.map((entry, index) => (
+                            <Cell
+                              key={`cell-${index}`}
+                              fill={
+                                [
+                                  "#248041", 
+                                  "#FFF833",
+                                  "#E44343", 
+                                  "#2B7FED", 
+                                ][index % 4]
+                              }
+                            />
+                          ))}
+                        </Bar>
+                      </BarChart>
+                    </ResponsiveContainer>
+
+                  </div>
+                </div>
               </div>
             </div>
           </div>
         </div>
 
-        <div className="facultyAssignmentP2" style={{ marginTop: 20 }}>
+
+        <div className="facultyAssignmentP2" >
           <div
             className="facultyAssignmentSorter"
-            style={{
-              display: 'flex',
-              gap: 12,
-              alignItems: 'center',
-              flexWrap: 'wrap',
-            }}
+
           >
             <div
               className="facultyAssignmentSearch"
-              style={{ display: 'flex', alignItems: 'center', gap: 8 }}
             >
               <i className="fa fa-search" aria-hidden="true"></i>
               <input
-                className="search"
+                
                 placeholder="Search name or department"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
               />
             </div>
 
-            <div className="sorter-grade">
-              <label style={{ display: 'block', fontSize: 12 }}>
+            <div className="sort">
+              <label>
                 Select Grade Level
               </label>
               <select
@@ -509,8 +542,8 @@ const FacultyAssignment = ({ activeSection = 'facultyAssignment' }) => {
               </select>
             </div>
 
-            <div className="sorter-subject">
-              <label style={{ display: 'block', fontSize: 12 }}>
+            <div className="sort">
+              <label>
                 Faculty/Subject
               </label>
               <select
@@ -527,10 +560,8 @@ const FacultyAssignment = ({ activeSection = 'facultyAssignment' }) => {
             </div>
           </div>
 
-          <div
-            className="facultyAssignmentTable"
-            style={{ marginTop: 12, overflowX: 'auto' }}
-          >
+          <div className="facultyAssignmentTable">
+            <div className='facultyAssignmentTableContainer'>
             <table className="faculty-periods-table">
               <thead>
                 <tr>
@@ -550,6 +581,7 @@ const FacultyAssignment = ({ activeSection = 'facultyAssignment' }) => {
                   <th>Fri</th>
                 </tr>
               </thead>
+
               <tbody>
                 {loading && (
                   <tr>
@@ -568,42 +600,22 @@ const FacultyAssignment = ({ activeSection = 'facultyAssignment' }) => {
                       <td>{r.dept}</td>
                       <td>{r.grade}</td>
                       <td>{r.max_load}</td>
-                      <td style={{ color: r.overload ? '#ef4444' : 'inherit' }}>
+                      <td className={r.overload ? 'highlight-red' : ''}>
                         {r.current_load}
                       </td>
-                      <td
-                        className={
-                          r.mon > MAX_PERIODS_PER_DAY ? 'highlight-red' : ''
-                        }
-                      >
+                      <td className={r.mon > MAX_PERIODS_PER_DAY ? 'highlight-red' : ''}>
                         {r.mon}
                       </td>
-                      <td
-                        className={
-                          r.tue > MAX_PERIODS_PER_DAY ? 'highlight-red' : ''
-                        }
-                      >
+                      <td className={r.tue > MAX_PERIODS_PER_DAY ? 'highlight-red' : ''}>
                         {r.tue}
                       </td>
-                      <td
-                        className={
-                          r.wed > MAX_PERIODS_PER_DAY ? 'highlight-red' : ''
-                        }
-                      >
+                      <td className={r.wed > MAX_PERIODS_PER_DAY ? 'highlight-red' : ''}>
                         {r.wed}
                       </td>
-                      <td
-                        className={
-                          r.thu > MAX_PERIODS_PER_DAY ? 'highlight-red' : ''
-                        }
-                      >
+                      <td className={r.thu > MAX_PERIODS_PER_DAY ? 'highlight-red' : ''}>
                         {r.thu}
                       </td>
-                      <td
-                        className={
-                          r.fri > MAX_PERIODS_PER_DAY ? 'highlight-red' : ''
-                        }
-                      >
+                      <td className={r.fri > MAX_PERIODS_PER_DAY ? 'highlight-red' : ''}>
                         {r.fri}
                       </td>
                       <td>{r.total}</td>
@@ -612,6 +624,8 @@ const FacultyAssignment = ({ activeSection = 'facultyAssignment' }) => {
               </tbody>
             </table>
           </div>
+          </div>
+
 
           <div className="pagination-bar">
             <div className="pager-left">
@@ -697,6 +711,7 @@ const FacultyAssignment = ({ activeSection = 'facultyAssignment' }) => {
         </div>
       </div>
     </div>
+    </>
   );
 };
 

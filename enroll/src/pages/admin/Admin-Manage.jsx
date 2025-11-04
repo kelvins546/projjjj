@@ -410,14 +410,13 @@ export const Admin_Manage = () => {
           </div>
 
           <div className="userManageTable">
-            <table>
+            <table className="user-manage-table">
               <thead>
                 <tr>
-                  <th></th>
-                  <th scope="col">#</th>
+                  <th className='column1'></th>
+                  <th className='column2'scope="col">#</th>
                   <th scope="col">Name</th>
                   <th scope="col">Role</th>
-
                   <th scope="col">Status</th>
                   <th scope="col">Actions</th>
                 </tr>
@@ -426,7 +425,7 @@ export const Admin_Manage = () => {
                 {!loading &&
                   pageRows.map((u, index) => (
                     <tr key={u.user_id}>
-                      <td>
+                      <td className='column1'>
                         <input
                           type="checkbox"
                           checked={selectedIds.includes(u.user_id)}
@@ -435,7 +434,7 @@ export const Admin_Manage = () => {
                           }
                         />
                       </td>
-                      <td>{index + 1}</td>
+                      <td className='column2'>{index + 1}</td>
                       <td>{u.full_name}</td>
                       <td>{u.role}</td>
 

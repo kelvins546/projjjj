@@ -1,0 +1,55 @@
+/* 🌍 GLOBAL TABLE STYLES */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: #ffffff;
+  table-layout: fixed;
+  box-shadow: 0 5px 10px rgba(0, 0, 0, 0.05);
+
+}
+
+thead {
+  box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
+}
+
+th,
+td {
+  padding: 1rem 5rem;
+  text-align: left;
+  vertical-align: middle;
+}
+
+th {
+  letter-spacing: 0.1rem;
+  font-size: 0.9rem;
+  font-weight: 900;
+  color: #334155;
+  background-color: #f9fafb;
+  font-family: 'Mukta';
+  text-transform: uppercase;
+}
+
+td {
+  font-size: 0.9rem;
+  color: #475569;
+  border-top: 1px solid #e2e8f0;
+}
+
+/* Zebra striping */
+tr:nth-child(even) {
+  background-color: #f9fafb;
+}
+
+/* Hover effect */
+tr:hover {
+  background-color: #f1f8f3;
+  transition: background-color 0.2s;
+}
+
+/* Optional: Table titles */
+.table-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #334155;
+  margin-bottom: 15px;
+}

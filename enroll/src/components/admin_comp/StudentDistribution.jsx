@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { supabase } from '../../supabaseClient';
 import './studentDistribution.css';
-import './dashboardver1.css';
+import '../table/table.css'
 import {
   BarChart,
   Bar,
@@ -249,8 +249,8 @@ const StudentDistribution = () => {
 
   return (
     <div className="studentDistributionContainer">
-      <div style={{ padding: 20 }}>
-        <div
+      <div>
+        <div className='sorter'
           style={{
             display: 'flex',
             gap: 12,
@@ -383,7 +383,6 @@ const StudentDistribution = () => {
         <div className="gradeDistributionContainer" style={{ marginTop: 18 }}>
           <table className="gradeDistributionTable">
             <thead>
-              <tr>
                 <th>Grade Level</th>
                 <th
                   onClick={() => setSortAscending((v) => !v)}
@@ -401,7 +400,6 @@ const StudentDistribution = () => {
                 <th>Gap</th>
                 <th>Male</th>
                 <th>Female</th>
-              </tr>
             </thead>
             <tbody>
               {sortedData.map((r) => {

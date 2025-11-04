@@ -1,8 +1,8 @@
-import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { Header } from '../../components/Header';
-import { supabase } from '../../supabaseClient';
 import { Navigation_Bar } from '../../components/NavigationBar';
+import { useEffect, useState } from 'react';
+import { supabase } from '../../supabaseClient';
+import { LoadingPopup } from '../../components/loaders/LoadingPopup';
 import './applicant_profile.css';
 
 export const Applicant_Profile = () => {
@@ -10,35 +10,45 @@ export const Applicant_Profile = () => {
   const [user, setUser] = useState(null);
   const [profilePic, setProfilePic] = useState('/default-profile.png');
   const [loading, setLoading] = useState(true);
+  const [showDropdown, setShowDropdown] = useState(false);
 
   useEffect(() => {
     const userId = localStorage.getItem('user_id');
     if (!userId) return;
 
     async function fetchProfile() {
-      const { data: studentData } = await supabase
-        .from('students')
-        .select(
-          'lrn, last_name, first_name, middle_name, suffix, birthdate, profile_photo_url'
-        )
-        .eq('user_id', userId)
-        .single();
+      try {
+        const { data: studentData, error: studentError } = await supabase
+          .from('students')
+          .select(
+            'lrn, last_name, first_name, middle_name, suffix, birthdate, profile_photo_url'
+          )
+          .eq('user_id', userId)
+          .single();
 
-      setStudent(studentData);
+        if (studentError) console.error(studentError);
 
-      const { data: userData } = await supabase
-        .from('users')
-        .select('email')
-        .eq('user_id', userId)
-        .single();
+        const { data: userData, error: userError } = await supabase
+          .from('users')
+          .select('email')
+          .eq('user_id', userId)
+          .single();
 
-      setUser(userData);
+        if (userError) console.error(userError);
 
-      if (studentData?.profile_photo_url)
-        setProfilePic(studentData.profile_photo_url);
+        setStudent(studentData);
+        setUser(userData);
 
-      setLoading(false);
+        if (studentData?.profile_photo_url) {
+          setProfilePic(studentData.profile_photo_url);
+        }
+      } catch (err) {
+        console.error('Error fetching profile:', err);
+      } finally {
+        setLoading(false);
+      }
     }
+
     fetchProfile();
   }, []);
 
@@ -47,105 +57,75 @@ export const Applicant_Profile = () => {
     if (file) setProfilePic(URL.createObjectURL(file));
   };
 
-  if (loading)
-    return (
-      <>
-        <Header />
-        <div className="mainContent">Loading...</div>
-      </>
-    );
+  if (loading) return <LoadingPopup />;
 
   return (
     <>
       <Header userRole="applicant" />
-      <Navigation_Bar />
       <Navigation_Bar userRole="applicant" />
-      <div className="mainContent">
-        <h1 className="profileTitle">Applicant’s Profile</h1>
-        <div className="profileContainer">
-          <form className="profileForm">
-            <div className="formRow">
-              <div className="formColumn">
-                <label>
-                  LRN
-                  <input
-                    value={student?.lrn || ''}
-                    disabled
-                    className="profileInput"
-                  />
-                </label>
-                <label>
-                  Last Name
-                  <input
-                    value={student?.last_name || ''}
-                    disabled
-                    className="profileInput"
-                  />
-                </label>
-                <label>
-                  Birth date
-                  <input
-                    value={student?.birthdate || ''}
-                    disabled
-                    className="profileInput"
-                  />
-                </label>
-              </div>
-              <div className="formColumn">
-                <label>
-                  First Name
-                  <input
-                    value={student?.first_name || ''}
-                    disabled
-                    className="profileInput"
-                  />
-                </label>
-                <label>
-                  Middle Name
-                  <input
-                    value={student?.middle_name || ''}
-                    disabled
-                    className="profileInput"
-                  />
-                </label>
-                <label>
-                  Email
-                  <input
-                    value={user?.email || ''}
-                    disabled
-                    className="profileInput"
-                  />
-                </label>
-              </div>
-              <div className="suffixColumn">
-                <label>
-                  Suffix
-                  <input
-                    value={student?.suffix || ''}
-                    disabled
-                    className="profileInput"
-                  />
-                </label>
+      <div className="applicantProfileContainer">
+        <div className="applicantDetails">
+          <div className="applicantDatas">
+            <div className="applicantDataName">
+              <h2>
+                {student
+                  ? `${student.first_name} ${student.middle_name || ''} ${student.last_name} ${student.suffix || ''}`
+                  : 'Loading...'}
+              </h2>
+            </div>
+
+            <div className="applicantDataContainer">
+              <div className="applicantData">
+                <p className="data">Birthdate:</p>
+                <p className="userData">{student?.birthdate || 'N/A'}</p>
               </div>
             </div>
-            <button type="button" className="changePasswordBtn">
-              Change Password
-            </button>
-          </form>
-          <div className="profilePictureContainer">
-            <img src={profilePic} alt="Profile" className="profilePicture" />
-            <label htmlFor="applicant-upload">
-              <input
-                id="applicant-upload"
-                type="file"
-                accept="image/*"
-                style={{ display: 'none' }}
-                onChange={handlePicChange}
+
+            <div className="applicantDataContainer">
+              <div className="applicantData">
+                <p className="data">Email:</p>
+                <p className="userData">{user?.email || 'N/A'}</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="applicantPhotoContainer">
+            <div className="applicantPhoto">
+              <img
+                src={profilePic}
+                alt="Applicant"
+                className="profilePicture"
               />
-              <button type="button" className="uploadButton">
-                Upload
-              </button>
-            </label>
+              <label htmlFor="photo-upload" className="cameraOverlay">
+                <input
+                  id="photo-upload"
+                  type="file"
+                  accept="image/*"
+                  style={{ display: 'none' }}
+                  onChange={handlePicChange}
+                />
+                <i className="fa fa-camera" aria-hidden="true"></i>
+              </label>
+            </div>
+          </div>
+          <div className="profileOptionContainer">
+            <i
+              className="fa fa-ellipsis-h profileOptionIcon"
+              aria-hidden="true"
+              onClick={() => setShowDropdown((prev) => !prev)}
+            ></i>
+
+            {showDropdown && (
+              <div className="profileDropdown">
+                <button
+                  className="dropdownItem"
+                  onClick={() => alert('Change Password clicked!')}
+                >
+                  <i className="fa fa-key" aria-hidden="true"></i> Change
+                  Password
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </div>

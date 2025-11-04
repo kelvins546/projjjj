@@ -6,9 +6,103 @@ import { useEffect, useMemo, useState } from 'react';
 import { supabase } from '../../supabaseClient';
 import emailjs from 'emailjs-com';
 import { ImageModal } from '../../components/modals/ImageModal';
+import EnrollmentSuccessModal from '../../components/modals/EnrollmentSuccessModal';
 
 const GRADES = ['Grade 7', 'Grade 8', 'Grade 9', 'Grade 10'];
 const normalizeSY = (s) => (s || '').replace(/[–—−]/g, '-').trim();
+
+// Inline notify modal (collects choice + notes)
+const NotifyModal = ({
+  open,
+  row,
+  choice,
+  notes,
+  setChoice,
+  setNotes,
+  onClose,
+  onContinue, // proceed to confirm
+  busy,
+}) => {
+  if (!open || !row) return null;
+  return (
+    <div className="modal-backdrop">
+      <div
+        className="modal-card"
+        role="dialog"
+        aria-modal="true"
+        style={{ maxWidth: 520 }}
+      >
+        <h3 style={{ margin: 0 }}>Notify Applicant</h3>
+        <div style={{ marginTop: 6, color: '#64748b', fontSize: 13 }}>
+          {row.name} • {row.email} • {row.grade_level}
+        </div>
+
+        <div style={{ marginTop: 12, display: 'grid', gap: 8 }}>
+          <label style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+            <input
+              type="radio"
+              name="notifyReason"
+              value="refer"
+              checked={choice === 'refer'}
+              onChange={(e) => setChoice(e.target.value)}
+            />
+            <span>Refer to other school (slots are full)</span>
+          </label>
+          <label style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+            <input
+              type="radio"
+              name="notifyReason"
+              value="resubmit"
+              checked={choice === 'resubmit'}
+              onChange={(e) => setChoice(e.target.value)}
+            />
+            <span>Please resubmit documents (unclear)</span>
+          </label>
+        </div>
+
+        <div style={{ marginTop: 12 }}>
+          <label
+            style={{
+              display: 'block',
+              fontSize: 12,
+              color: '#475569',
+              marginBottom: 4,
+            }}
+          >
+            Optional notes to include
+          </label>
+          <textarea
+            rows={4}
+            style={{ width: '100%' }}
+            value={notes}
+            onChange={(e) => setNotes(e.target.value)}
+            placeholder="Add specific guidance or instructions…"
+          />
+        </div>
+
+        <div
+          style={{
+            marginTop: 12,
+            display: 'flex',
+            justifyContent: 'flex-end',
+            gap: 8,
+          }}
+        >
+          <button className="modal-btn" onClick={onClose} disabled={busy}>
+            Cancel
+          </button>
+          <button
+            className="modal-btn primary"
+            onClick={onContinue}
+            disabled={busy}
+          >
+            {busy ? 'Preparing…' : 'Continue'}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 export const Admin_Enrollment = () => {
   const [modalImage, setModalImage] = useState(null);
@@ -36,11 +130,150 @@ export const Admin_Enrollment = () => {
 
   const [docsByStudent, setDocsByStudent] = useState(new Map());
   const [studentByApplicant, setStudentByApplicant] = useState(new Map());
+  const [resubmitCount, setResubmitCount] = useState(0);
 
+  // Filters
+  const [statusFilter, setStatusFilter] = useState('pending'); // default: show Pending
+
+  // Notify state
+  const [notifyOpen, setNotifyOpen] = useState(false);
+  const [notifyRow, setNotifyRow] = useState(null);
+  const [notifyChoice, setNotifyChoice] = useState('refer'); // 'refer' | 'resubmit'
+  const [notifyNotes, setNotifyNotes] = useState('');
+  const [notifyBusy, setNotifyBusy] = useState(false);
+
+  // Notify confirm/success
+  const [showNotifyConfirm, setShowNotifyConfirm] = useState(false);
+  const [notifyConfirmBusy, setNotifyConfirmBusy] = useState(false);
+  const [showNotifySuccess, setShowNotifySuccess] = useState(false);
+
+  // Enrollment window per SY
+  const [windowRow, setWindowRow] = useState(null); // { school_year, start_at, end_at, is_open }
+  const [loadingWindow, setLoadingWindow] = useState(false);
+  const [showWindowModal, setShowWindowModal] = useState(false);
+  const [winStart, setWinStart] = useState(''); // 'YYYY-MM-DDTHH:mm'
+  const [winEnd, setWinEnd] = useState(''); // 'YYYY-MM-DDTHH:mm'
+  const [winOpen, setWinOpen] = useState(false);
+
+  // Open/close confirm + success for Enrollment Settings
+  const [winAction, setWinAction] = useState(null); // 'open' | 'close' | null
+  const [showWinConfirm, setShowWinConfirm] = useState(false);
+  const [winConfirmBusy, setWinConfirmBusy] = useState(false);
+  const [showWinSuccess, setShowWinSuccess] = useState(false);
+  const [winSuccessMsg, setWinSuccessMsg] = useState('');
+
+  // Build options like '2025-2026'
+  const makeSyOptions = (
+    centerYear = new Date().getFullYear(),
+    back = 1,
+    forward = 3
+  ) => {
+    const opts = [];
+    for (let y = centerYear - back; y <= centerYear + forward; y++) {
+      opts.push(`${y}-${y + 1}`);
+    }
+    return opts;
+  };
+
+  // Load window for selected SY
+  const loadEnrollmentWindow = async () => {
+    setLoadingWindow(true);
+    try {
+      const sy = normalizeSY(schoolYear);
+      const { data, error } = await supabase
+        .from('enrollment_windows')
+        .select('school_year, start_at, end_at, is_open')
+        .eq('school_year', sy)
+        .maybeSingle();
+      if (error) throw error;
+
+      setWindowRow(data || null);
+
+      const toInput = (d) => {
+        if (!d) return '';
+        const dt = new Date(d);
+        const pad = (n) => String(n).padStart(2, '0');
+        return `${dt.getFullYear()}-${pad(dt.getMonth() + 1)}-${pad(dt.getDate())}T${pad(dt.getHours())}:${pad(dt.getMinutes())}`;
+      };
+      setWinStart(toInput(data?.start_at));
+      setWinEnd(toInput(data?.end_at));
+      setWinOpen(!!data?.is_open);
+    } finally {
+      setLoadingWindow(false);
+    }
+  };
+
+  useEffect(() => {
+    loadEnrollmentWindow();
+  }, [schoolYear]);
+
+  const openWindowModal = () => setShowWindowModal(true);
+  const closeWindowModal = () => setShowWindowModal(false);
+
+  // Create/Update window for this SY
+  const saveEnrollmentWindow = async () => {
+    const sy = normalizeSY(schoolYear);
+    if (!winStart || !winEnd) throw new Error('Enrollment window is required'); // [attached_file:498]
+
+    await ensureSchoolYearRow(sy); // make FK parent exist [attached_file:498]
+
+    const payload = {
+      school_year: sy,
+      start_at: new Date(winStart).toISOString(),
+      end_at: new Date(winEnd).toISOString(),
+      is_open: !!winOpen,
+    }; // [attached_file:498]
+
+    const { error } = await supabase
+      .from('enrollment_windows')
+      .upsert(payload, { onConflict: 'school_year' }); // [attached_file:498]
+    if (error) throw error; // [attached_file:498]
+
+    await loadEnrollmentWindow(); // [attached_file:498]
+  }; // keep modal open/closed logic in the callers so you can show confirms/success [attached_file:498]
+
+  // One-click open/close for current SY
+  const setOpenClosed = async (nextOpen) => {
+    const sy = normalizeSY(schoolYear);
+    if (!windowRow) {
+      const now = new Date();
+      const in7 = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
+      const { error: upErr } = await supabase.from('enrollment_windows').upsert(
+        {
+          school_year: sy,
+          start_at: now.toISOString(),
+          end_at: in7.toISOString(),
+          is_open: !!nextOpen,
+        },
+        { onConflict: 'school_year' }
+      );
+      if (upErr) throw upErr;
+    } else {
+      const { error } = await supabase
+        .from('enrollment_windows')
+        .update({ is_open: !!nextOpen })
+        .eq('school_year', sy);
+      if (error) throw error;
+    }
+    await loadEnrollmentWindow();
+  };
+
+  const saveAndOpenNow = async () => {
+    await saveEnrollmentWindow();
+    await setOpenClosed(true);
+  };
+
+  const saveAndCloseNow = async () => {
+    await saveEnrollmentWindow();
+    await setOpenClosed(false);
+  };
+
+  // Stats
   const loadStats = async () => {
     setError('');
     try {
       const sy = normalizeSY(schoolYear);
+
       const { count: pend, error: ePend } = await supabase
         .from('enrollments')
         .select('enrollment_id', { count: 'exact', head: true })
@@ -48,6 +281,14 @@ export const Admin_Enrollment = () => {
         .eq('status', 'pending');
       if (ePend) throw ePend;
       setPendingCount(pend || 0);
+
+      const { count: resub, error: eResub } = await supabase
+        .from('enrollments')
+        .select('enrollment_id', { count: 'exact', head: true })
+        .eq('school_year', sy)
+        .eq('status', 'resubmit');
+      if (eResub) throw eResub;
+      setResubmitCount(resub || 0);
 
       const { count: enrolledCount, error: eEnr } = await supabase
         .from('enrollments')
@@ -60,7 +301,41 @@ export const Admin_Enrollment = () => {
       setError('Failed to load stats.');
     }
   };
+  // Ask for confirmation from inside the modal
+  const askConfirmOpen = () => {
+    setWinAction('open');
+    setShowWinConfirm(true);
+  };
+  const askConfirmClose = () => {
+    setWinAction('close');
+    setShowWinConfirm(true);
+  };
 
+  // Perform the chosen action after confirmation
+  const doConfirmedOpenClose = async () => {
+    if (!winAction) return;
+    setWinConfirmBusy(true);
+    try {
+      // Always persist the window fields first
+      await saveEnrollmentWindow();
+      // Then toggle the status
+      await setOpenClosed(winAction === 'open');
+      // Close the settings modal and show success
+      setShowWindowModal(false);
+      setWinSuccessMsg(
+        `Enrollment ${winAction === 'open' ? 'opened' : 'closed'} for ${normalizeSY(schoolYear)}.`
+      );
+      setShowWinSuccess(true);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setWinConfirmBusy(false);
+      setShowWinConfirm(false);
+      setWinAction(null);
+    }
+  };
+
+  // Rows
   const loadRows = async () => {
     setLoading(true);
     setError('');
@@ -175,6 +450,7 @@ export const Admin_Enrollment = () => {
     loadRows();
   }, [schoolYear, dateSort]);
 
+  // Selection helpers
   const toggleSelection = (applicant_id) => {
     setSelected((prev) => {
       const s = new Set(prev);
@@ -204,6 +480,7 @@ export const Admin_Enrollment = () => {
     });
   };
 
+  // Visible rows + paging
   const visibleRows = useMemo(() => {
     let list = rows;
     if (searchText.trim()) {
@@ -221,8 +498,16 @@ export const Admin_Enrollment = () => {
         (r) => (r.gender || '').toLowerCase() === genderFilter.toLowerCase()
       );
     if (docCompleteOnly) list = list.filter((r) => r.complete);
+    if (statusFilter) list = list.filter((r) => r.status === statusFilter);
     return list;
-  }, [rows, searchText, gradeFilter, genderFilter, docCompleteOnly]);
+  }, [
+    rows,
+    searchText,
+    gradeFilter,
+    genderFilter,
+    docCompleteOnly,
+    statusFilter,
+  ]);
 
   const totalRows = visibleRows.length;
   const totalPages = Math.max(1, Math.ceil(totalRows / pageSize));
@@ -261,6 +546,7 @@ export const Admin_Enrollment = () => {
   const nextPage = () => gotoPage(page + 1);
   const lastPage = () => gotoPage(totalPages);
 
+  // Approvals
   const approveEnrollments = async (enrollmentIds) => {
     if (!enrollmentIds.length) return;
     setModalBusy(true);
@@ -328,8 +614,8 @@ export const Admin_Enrollment = () => {
           school_year: enrollmentData.school_year,
           grade_level: enrollmentData.grade_level,
           enrollment_id: enrollment_id,
-          lrn: studentData.lrn || '', // ADDED: Student ID for template {{lrn}}
-          password: studentData.last_name || '', // ADDED: Password for template {{password}}
+          lrn: studentData.lrn || '',
+          password: studentData.last_name || '',
         };
 
         try {
@@ -395,11 +681,178 @@ export const Admin_Enrollment = () => {
     return data.publicUrl;
   }
 
+  const choiceCopy = (choice) => {
+    if (choice === 'refer') {
+      return `Thank you for your application. At this time, all available slots for your chosen grade level are full. We kindly advise you to consider applying to other nearby schools. We appreciate your interest and wish you the best in your enrollment journey.`;
+    }
+    return `Thank you for your submission. Some of your uploaded documents are unclear or incomplete. Please resubmit clear copies (e.g., PSA Birth Certificate, Report Card, and SF10) so we can proceed with your application. If you need assistance, please reply to this email.`;
+  };
+
+  const openNotify = (row) => {
+    setNotifyRow(row);
+    setNotifyChoice('refer');
+    setNotifyNotes('');
+    setNotifyOpen(true);
+  };
+  const closeNotify = () => {
+    setNotifyOpen(false);
+    setNotifyRow(null);
+    setNotifyNotes('');
+  };
+
+  // Email notify (returns boolean)
+  const actuallySendNotification = async () => {
+    if (!notifyRow) return false;
+    setNotifyBusy(true);
+    setError('');
+    try {
+      const paramsBase = {
+        to_name: notifyRow.name || 'Applicant',
+        to_email: notifyRow.email,
+        school_year: schoolYear,
+        grade_level: notifyRow.grade_level,
+        email_title: 'Enrollment Notice',
+        year: new Date().getFullYear(),
+        optional_note: (notifyNotes || '').trim(),
+      };
+
+      const VARIANTS = {
+        refer: {
+          header_subtitle: 'Enrollment Update',
+          intro_text: `Thank you for your interest in enrolling for the ${schoolYear} school year.`,
+          notice_text:
+            'We regret to inform you that all available slots are currently filled.',
+          body_text_1:
+            'We encourage you to apply to other schools in your area to ensure your continued learning this year.',
+          body_text_2: 'Thank you for your time and understanding.',
+        },
+        resubmit: {
+          header_subtitle: 'Enrollment Clarification Required',
+          intro_text: `We reviewed your application for the ${schoolYear} school year, but some submitted documents were unclear or incomplete.`,
+          notice_text:
+            'Please review your documents and resubmit the required files for verification.',
+          body_text_1:
+            'Once you have uploaded the corrected documents, our team will process your application as soon as possible.',
+          body_text_2:
+            'If you need guidance, please refer to the enrollment portal or contact our support team.',
+        },
+      };
+
+      const variant = VARIANTS[notifyChoice] || VARIANTS.refer;
+
+      await emailjs.send(
+        'service_q1ngnvg',
+        'template_xra0h2d',
+        { ...paramsBase, ...variant },
+        'EXXWbe2NSHxvbalnb'
+      );
+
+      try {
+        await supabase.from('enrollment_notifications').insert({
+          enrollment_id: notifyRow.enrollment_id,
+          applicant_id: notifyRow.applicant_id,
+          school_year: normalizeSY(schoolYear),
+          reason: notifyChoice,
+          notes: notifyNotes?.trim() || null,
+          recipient_email: notifyRow.email,
+          sent_at: new Date().toISOString(),
+        });
+      } catch (logErr) {
+        console.warn(
+          'Log notify error (non-fatal):',
+          logErr?.message || logErr
+        );
+      }
+
+      closeNotify();
+      return true;
+    } catch (err) {
+      console.error(err);
+      setError('Failed to send notification: ' + (err?.message || String(err)));
+      return false;
+    } finally {
+      setNotifyBusy(false);
+    }
+  };
+
+  // Mark for resubmission
+  const markEnrollmentForResubmit = async () => {
+    if (!notifyRow?.enrollment_id) return;
+    try {
+      const { error } = await supabase
+        .from('enrollments')
+        .update({ status: 'resubmit' })
+        .eq('enrollment_id', notifyRow.enrollment_id);
+      if (error) console.warn('Status update failed:', error.message);
+
+      setRows((prev) =>
+        prev.map((r) =>
+          r.enrollment_id === notifyRow.enrollment_id
+            ? { ...r, status: 'resubmit' }
+            : r
+        )
+      );
+      await loadStats();
+    } catch (e) {
+      console.warn('Resubmit status error:', e?.message || String(e));
+    }
+  }; // helpers — place near other helpers
+  const parseSY = (syStr) => {
+    // '2025-2026' -> { y1: 2025, y2: 2026 }
+    const m = String(syStr || '').match(/^(\d{4})-(\d{4})$/);
+    if (!m) return null;
+    return { y1: parseInt(m[1], 10), y2: parseInt(m[2], 10) };
+  }; // [attached_file:498]
+
+  const ensureSchoolYearRow = async (syStr) => {
+    // enrollment_windows has FK to school_years, so ensure it exists before window upsert
+    const sy = normalizeSY(syStr);
+    const yrs = parseSY(sy);
+    if (!yrs) throw new Error('Invalid School Year format'); // [attached_file:498]
+    // pick a conventional SY span (adjust if your school uses different dates)
+    const sy_start = new Date(Date.UTC(yrs.y1, 6, 1))
+      .toISOString()
+      .slice(0, 10); // Jul 1 YYYY [attached_file:498]
+    const sy_end = new Date(Date.UTC(yrs.y2, 5, 30)).toISOString().slice(0, 10); // Jun 30 YYYY+1 [attached_file:498]
+    // Try reading first; if missing, insert
+    const { data: existing, error: readErr } = await supabase
+      .from('school_years')
+      .select('school_year')
+      .eq('school_year', sy)
+      .maybeSingle(); // [attached_file:498]
+    if (readErr) throw readErr; // [attached_file:498]
+    if (!existing) {
+      const { error: upErr } = await supabase
+        .from('school_years')
+        .upsert(
+          { school_year: sy, sy_start, sy_end, is_active: false },
+          { onConflict: 'school_year' }
+        ); // [attached_file:498]
+      if (upErr) throw upErr; // [attached_file:498]
+    }
+  }; // [attached_file:498]
+
+  // Confirm -> send -> update status if needed -> show success
+  const confirmAndSendNotification = async () => {
+    setNotifyConfirmBusy(true);
+    const ok = await actuallySendNotification();
+    setNotifyConfirmBusy(false);
+    setShowNotifyConfirm(false);
+
+    if (ok && notifyChoice === 'resubmit') {
+      await markEnrollmentForResubmit();
+    }
+    if (ok) {
+      setShowNotifySuccess(true);
+      await loadRows();
+    }
+  };
   return (
     <>
       <Header userRole="admin" />
       <Navigation_Bar userRole="super_admin" activeSection="enrollment" />
 
+      {/* Existing approval confirmation */}
       {showConfirmation && (
         <Confirmation_Modal
           show={showConfirmation}
@@ -414,11 +867,13 @@ export const Admin_Enrollment = () => {
           description="This will mark the enrollment(s) as approved and set adviser/dept/principal flags."
         />
       )}
+
       <ImageModal
         isOpen={!!modalImage}
         imageUrl={modalImage}
         onClose={() => setModalImage(null)}
       />
+
       <div className="admin-enrollment-container">
         <div className="stats-container">
           <div className="stat-card">
@@ -428,6 +883,24 @@ export const Admin_Enrollment = () => {
           <div className="stat-card">
             <h2>{totalEnrolled}</h2>
             <p>Total Enrolled Students</p>
+          </div>
+          <div className="stat-card">
+            <h2 style={{ color: windowRow?.is_open ? '#16a34a' : '#ef4444' }}>
+              {loadingWindow ? '…' : windowRow?.is_open ? 'OPEN' : 'CLOSED'}
+            </h2>
+            <p>Enrollment Status</p>
+            <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
+              <button onClick={openWindowModal}>Open Enrollment</button>
+              <button
+                onClick={() => setOpenClosed(!windowRow?.is_open)}
+                disabled={loadingWindow || !windowRow}
+                style={{
+                  backgroundColor: windowRow?.is_open ? '#ef4444' : '#16a34a',
+                }}
+              >
+                {windowRow?.is_open ? 'Close Now' : 'Open Now'}
+              </button>
+            </div>
           </div>
         </div>
 
@@ -454,6 +927,17 @@ export const Admin_Enrollment = () => {
           </div>
 
           <div className="enrollmentFilters">
+            <div className="filter">
+              <label>Status</label>
+              <select
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value)}
+              >
+                <option value="">All</option>
+                <option value="pending">Pending</option>
+                <option value="resubmit">Resubmit</option>
+              </select>
+            </div>
             <div className="filter">
               <label>Application Date</label>
               <select
@@ -657,18 +1141,27 @@ export const Admin_Enrollment = () => {
                     <td style={{ textTransform: 'capitalize' }}>{r.status}</td>
                     <td>
                       {r.status === 'pending' ? (
-                        <button
-                          className="accept-btn"
-                          onClick={() => {
-                            setConfirmPayload({
-                              type: 'single',
-                              ids: [r.enrollment_id],
-                            });
-                            setShowConfirmation(true);
-                          }}
-                        >
-                          Accept
-                        </button>
+                        <div style={{ display: 'flex', gap: 8 }}>
+                          <button
+                            className="accept-btn"
+                            onClick={() => {
+                              setConfirmPayload({
+                                type: 'single',
+                                ids: [r.enrollment_id],
+                              });
+                              setShowConfirmation(true);
+                            }}
+                          >
+                            Accept
+                          </button>
+                          <button
+                            className="notify-btn"
+                            onClick={() => openNotify(r)}
+                            title="Send a notification to the applicant"
+                          >
+                            Notify
+                          </button>
+                        </div>
                       ) : (
                         <span>—</span>
                       )}
@@ -761,6 +1254,159 @@ export const Admin_Enrollment = () => {
           </div>
         </div>
       </div>
+      {/* Enrollment Settings modal (year-only + open/close inside) */}
+      {showWindowModal && (
+        <div className="modal-backdrop">
+          <div
+            className="modal-card"
+            role="dialog"
+            aria-modal="true"
+            style={{ maxWidth: 520 }}
+          >
+            <h3 style={{ margin: 0 }}>
+              Enrollment Settings ({normalizeSY(schoolYear)})
+            </h3>
+
+            {/* School Year (year-only, e.g., 2025-2026) */}
+            <div style={{ marginTop: 12, display: 'grid', gap: 12 }}>
+              <label style={{ display: 'grid', gap: 6 }}>
+                <span>School Year</span>
+                <select
+                  value={schoolYear}
+                  onChange={(e) => setSchoolYear(e.target.value)}
+                >
+                  {makeSyOptions().map((sy) => (
+                    <option key={sy} value={sy}>
+                      {sy}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            </div>
+
+            {/* Enrollment Window for selected year */}
+            <div style={{ marginTop: 12, display: 'grid', gap: 12 }}>
+              <label style={{ display: 'grid', gap: 6 }}>
+                <span>Enrollment Start</span>
+                <input
+                  type="datetime-local"
+                  value={winStart}
+                  onChange={(e) => setWinStart(e.target.value)}
+                />
+              </label>
+              <label style={{ display: 'grid', gap: 6 }}>
+                <span>Enrollment End</span>
+                <input
+                  type="datetime-local"
+                  value={winEnd}
+                  onChange={(e) => setWinEnd(e.target.value)}
+                />
+              </label>
+              <label style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <input
+                  type="checkbox"
+                  checked={winOpen}
+                  onChange={(e) => setWinOpen(e.target.checked)}
+                />
+                <span>Mark enrollment as Open</span>
+              </label>
+              <div style={{ fontSize: 12, color: '#64748b' }}>
+                Current status:{' '}
+                {loadingWindow ? '…' : windowRow?.is_open ? 'OPEN' : 'CLOSED'}
+              </div>
+            </div>
+
+            {/* Actions */}
+            <div
+              style={{
+                marginTop: 16,
+                display: 'flex',
+                justifyContent: 'flex-end',
+                gap: 8,
+                flexWrap: 'wrap',
+              }}
+            >
+              <button onClick={closeWindowModal}>Cancel</button>
+
+              {/* Save + Open now */}
+              <button
+                onClick={async () => {
+                  try {
+                    await saveEnrollmentWindow();
+                    await setOpenClosed(true);
+                    setShowWindowModal(false);
+                    setWinSuccessMsg(
+                      `Enrollment opened for ${normalizeSY(schoolYear)}.`
+                    );
+                    setShowWinSuccess(true);
+                  } catch (e) {
+                    console.error(e);
+                    setError(e?.message || String(e));
+                  }
+                }}
+                style={{ backgroundColor: '#16a34a', color: '#fff' }}
+                disabled={!winStart || !winEnd}
+                title="Save window and open enrollment now"
+              >
+                <Proceed></Proceed>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      <Confirmation_Modal
+        show={showWinConfirm}
+        onClose={() => {
+          setShowWinConfirm(false);
+          setWinAction(null);
+        }}
+        onConfirm={doConfirmedOpenClose}
+        busy={winConfirmBusy}
+        title={
+          winAction === 'open'
+            ? 'Open enrollment now?'
+            : 'Close enrollment now?'
+        }
+        description={
+          winAction === 'open'
+            ? `This will mark ${normalizeSY(schoolYear)} as OPEN and allow approvals during the configured window.`
+            : `This will mark ${normalizeSY(schoolYear)} as CLOSED and block approvals until reopened.`
+        }
+      />
+
+      {/* Step 1: collect details */}
+      <NotifyModal
+        open={notifyOpen}
+        row={notifyRow}
+        choice={notifyChoice}
+        notes={notifyNotes}
+        setChoice={setNotifyChoice}
+        setNotes={setNotifyNotes}
+        busy={notifyBusy}
+        onClose={closeNotify}
+        onContinue={() => setShowNotifyConfirm(true)}
+      />
+
+      {/* Step 2: confirm */}
+      <Confirmation_Modal
+        show={showNotifyConfirm}
+        onClose={() => setShowNotifyConfirm(false)}
+        onConfirm={confirmAndSendNotification}
+        busy={notifyConfirmBusy}
+        title="Send this notification?"
+        description={
+          notifyRow
+            ? `Send a "${notifyChoice === 'refer' ? 'Refer to other school' : 'Resubmit documents'}" email to ${notifyRow.name} (${notifyRow.email}) for ${notifyRow.grade_level}?`
+            : 'Send this notification now?'
+        }
+      />
+
+      {/* Step 3: success */}
+      <EnrollmentSuccessModal
+        show={showNotifySuccess}
+        onClose={() => setShowNotifySuccess(false)}
+        message="Notification sent successfully."
+      />
     </>
   );
 };

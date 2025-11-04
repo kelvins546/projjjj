@@ -1,3 +1,4 @@
+// StudentList.jsx
 import { useState, useEffect, useMemo } from 'react';
 import { ReusableModalBox } from '../modals/Reusable_Modal';
 import { supabase } from '../../supabaseClient';
@@ -10,7 +11,7 @@ const GRADES = [
   { label: 'Grade 10', value: 10 },
 ];
 
-const STATIC_SY = '2025-2026'; // ✅ CURRENT
+const STATIC_SY = '2025-2026';
 
 const StudentList = () => {
   const [students, setStudents] = useState([]);
@@ -26,15 +27,11 @@ const StudentList = () => {
     'Changes Applied Successfully!'
   );
   const [overrideStudentId, setOverrideStudentId] = useState(null);
-
-  // NEW: track the overriding student's grade and the chosen section_id
   const [overrideStudentGrade, setOverrideStudentGrade] = useState(null);
   const [overrideTargetSectionId, setOverrideTargetSectionId] = useState('');
-
   const [pageStu, setPageStu] = useState(1);
   const [pageSizeStu, setPageSizeStu] = useState(10);
 
-  // Only sections for the overriding student's grade
   const overrideSectionsForGrade = useMemo(() => {
     if (overrideStudentGrade == null) return [];
     return (sections || [])
@@ -47,14 +44,14 @@ const StudentList = () => {
       const { data, error } = await supabase
         .from('sections')
         .select('section_id, name, grade_level, is_star, adviser_id')
-        .order('name');
+        .order('name', { ascending: true });
       if (error) throw error;
       setSections(data || []);
     } catch (e) {
       console.error('Failed to load sections:', e);
       setSections([]);
     }
-  };
+  }; // [web:430][web:474]
 
   const loadStudents = async () => {
     setLoadingStudents(true);
@@ -197,267 +194,254 @@ const StudentList = () => {
 
       setStudents(normalized);
     } catch (e) {
-      console.error(
-        'Failed to load students:',
-        e?.message,
-        e?.details,
-        e?.hint,
-        e?.code
-      );
+      console.error('Failed to load students:', e?.message);
       setStudents([]);
     } finally {
       setLoadingStudents(false);
     }
-  };
+  }; // [web:430]
 
-  const automateStudentSectioning = async (gradeLevel) => {
-    try {
-      if (!gradeLevel) {
-        setNotifMessage('Please select a grade level first.');
-        setShowApplyNotif(true);
-        return;
-      }
+  // Helper: run the existing per-grade logic, return summary
+  const runForGrade = async (g) => {
+    const { data: secRows, error: secErr } = await supabase
+      .from('sections')
+      .select('section_id, name, grade_level, is_star')
+      .eq('grade_level', g)
+      .order('name', { ascending: true });
+    if (secErr) throw secErr;
+    if (!secRows?.length) return { grade: g, rowsInserted: 0, starPlaced: 0 };
 
-      const { data: secRows, error: secErr } = await supabase
-        .from('sections')
-        .select('section_id, name, grade_level, is_star')
-        .eq('grade_level', gradeLevel)
-        .order('name', { ascending: true });
-      if (secErr) throw secErr;
+    const starSection = secRows.find((s) => s.is_star === true);
+    const nonStarSections = secRows.filter((s) => s.is_star !== true);
+    if (!starSection && !nonStarSections.length)
+      return { grade: g, rowsInserted: 0, starPlaced: 0 };
 
-      if (!secRows || secRows.length === 0) {
-        throw new Error(`No sections found for Grade ${gradeLevel}`);
-      }
+    const STAR_CAP = 65;
+    const NONSTAR_CAP = 45;
 
-      const starSection = secRows.find((s) => s.is_star === true);
-      const nonStarSections = secRows.filter((s) => s.is_star !== true);
+    const { data: enrRows, error: enrErr } = await supabase
+      .from('enrollments')
+      .select('applicant_id')
+      .eq('grade_level', `Grade ${g}`)
+      .eq('school_year', STATIC_SY);
+    if (enrErr) throw enrErr;
+    const applicantIds = (enrRows || [])
+      .map((e) => e.applicant_id)
+      .filter(Boolean);
+    if (!applicantIds.length)
+      return { grade: g, rowsInserted: 0, starPlaced: 0 };
 
-      if (!starSection) {
-        console.warn(
-          `No STAR section found for Grade ${gradeLevel}. All students will be assigned to regular sections.`
-        );
-        if (nonStarSections.length === 0) {
-          throw new Error(`No sections available for Grade ${gradeLevel}`);
-        }
-      }
+    const { data: stuIdRows, error: mapErr } = await supabase
+      .from('students')
+      .select('student_id, applicant_id, gender')
+      .in('applicant_id', applicantIds);
+    if (mapErr) throw mapErr;
+    const studentIdsForGrade = (stuIdRows || [])
+      .map((r) => r.student_id)
+      .filter(Boolean);
+    if (!studentIdsForGrade.length)
+      return { grade: g, rowsInserted: 0, starPlaced: 0 };
+    const genderByStudent = new Map(
+      stuIdRows.map((r) => [r.student_id, r.gender])
+    );
 
-      const STAR_CAP = 65;
-      const NONSTAR_CAP = 45;
+    const { data: academicRows, error: acadErr } = await supabase
+      .from('academic_history')
+      .select('student_id, general_average')
+      .in('student_id', studentIdsForGrade);
+    if (acadErr) throw acadErr;
+    const gaByStudent = new Map(
+      (academicRows || []).map((a) => [
+        a.student_id,
+        Number(a.general_average || 0),
+      ])
+    );
 
-      const { data: enrRows, error: enrErr } = await supabase
-        .from('enrollments')
-        .select('applicant_id')
-        .eq('grade_level', `Grade ${gradeLevel}`)
-        .eq('school_year', STATIC_SY);
-      if (enrErr) throw enrErr;
+    const studentsForAlgo = studentIdsForGrade.map((id) => ({
+      student_id: id,
+      gender: genderByStudent.get(id) || '',
+      general_average: gaByStudent.get(id) || 0,
+    }));
+    if (!studentsForAlgo.length)
+      return { grade: g, rowsInserted: 0, starPlaced: 0 };
 
-      if (!enrRows || enrRows.length === 0) {
-        throw new Error(
-          `No enrollments found for Grade ${gradeLevel} in ${STATIC_SY}`
-        );
-      }
+    const isStarEligible = (s) => Number(s.general_average || 0) >= 95;
+    const starQueue = studentsForAlgo.filter(isStarEligible);
+    const nonStarQueue = studentsForAlgo.filter((s) => !isStarEligible(s));
 
-      const applicantIds = enrRows.map((e) => e.applicant_id).filter(Boolean);
-
-      const { data: stuIdRows, error: mapErr } = await supabase
-        .from('students')
-        .select('student_id, applicant_id, gender')
-        .in('applicant_id', applicantIds);
-      if (mapErr) throw mapErr;
-
-      if (!stuIdRows || stuIdRows.length === 0) {
-        throw new Error(
-          `No students mapped from enrollments for Grade ${gradeLevel}`
-        );
-      }
-
-      const studentIdsForGrade = stuIdRows
-        .map((r) => r.student_id)
-        .filter(Boolean);
-      const genderByStudent = new Map(
-        stuIdRows.map((r) => [r.student_id, r.gender])
-      );
-
-      const { data: academicRows, error: acadErr } = await supabase
-        .from('academic_history')
-        .select('student_id, general_average')
-        .in('student_id', studentIdsForGrade);
-      if (acadErr) throw acadErr;
-
-      const gaByStudent = new Map(
-        (academicRows || []).map((a) => [
-          a.student_id,
-          Number(a.general_average || 0),
-        ])
-      );
-
-      const studentsForAlgo = studentIdsForGrade.map((id) => ({
-        student_id: id,
-        gender: genderByStudent.get(id) || '',
-        general_average: gaByStudent.get(id) || 0,
-      }));
-
-      if (studentsForAlgo.length === 0) {
-        throw new Error(`No students found for Grade ${gradeLevel}`);
-      }
-
-      const isStarEligible = (s) => Number(s.general_average || 0) >= 95;
-      const starQueue = studentsForAlgo.filter(isStarEligible);
-      const nonStarQueue = studentsForAlgo.filter((s) => !isStarEligible(s));
-
-      let starAssigned = [];
-      let starOverflow = [];
-
-      if (starSection) {
-        const starBoys = starQueue.filter((s) =>
-          String(s.gender || '')
-            .toLowerCase()
-            .startsWith('m')
-        );
-        const starGirls = starQueue.filter((s) =>
-          String(s.gender || '')
-            .toLowerCase()
-            .startsWith('f')
-        );
-
-        let sb = 0,
-          sg = 0;
-        while (
-          starAssigned.length < STAR_CAP &&
-          (sb < starBoys.length || sg < starGirls.length)
-        ) {
-          if (sb < starBoys.length && (sb <= sg || sg >= starGirls.length)) {
-            starAssigned.push(starBoys[sb++]);
-          } else if (sg < starGirls.length) {
-            starAssigned.push(starGirls[sg++]);
-          } else {
-            break;
-          }
-        }
-
-        const starAssignedIds = new Set(starAssigned.map((s) => s.student_id));
-        starOverflow = starQueue.filter(
-          (s) => !starAssignedIds.has(s.student_id)
-        );
-      } else {
-        starOverflow = starQueue;
-      }
-
-      const nonStarPool = [...starOverflow, ...nonStarQueue];
-      const boys = nonStarPool.filter((s) =>
+    let starAssigned = [];
+    if (starSection) {
+      const starBoys = starQueue.filter((s) =>
         String(s.gender || '')
           .toLowerCase()
           .startsWith('m')
       );
-      const girls = nonStarPool.filter((s) =>
+      const starGirls = starQueue.filter((s) =>
         String(s.gender || '')
           .toLowerCase()
           .startsWith('f')
       );
-
-      let bi = 0,
-        gi = 0;
-      const nonStarAssignments = [];
-
-      for (const sec of nonStarSections) {
-        let count = 0,
-          bCount = 0,
-          gCount = 0;
-        while (count < NONSTAR_CAP && (bi < boys.length || gi < girls.length)) {
-          const needBoy = bCount <= gCount;
-          if (needBoy && bi < boys.length) {
-            nonStarAssignments.push({
-              student: boys[bi++],
-              section_id: sec.section_id,
-            });
-            bCount++;
-            count++;
-          } else if (gi < girls.length) {
-            nonStarAssignments.push({
-              student: girls[gi++],
-              section_id: sec.section_id,
-            });
-            gCount++;
-            count++;
-          } else if (bi < boys.length) {
-            nonStarAssignments.push({
-              student: boys[bi++],
-              section_id: sec.section_id,
-            });
-            bCount++;
-            count++;
-          } else {
-            break;
-          }
-        }
+      let sb = 0,
+        sg = 0;
+      while (
+        starAssigned.length < STAR_CAP &&
+        (sb < starBoys.length || sg < starGirls.length)
+      ) {
+        if (sb < starBoys.length && (sb <= sg || sg >= starGirls.length))
+          starAssigned.push(starBoys[sb++]);
+        else if (sg < starGirls.length) starAssigned.push(starGirls[sg++]);
+        else break;
       }
+    }
+    const starAssignedIds = new Set(starAssigned.map((s) => s.student_id));
+    const starOverflow = starQueue.filter(
+      (s) => !starAssignedIds.has(s.student_id)
+    );
 
-      const sectionIds = secRows.map((s) => s.section_id);
-      const { error: delErr } = await supabase
-        .from('student_sections')
-        .delete()
-        .eq('school_year', STATIC_SY)
-        .in('section_id', sectionIds);
-      if (delErr) throw delErr;
-
-      const rows = [];
-
-      if (starSection) {
-        for (const s of starAssigned) {
-          rows.push({
-            student_id: s.student_id,
-            section_id: starSection.section_id,
-            school_year: STATIC_SY,
+    const nonStarPool = [...starOverflow, ...nonStarQueue];
+    const boys = nonStarPool.filter((s) =>
+      String(s.gender || '')
+        .toLowerCase()
+        .startsWith('m')
+    );
+    const girls = nonStarPool.filter((s) =>
+      String(s.gender || '')
+        .toLowerCase()
+        .startsWith('f')
+    );
+    let bi = 0,
+      gi = 0;
+    const nonStarAssignments = [];
+    for (const sec of nonStarSections) {
+      let count = 0,
+        bCount = 0,
+        gCount = 0;
+      while (count < NONSTAR_CAP && (bi < boys.length || gi < girls.length)) {
+        const needBoy = bCount <= gCount;
+        if (needBoy && bi < boys.length) {
+          nonStarAssignments.push({
+            student: boys[bi++],
+            section_id: sec.section_id,
           });
-        }
+          bCount++;
+          count++;
+        } else if (gi < girls.length) {
+          nonStarAssignments.push({
+            student: girls[gi++],
+            section_id: sec.section_id,
+          });
+          gCount++;
+          count++;
+        } else if (bi < boys.length) {
+          nonStarAssignments.push({
+            student: boys[bi++],
+            section_id: sec.section_id,
+          });
+          bCount++;
+          count++;
+        } else break;
       }
+    }
 
-      for (const a of nonStarAssignments) {
+    const sectionIds = secRows.map((s) => s.section_id);
+    const { error: delErr } = await supabase
+      .from('student_sections')
+      .delete()
+      .eq('school_year', STATIC_SY)
+      .in('section_id', sectionIds);
+    if (delErr) throw delErr;
+
+    const rows = [];
+    if (starSection) {
+      for (const s of starAssigned) {
         rows.push({
-          student_id: a.student.student_id,
-          section_id: a.section_id,
+          student_id: s.student_id,
+          section_id: starSection.section_id,
           school_year: STATIC_SY,
         });
       }
+    }
+    for (const a of nonStarAssignments) {
+      rows.push({
+        student_id: a.student.student_id,
+        section_id: a.section_id,
+        school_year: STATIC_SY,
+      });
+    }
+    if (rows.length) {
+      const { error: insErr } = await supabase
+        .from('student_sections')
+        .insert(rows);
+      if (insErr) throw insErr;
+    }
 
-      if (rows.length > 0) {
-        const { error: insErr } = await supabase
-          .from('student_sections')
-          .insert(rows);
-        if (insErr) throw insErr;
+    return {
+      grade: g,
+      rowsInserted: rows.length,
+      starPlaced: starAssigned.length,
+    };
+  }; // [web:430][web:468]
+
+  // Wrapper: run for one grade or all grades when gradeLevel is 0/empty
+  const automateStudentSectioning = async (gradeLevel) => {
+    try {
+      let summaries = [];
+      if (!gradeLevel) {
+        for (const g of GRADES.map((x) => x.value)) {
+          const s = await runForGrade(g);
+          summaries.push(s);
+        }
+      } else {
+        const s = await runForGrade(gradeLevel);
+        summaries = [s];
       }
 
       await Promise.all([loadStudents(), loadSections()]);
-
-      const message = starSection
-        ? `Automated sectioning completed for Grade ${gradeLevel}. ${rows.length} students assigned (${starAssigned.length} to STAR section).`
-        : `Automated sectioning completed for Grade ${gradeLevel}. ${rows.length} students assigned to regular sections (no STAR section available).`;
-
-      setNotifMessage(message);
+      const total = summaries.reduce(
+        (t, s) => ({
+          rows: t.rows + s.rowsInserted,
+          star: t.star + s.starPlaced,
+        }),
+        { rows: 0, star: 0 }
+      );
+      const detail = summaries
+        .map((s) => `G${s.grade}: ${s.rowsInserted} (${s.star} STAR)`)
+        .join(', ');
+      setNotifMessage(
+        `Automated sectioning complete: ${total.rows} assigned across ${summaries.length} grade(s); ${total.star} to STAR. ${detail}`
+      );
       setShowApplyNotif(true);
     } catch (e) {
       console.error('Automate sectioning error:', e);
       setNotifMessage(e.message || 'Failed to automate sectioning.');
       setShowApplyNotif(true);
     }
-  };
+  }; // [web:430]
 
+  // Remove sectioning for one grade, or all if gradeLevel is 0/empty
   const removeStudentSectioning = async (gradeLevel) => {
     try {
+      let secRows = [];
       if (!gradeLevel) {
-        setNotifMessage('Please select a grade level first.');
-        setShowApplyNotif(true);
-        return;
+        const { data, error } = await supabase
+          .from('sections')
+          .select('section_id, grade_level');
+        if (error) throw error;
+        secRows = data || [];
+      } else {
+        const { data, error } = await supabase
+          .from('sections')
+          .select('section_id, grade_level')
+          .eq('grade_level', gradeLevel);
+        if (error) throw error;
+        secRows = data || [];
       }
-
-      const { data: secRows, error: secErr } = await supabase
-        .from('sections')
-        .select('section_id, name')
-        .eq('grade_level', gradeLevel);
-      if (secErr) throw secErr;
-
-      if (!secRows || secRows.length === 0) {
-        setNotifMessage(`No sections found for Grade ${gradeLevel}.`);
+      if (!secRows.length) {
+        setNotifMessage(
+          !gradeLevel
+            ? 'No sections found.'
+            : `No sections found for Grade ${gradeLevel}.`
+        );
         setShowApplyNotif(true);
         return;
       }
@@ -472,7 +456,9 @@ const StudentList = () => {
 
       await Promise.all([loadStudents(), loadSections()]);
       setNotifMessage(
-        `All section assignments removed for Grade ${gradeLevel}. ${count || 0} assignments deleted.`
+        !gradeLevel
+          ? `All section assignments removed across all grades. ${count || 0} assignments deleted.`
+          : `All section assignments removed for Grade ${gradeLevel}. ${count || 0} assignments deleted.`
       );
       setShowApplyNotif(true);
     } catch (e) {
@@ -480,9 +466,8 @@ const StudentList = () => {
       setNotifMessage(e.message || 'Failed to remove sectioning.');
       setShowApplyNotif(true);
     }
-  };
+  }; // [web:468][web:430]
 
-  // UPDATED: resolve by section_id and validate grade match
   const applyOverrideStudent = async () => {
     try {
       if (!overrideStudentId || !overrideTargetSectionId) return;
@@ -491,7 +476,6 @@ const StudentList = () => {
         (s) => Number(s.section_id) === Number(overrideTargetSectionId)
       );
       if (!targetSection) throw new Error('Section not found');
-
       if (Number(targetSection.grade_level) !== Number(overrideStudentGrade)) {
         throw new Error(
           `Please choose a Grade ${overrideStudentGrade} section only`
@@ -523,9 +507,8 @@ const StudentList = () => {
       setNotifMessage('Failed to update student section.');
       setShowApplyNotif(true);
     }
-  };
+  }; // [web:430]
 
-  // UPDATED: capture student grade and reset selection
   const openOverrideStudent = (studentId) => {
     setOverrideStudentId(studentId);
     setOverrideTargetSectionId('');
@@ -533,7 +516,7 @@ const StudentList = () => {
     const g = Number(stu?.grade_level);
     setOverrideStudentGrade(Number.isFinite(g) ? g : null);
     setShowOverrideStudent(true);
-  };
+  }; // [web:239]
 
   const filteredStudents = useMemo(() => {
     const q = studentSearch.trim().toLowerCase();
@@ -546,17 +529,22 @@ const StudentList = () => {
         !studentListSection || s.section === studentListSection;
       return matchesText && matchesGrade && matchesSection;
     });
-  }, [students, studentSearch, studentListGrade, studentListSection]);
+  }, [students, studentSearch, studentListGrade, studentListSection]); // [web:239]
 
   const totalRowsStu = filteredStudents.length;
   const totalPagesStu = Math.max(1, Math.ceil(totalRowsStu / pageSizeStu));
   const startIdxStu = (pageStu - 1) * pageSizeStu;
   const endIdxStu = Math.min(startIdxStu + pageSizeStu, totalRowsStu);
-  const pageRowsStu = filteredStudents.slice(startIdxStu, endIdxStu);
+  const pageRowsStu = filteredStudents.slice(startIdxStu, endIdxStu); // [web:239]
 
   useEffect(() => {
     setPageStu((p) => Math.min(Math.max(1, p), totalPagesStu));
-  }, [totalPagesStu]);
+  }, [totalPagesStu]); // [web:239]
+
+  useEffect(() => {
+    loadSections();
+    loadStudents();
+  }, []); // [web:430]
 
   const MAX_PAGES = 5;
   const getPageNumbersStu = () => {
@@ -577,19 +565,14 @@ const StudentList = () => {
       list.push(totalPagesStu);
     }
     return list;
-  };
+  }; // [web:239]
 
   const gotoPageStu = (n) =>
-    setPageStu(Math.min(Math.max(1, n), totalPagesStu));
-  const firstPageStu = () => gotoPageStu(1);
-  const prevPageStu = () => gotoPageStu(pageStu - 1);
-  const nextPageStu = () => gotoPageStu(pageStu + 1);
-  const lastPageStu = () => gotoPageStu(totalPagesStu);
-
-  useEffect(() => {
-    loadSections();
-    loadStudents();
-  }, []);
+    setPageStu(Math.min(Math.max(1, n), totalPagesStu)); // [web:239]
+  const firstPageStu = () => gotoPageStu(1); // [web:239]
+  const prevPageStu = () => gotoPageStu(pageStu - 1); // [web:239]
+  const nextPageStu = () => gotoPageStu(pageStu + 1); // [web:239]
+  const lastPageStu = () => gotoPageStu(totalPagesStu); // [web:239]
 
   return (
     <>
@@ -659,17 +642,15 @@ const StudentList = () => {
             onClick={() =>
               automateStudentSectioning(Number(studentListGrade) || 0)
             }
-            disabled={!studentListGrade}
           >
-            Automate Sectioning
+            {studentListGrade ? 'Automate Sectioning' : 'Automate All Grades'}
           </button>
           <button
             onClick={() =>
               removeStudentSectioning(Number(studentListGrade) || 0)
             }
-            disabled={!studentListGrade}
           >
-            Remove Sectioning
+            {studentListGrade ? 'Remove Sectioning' : 'Remove All Sectioning'}
           </button>
         </div>
 
