@@ -1,5 +1,8 @@
 .userManagementContainer {
   padding: 80px 40px;
+  gap: 20px;
+  display: flex;
+  flex-direction: column;
 }
 
 .userManageSorter {
@@ -91,7 +94,7 @@
 }
 
 .userManageTableContainer {
-  background-color: #F5F6F6;
+  background-color: #f5f6f6;
   border-radius: 12px;
   padding: 20px;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
@@ -129,8 +132,6 @@
   text-align: center;
   padding: 6px;
 }
-
-
 
 .userManageTableContainer td.actionsCell {
   display: flex;

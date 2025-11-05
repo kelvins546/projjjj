@@ -301,7 +301,7 @@ export const Teacher_Homepage = () => {
               disabled={loading}
             />
           </div>
-          <div className="sorter">
+          <div className="sort">
             <label>Select Grade Level</label>
             <select
               value={grade}
@@ -314,7 +314,7 @@ export const Teacher_Homepage = () => {
               ))}
             </select>
           </div>
-          <div className="sorter">
+          <div className="sort">
             <label>Faculty/Subject</label>
             <select
               value={subjectId}
@@ -384,7 +384,7 @@ export const Teacher_Homepage = () => {
                     <p>{c.time_label}</p>
                   </div>
                 </div>
-                <div className="buttonContainer">
+                <div className="viewMasterListButtonContainer">
                   <button
                     onClick={() => {
                       setSelectedClass(c);

@@ -1,3 +1,4 @@
+// src/pages/applicant/Applicant_Homepage.jsx
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Header } from '../../components/Header';
@@ -25,12 +26,12 @@ export const Applicant_Homepage = () => {
 
   const navigate = useNavigate();
 
-  // Local helpers
-  const maybeSingle = async (table, builder) => {
+  // Helpers
+  const firstRow = async (table, builder) => {
     const q = builder(supabase.from(table));
-    const { data, error } = await q.maybeSingle();
+    const { data, error } = await q;
     if (error) throw error;
-    return data || null;
+    return Array.isArray(data) ? data[0] || null : data || null;
   };
 
   const recomputeGate = (w) => {
@@ -59,21 +60,23 @@ export const Applicant_Homepage = () => {
       try {
         setLoadingGate(true);
 
-        const userId = localStorage.getItem('user_id');
+        const userId = Number(localStorage.getItem('user_id'));
 
         // 1) Student
-        const s = await maybeSingle('students', (r) =>
+        const s = await firstRow('students', (r) =>
           r
             .select(
-              'student_id, applicant_id, first_name, last_name, lrn, gender'
+              'student_id, applicant_id, first_name, last_name, lrn, gender, user_id'
             )
             .eq('user_id', userId)
+            .order('student_id', { ascending: false })
+            .limit(1)
         );
         setStudent(s);
 
-        // 2) Latest enrollment for this applicant
+        // 2) Latest enrollment for this applicant (if any)
         if (s?.applicant_id) {
-          const enr = await maybeSingle('enrollments', (r) =>
+          const enr = await firstRow('enrollments', (r) =>
             r
               .select('*')
               .eq('applicant_id', s.applicant_id)
@@ -85,23 +88,45 @@ export const Applicant_Homepage = () => {
           setEnrollment(null);
         }
 
-        // 3) Active SY and its window
-        const sy = await maybeSingle('school_years', (r) =>
+        // 3) Active SY and best matching window (open now > active SY latest > latest created)
+        const sy = await firstRow('school_years', (r) =>
           r
-            .select('school_year, sy_start, sy_end, is_active')
+            .select('school_year, sy_start, sy_end, is_active, created_at')
             .eq('is_active', true)
             .order('created_at', { ascending: false })
             .limit(1)
         );
         setActiveSY(sy);
 
-        const w = sy
-          ? await maybeSingle('enrollment_windows', (r) =>
-              r
-                .select('school_year, start_at, end_at, is_open')
-                .eq('school_year', sy.school_year)
-            )
-          : null;
+        const nowIso = new Date().toISOString();
+        const openNow = await firstRow('enrollment_windows', (r) =>
+          r
+            .select('school_year, start_at, end_at, is_open, created_at')
+            .eq('is_open', true)
+            .lte('start_at', nowIso)
+            .gte('end_at', nowIso)
+            .order('start_at', { ascending: false })
+            .limit(1)
+        );
+
+        let w = openNow;
+        if (!w && sy?.school_year) {
+          w = await firstRow('enrollment_windows', (r) =>
+            r
+              .select('school_year, start_at, end_at, is_open, created_at')
+              .eq('school_year', sy.school_year)
+              .order('created_at', { ascending: false })
+              .limit(1)
+          );
+        }
+        if (!w) {
+          w = await firstRow('enrollment_windows', (r) =>
+            r
+              .select('school_year, start_at, end_at, is_open, created_at')
+              .order('created_at', { ascending: false })
+              .limit(1)
+          );
+        }
 
         setWin(w);
         setCanApply(recomputeGate(w));
@@ -152,7 +177,7 @@ export const Applicant_Homepage = () => {
     }
   };
 
-  // Closed modal component (inline)
+  // Closed modal (inline)
   const ClosedEnrollmentModal = ({ isOpen, onClose }) => {
     if (!isOpen) return null;
     return (
@@ -202,7 +227,6 @@ export const Applicant_Homepage = () => {
   return (
     <>
       <Header userRole="applicant" />
-      <Navigation_Bar />
       <Navigation_Bar userRole="applicant" />
 
       {/* Already enrolled modal */}
@@ -247,12 +271,16 @@ export const Applicant_Homepage = () => {
                   Click the button to see the schedule and details.
                 </p>
               )}
+              {!loadingGate && win && (
+                <p style={{ color: '#64748b', fontSize: 13 }}>
+                  Window: {fmtDT(win?.start_at)} → {fmtDT(win?.end_at)}
+                </p>
+              )}
             </div>
 
             <div className="buttonContainerCard">
               <button
                 onClick={onCtaClick}
-                // Leave enabled so users can click and see the modal when closed
                 title={
                   canApply
                     ? ''
@@ -302,9 +330,9 @@ export const Applicant_Homepage = () => {
                     }
                     alt="Status Icon"
                     style={{
-                      width: '18px',
-                      height: '18px',
-                      marginRight: '6px',
+                      width: 18,
+                      height: 18,
+                      marginRight: 6,
                       verticalAlign: 'middle',
                     }}
                   />
@@ -344,7 +372,7 @@ export const Applicant_Homepage = () => {
               </div>
 
               {/* Bottom row: Next Step */}
-              <div className="enroll-card-row" style={{ marginTop: '8px' }}>
+              <div className="enroll-card-row" style={{ marginTop: 8 }}>
                 <div>
                   <strong>Next Step:</strong>{' '}
                   {enrollment.status === 'resubmit'

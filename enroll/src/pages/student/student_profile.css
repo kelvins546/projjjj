@@ -1,0 +1,270 @@
+/* ---------- CONTAINER LAYOUT ---------- */
+.applicantProfileContainer {
+  padding: 60px 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #fafafa;
+  min-height: 80vh;
+}
+
+.applicantDetails {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 40px;
+  width: 70%;
+  background-color: #fffffa;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  border-radius: 16px;
+  padding: 40px;
+  flex-wrap: wrap;
+  transition:
+    box-shadow 0.3s ease,
+    transform 0.3s ease;
+  position: relative;
+}
+
+/* ---------- DATA SECTION ---------- */
+.applicantDatas {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  flex: 1;
+}
+
+.applicantDataContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.applicantData {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.applicantData label {
+  font-size: 15px;
+  font-family: 'Inter', sans-serif;
+  font-weight: 600;
+  color: #333;
+  width: 90px;
+}
+
+.data,
+.userData {
+  font-family: 'Inter', sans-serif;
+  color: #222;
+}
+
+.data {
+  font-size: 15px;
+  font-weight: 400;
+}
+
+.userData {
+  font-size: 17px;
+  font-weight: 600;
+}
+
+/* ---------- PROFILE PHOTO ---------- */
+.applicantPhotoContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+}
+
+.applicantPhoto {
+  position: relative;
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+  background-color: #f3f3f3;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+  transition: transform 0.3s ease;
+  overflow: visible;
+}
+
+.profilePicture {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+/* ---------- CAMERA OVERLAY ---------- */
+.cameraOverlay {
+  position: absolute;
+  bottom: 6px;
+  right: 6px;
+  background: #2b7029;
+  color: white;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  border: 2px solid white;
+  transition:
+    background 0.25s ease,
+    transform 0.25s ease;
+}
+
+.cameraOverlay:hover {
+  background: #3ba63b;
+  transform: scale(1.1);
+}
+
+.cameraOverlay i {
+  font-size: 18px;
+}
+
+/* ---------- CONTAINER ---------- */
+.profileOptionContainer {
+  position: absolute;
+  top: 10px;
+  right: 15px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  z-index: 20;
+}
+
+/* ---------- 3 DOTS ICON ---------- */
+.profileOptionIcon {
+  font-size: 26px;
+  color: #2b7029;
+  cursor: pointer;
+  transition:
+    transform 0.2s ease,
+    color 0.2s ease;
+}
+
+.profileOptionIcon:hover {
+  transform: scale(1.2);
+  color: #3ba63b;
+}
+
+/* ---------- DROPDOWN MENU ---------- */
+.profileDropdown {
+  margin-top: 8px;
+  background: #ffffff;
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  overflow: hidden;
+  animation: dropdownFade 0.25s ease forwards;
+}
+
+.dropdownItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 180px;
+  padding: 10px 15px;
+  background: none;
+  border: none;
+  font-size: 15px;
+  color: #333;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.2s ease;
+  font-family: 'Inter', sans-serif;
+}
+
+.dropdownItem i {
+  color: #2b7029;
+  font-size: 16px;
+}
+
+.dropdownItem:hover {
+  background: rgba(43, 112, 41, 0.08);
+}
+
+/* ---------- ANIMATION ---------- */
+@keyframes dropdownFade {
+  from {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ---------- RESPONSIVENESS ---------- */
+@media (max-width: 992px) {
+  .applicantDetails {
+    width: 85%;
+    padding: 30px;
+    gap: 30px;
+  }
+
+  .applicantPhoto {
+    width: 130px;
+    height: 130px;
+  }
+
+  .applicantData label {
+    font-size: 14px;
+  }
+
+  .data {
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 600px) {
+  .applicantProfileContainer {
+    padding: 30px 15px;
+  }
+
+  .applicantDetails {
+    flex-direction: column;
+    align-items: center;
+    width: 95%;
+    padding: 25px;
+    text-align: center;
+  }
+
+  .applicantDatas {
+    align-items: center;
+  }
+
+  .applicantData {
+    justify-content: center;
+  }
+
+  .applicantPhoto {
+    width: 120px;
+    height: 120px;
+  }
+
+  .cameraOverlay {
+    width: 36px;
+    height: 36px;
+    bottom: 4px;
+    right: 4px;
+  }
+
+  .cameraOverlay i {
+    font-size: 16px;
+  }
+}
+
+@media (max-width: 400px) {
+  .applicantDetails {
+    padding: 20px;
+    border-radius: 12px;
+  }
+
+  .applicantPhoto {
+    width: 100px;
+    height: 100px;
+  }
+}

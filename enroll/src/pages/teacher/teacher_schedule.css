@@ -1,22 +1,84 @@
 .teacherScheduleContainer {
-    display: flex;
-    flex-direction: column;
-    padding: 60px 30px;
-    text-align: center;
+  display: flex;
+  flex-direction: column;
+  padding: 60px 30px;
+  text-align: center;
 }
 
 .teacherScheduleContainer h2 {
-    font-size: 30px;
+  font-size: 30px;
 }
 
 .scheduleArea {
-    padding: 20px;
-    width: 100%;
-    justify-content: center;
-    display: flex;
-    align-items: center;
+  padding: 20px;
+  width: 100%;
+  justify-content: center;
+  display: flex;
+  align-items: center;
 }
 
 .scheduleContainer {
-    width: 70%;
+  width: 70%;
+}
+/* src/pages/teacher_schedule.css */
+
+/* Button row layout (screen only) */
+.headerRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+.printBtn {
+  padding: 8px 12px;
+  font-size: 14px;
+}
+
+/* PRINT ONLY THE SCHEDULE AREA */
+@media print {
+  /* Hide everything by default */
+  html,
+  body {
+    background: #fff !important;
+  }
+  body * {
+    display: none !important;
+  }
+
+  /* Show only the schedule block and its children */
+  #print-schedule,
+  #print-schedule * {
+    display: revert !important;
+  }
+
+  /* Optional: if you wrapped only the pure table in #print-table, use that selector instead */
+  /* #print-table, #print-table * { display: revert !important; } */
+
+  /* Expand to full page */
+  #print-schedule {
+    position: static !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  /* Tidy up table borders/colors for print */
+  .scheduleContainer table {
+    width: 100% !important;
+    border-collapse: collapse !important;
+  }
+  .scheduleContainer th,
+  .scheduleContainer td {
+    border: 1px solid #000 !important;
+    padding: 6px !important;
+  }
+
+  /* Always hide app chrome */
+  .navigationBar,
+  .headerContainer,
+  .headerRow,
+  .printBtn {
+    display: none !important;
+  }
 }

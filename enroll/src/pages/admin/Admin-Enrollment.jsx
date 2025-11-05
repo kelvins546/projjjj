@@ -233,6 +233,7 @@ export const Admin_Enrollment = () => {
   }; // keep modal open/closed logic in the callers so you can show confirms/success [attached_file:498]
 
   // One-click open/close for current SY
+  // In Admin_Enrollment
   const setOpenClosed = async (nextOpen) => {
     const sy = normalizeSY(schoolYear);
     if (!windowRow) {
@@ -249,9 +250,25 @@ export const Admin_Enrollment = () => {
       );
       if (upErr) throw upErr;
     } else {
+      // If opening and dates don’t cover now, bump them to cover now
+      let patch = { is_open: !!nextOpen };
+      if (nextOpen) {
+        const now = Date.now();
+        const s = windowRow.start_at ? Date.parse(windowRow.start_at) : 0;
+        const e = windowRow.end_at ? Date.parse(windowRow.end_at) : 0;
+        if (!(now >= s && now <= e)) {
+          const start = new Date();
+          const end = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+          patch = {
+            ...patch,
+            start_at: start.toISOString(),
+            end_at: end.toISOString(),
+          };
+        }
+      }
       const { error } = await supabase
         .from('enrollment_windows')
-        .update({ is_open: !!nextOpen })
+        .update(patch)
         .eq('school_year', sy);
       if (error) throw error;
     }
@@ -1348,7 +1365,7 @@ export const Admin_Enrollment = () => {
                 disabled={!winStart || !winEnd}
                 title="Save window and open enrollment now"
               >
-                <Proceed></Proceed>
+                Proceed
               </button>
             </div>
           </div>

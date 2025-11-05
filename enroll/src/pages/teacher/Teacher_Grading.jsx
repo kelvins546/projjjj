@@ -468,7 +468,7 @@ export const Teacher_Grading = () => {
               disabled={loading}
             />
           </div>
-          <div className="sorter">
+          <div className="sort">
             <label>Select Grade Level</label>
             <select
               value={grade}
@@ -485,7 +485,7 @@ export const Teacher_Grading = () => {
                 ))}
             </select>
           </div>
-          <div className="sorter">
+          <div className="sort">
             <label>Faculty/Subject</label>
             <select
               value={subjectId}

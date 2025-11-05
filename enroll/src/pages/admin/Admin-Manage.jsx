@@ -283,7 +283,7 @@ export const Admin_Manage = () => {
             />
           </div>
 
-          <div className="userManageSort">
+          <div className="sort">
             <label>Select Users</label>
             <select
               value={filters.role}
@@ -299,7 +299,7 @@ export const Admin_Manage = () => {
             </select>
           </div>
 
-          <div className="userManageSort">
+          <div className="sort">
             <label>Status</label>
             <select
               value={filters.status}
@@ -413,8 +413,10 @@ export const Admin_Manage = () => {
             <table className="user-manage-table">
               <thead>
                 <tr>
-                  <th className='column1'></th>
-                  <th className='column2'scope="col">#</th>
+                  <th className="column1"></th>
+                  <th className="column2" scope="col">
+                    #
+                  </th>
                   <th scope="col">Name</th>
                   <th scope="col">Role</th>
                   <th scope="col">Status</th>
@@ -425,7 +427,7 @@ export const Admin_Manage = () => {
                 {!loading &&
                   pageRows.map((u, index) => (
                     <tr key={u.user_id}>
-                      <td className='column1'>
+                      <td className="column1">
                         <input
                           type="checkbox"
                           checked={selectedIds.includes(u.user_id)}
@@ -434,7 +436,7 @@ export const Admin_Manage = () => {
                           }
                         />
                       </td>
-                      <td className='column2'>{index + 1}</td>
+                      <td className="column2">{index + 1}</td>
                       <td>{u.full_name}</td>
                       <td>{u.role}</td>
 

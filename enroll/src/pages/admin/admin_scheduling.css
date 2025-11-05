@@ -74,7 +74,8 @@
   border-radius: 8px;
   color: #222;
   height: 40px;
-  padding: 8px 36px 8px 12px; /* room for arrow */
+  padding: 8px 36px 8px 12px;
+  /* room for arrow */
   font-size: 14px;
   line-height: 1.2;
 
@@ -109,6 +110,7 @@
   .adminScheduleSearch {
     max-width: 360px;
   }
+
   .adminSchedulesSorter {
     gap: 16px;
   }
@@ -138,6 +140,7 @@
     width: 100%;
   }
 }
+
 /* Analytics Cards */
 .analytics-grid {
   display: flex;
@@ -227,5 +230,83 @@
 
   .analytics-card {
     width: 100%;
+  }
+}
+
+.folderSelect {
+  padding: 24px;
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+.folder-title {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #1f2937;
+  margin-bottom: 24px;
+}
+
+.folder-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 24px;
+}
+
+.folder-card {
+  background: #ffffff;
+  border-radius: 14px;
+  padding: 32px 20px;
+  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.08);
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  border: 1px solid #e5e7eb;
+}
+
+.folder-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
+}
+
+.folder-icon {
+  font-size: 3rem;
+  margin-bottom: 12px;
+  transition: transform 0.3s ease;
+}
+
+.folder-card:hover .folder-icon {
+  transform: scale(1.1);
+}
+
+.folder-card h3 {
+  font-size: 1rem;
+  color: #374151;
+  font-weight: 600;
+}
+
+.grade7 .folder-icon {
+  color: #248041;
+}
+
+.grade8 .folder-icon {
+  color: #fff833;
+}
+
+.grade9 .folder-icon {
+  color: #e44343;
+}
+
+.grade10 .folder-icon {
+  color: #2b7fed;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }

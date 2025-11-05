@@ -510,7 +510,7 @@ export const Teacher_Scheduling_Card = ({
                   </tbody>
                 </table>
 
-                <div className="buttonContainerCard">
+                <div className="editButtonCardContainer">
                   <button
                     className="edit-btn"
                     onClick={() => openModalFor(t.teacher_id)}
@@ -647,10 +647,7 @@ export const Teacher_Scheduling_Card = ({
               </tbody>
             </table>
 
-            <div
-              className="buttonContainer"
-              style={{ display: 'flex', gap: 8 }}
-            >
+            <div className="editSchedButtonContainer">
               <button className="update-btn" onClick={handleUpdate}>
                 Update
               </button>

@@ -21,6 +21,7 @@ import { Teacher_Grading } from './pages/teacher/Teacher_Grading';
 import { Teacher_Evaluation } from './pages/teacher/Teacher_Evaluation';
 import { Teacher_Schedule } from './pages/teacher/Teacher_Schedule';
 import ResetPassword from './pages/ResetPassword';
+import { Student_Profile } from './pages/student/Student_Profile';
 function App() {
   return (
     <Routes>
@@ -38,6 +39,11 @@ function App() {
         <Route path="/Student_Homepage" element={<Student_Homepage />} />
         <Route path="/Student_Schedule" element={<Student_Schedule />} />
         <Route path="/Student_Grades" element={<Student_Grades />} />
+        <Route
+          path="/Student_Enrollment/step-2"
+          element={<Student_Enrollment />}
+        />
+        <Route path="/Student_Profile" element={<Student_Profile />} />
         <Route path="/Student_Enrollment" element={<Student_Enrollment />} />
       </Route>
       <Route element={<ProtectedRoute allowRoles={['teacher']} />}>

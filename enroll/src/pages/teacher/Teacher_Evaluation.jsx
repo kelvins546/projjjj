@@ -247,7 +247,7 @@ export const Teacher_Evaluation = () => {
               onChange={(e) => setSearch(e.target.value)}
             />
           </div>
-          <div className="sorter">
+          <div className="sort">
             <label>Faculty/Subject</label>
             <select
               value={subjectFilter}
@@ -263,7 +263,7 @@ export const Teacher_Evaluation = () => {
               )}
             </select>
           </div>
-          <div className="sorter">
+          <div className="sort">
             <label>Status</label>
             <select
               value={statusFilter}

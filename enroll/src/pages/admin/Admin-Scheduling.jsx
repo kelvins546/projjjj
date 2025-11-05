@@ -1141,6 +1141,31 @@ export const Admin_Scheduling = () => {
 
         <div className="gradeSchedulesContainer">{renderCards()}</div>
       </div>
+      <div className="folderSelect">
+        <h2 className="folder-title">Grade Level Folders</h2>
+
+        <div className="folder-grid">
+          <div className="folder-card grade7">
+            <i className="fas fa-folder folder-icon"></i>
+            <h3>Grade 7</h3>
+          </div>
+
+          <div className="folder-card grade8">
+            <i className="fas fa-folder folder-icon"></i>
+            <h3>Grade 8</h3>
+          </div>
+
+          <div className="folder-card grade9">
+            <i className="fas fa-folder folder-icon"></i>
+            <h3>Grade 9</h3>
+          </div>
+
+          <div className="folder-card grade10">
+            <i className="fas fa-folder folder-icon"></i>
+            <h3>Grade 10</h3>
+          </div>
+        </div>
+      </div>
 
       <TeacherLoadConfig
         show={showLoadConfig}

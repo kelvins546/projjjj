@@ -431,7 +431,7 @@ export const Admin_Grades = () => {
           </div>
         </div>
         <div className="gradingSorter">
-          <div className="gradingSorter-quarter">
+          <div className="sort">
             <label>Quarter</label>
             <select
               value={quarter}
@@ -444,7 +444,7 @@ export const Admin_Grades = () => {
               <option value="4">4th</option>
             </select>
           </div>
-          <div className="gradingSorter-grade">
+          <div className="sort">
             <label>Grade Level</label>
             <select
               value={gradeFilter}
@@ -457,7 +457,7 @@ export const Admin_Grades = () => {
               ))}
             </select>
           </div>
-          <div className="gradingSorter-section">
+          <div className="sort">
             <label>Section</label>
             <select
               value={sectionFilter}
@@ -472,7 +472,7 @@ export const Admin_Grades = () => {
               ))}
             </select>
           </div>
-          <div className="gradingSorter-subject">
+          <div className="sort">
             <label>Faculty/Subject</label>
             <select
               value={subjectFilter}
@@ -487,7 +487,7 @@ export const Admin_Grades = () => {
               ))}
             </select>
           </div>
-          <div className="gradingSorter-status">
+          <div className="sort">
             <label>Status</label>
             <select
               value={statusFilter}
@@ -602,10 +602,10 @@ export const Admin_Grades = () => {
             </div>
           )}
 
-          <table className='grading-table'>
+          <table className="grading-table">
             <thead>
               <tr>
-                <th className='column1'></th>
+                <th className="column1"></th>
                 <th>Name of teacher</th>
                 <th>Advisers</th>
                 <th>Grade Level</th>
@@ -616,7 +616,6 @@ export const Admin_Grades = () => {
                 <th>Encoding Window</th>
                 <th>Actions</th>
               </tr>
-
             </thead>
             <tbody>
               {loading ? (
@@ -632,7 +631,7 @@ export const Admin_Grades = () => {
                   const enc = isUnlocked(r.grade_level) ? 'Unlocked' : 'Locked';
                   return (
                     <tr key={r.key}>
-                      <td className='column1'>
+                      <td className="column1">
                         <input
                           type="checkbox"
                           checked={selectedRows.has(r.teacher_subject_id)}
@@ -733,7 +732,7 @@ export const Admin_Grades = () => {
                         try {
                           const userId = Number(
                             localStorage.getItem('user_id') ||
-                            localStorage.getItem('app_user_id')
+                              localStorage.getItem('app_user_id')
                           );
                           const { error } = await supabase
                             .from('encoding_windows')
@@ -864,7 +863,7 @@ export const Admin_Grades = () => {
                       try {
                         const userId = Number(
                           localStorage.getItem('user_id') ||
-                          localStorage.getItem('app_user_id')
+                            localStorage.getItem('app_user_id')
                         );
                         const { error } = await supabase
                           .from('encoding_windows')
