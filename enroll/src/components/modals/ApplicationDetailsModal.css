@@ -7,14 +7,141 @@
   align-items: center;
   justify-content: center;
   z-index: 1000;
+  backdrop-filter: blur(3px);
 }
 
-.modal-content {
+.applicationDetailsModal {
   background: #fff;
-  width: min(560px, 92vw);
-  max-height: 80vh;
-  overflow: auto;
-  border-radius: 10px;
-  padding: 18px 20px;
-  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.2);
+  width: 600px;
+  max-width: 95vw;
+  max-height: 85vh;
+  overflow-y: auto;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.25);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  animation: fadeInUp 0.25s ease;
+  margin-top: 105px;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.applicationDetailsModal h2 {
+  margin: 0;
+  font-size: 1.4rem;
+  font-weight: 600;
+  color: #222;
+}
+
+.applicationDetailsModal p {
+  color: #555;
+  font-size: 0.95rem;
+  margin-bottom: 10px;
+}
+
+/* Section styles */
+.applicationDetailsModal section {
+  border-top: 1px solid #eee;
+  padding-top: 10px;
+}
+
+.applicationDetailsModal section:first-of-type {
+  border-top: none;
+  padding-top: 0;
+}
+
+.applicationDetailsModal section h3 {
+  margin: 8px 0;
+  font-size: 1.05rem;
+  color: #333;
+}
+
+/* Row layout - fixed text overflow */
+.row {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 4px 0;
+  font-size: 0.95rem;
+  flex-wrap: nowrap;
+}
+
+.row label {
+  flex: 0 0 45%;
+  font-weight: 600;
+  color: #222;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.row span {
+  flex: 1;
+  color: #555;
+  text-align: right;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Buttons */
+.applicationDetailsModal button {
+  background: #007bff;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 16px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.applicationDetailsModal button:hover {
+  background: #005fcc;
+}
+
+/* Scrollbar (for large data) */
+.applicationDetailsModal::-webkit-scrollbar {
+  width: 8px;
+}
+.applicationDetailsModal::-webkit-scrollbar-thumb {
+  background-color: #ccc;
+  border-radius: 4px;
+}
+
+/* 📱 Mobile adjustments */
+@media (max-width: 768px) {
+  .applicationDetailsModal {
+    width: 95vw;
+    max-height: 90vh;
+    padding: 18px;
+  }
+
+  .row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+  }
+
+  .row label,
+  .row span {
+    flex: none;
+    text-align: left;
+    white-space: normal;
+  }
+
+  .applicationDetailsModal button {
+    width: 100%;
+    margin-top: 10px;
+  }
 }

@@ -179,12 +179,27 @@ export const MasterList = ({
   return (
     <div className="masterListOverlay" onClick={closeMasterList}>
       <div className="masterListContainer" onClick={(e) => e.stopPropagation()}>
-        <div className="title">
+        <div className="masterListTitle">
+          <div className="masterlistHeader">
+            <div className="educInfo">
+              <img className="educSeal" src="/DeptEduc_Seal.png"></img>
+              <div className="masterlistheaderText">
+                <span>Republic of the Philippines</span>
+                <span className="depEd">Department of Education</span>
+                <span>National Capital Region</span>
+              </div>
+              <img src="/schoollogo.png"></img>
+            </div>
+            <div className="schoolsDiv">
+              <h2>SCHOOLS DIVISION OFFICE OF CALOOCAN CITY</h2>
+              <p>North II</p>
+            </div>
+          </div>
           <h2>BENIGNO AQUINO JR. HIGH SCHOOL</h2>
-          <h2>{`SY ${titleSY}`}</h2>
-          <h2>{`${titleGrade ? titleGrade + ' - ' : ''}${titleSection} - MASTERLIST`}</h2>
-          <h2>{`Department: ${teacherDept}`}</h2>
-          <h2>{`Room: ${roomLabel}`}</h2>
+          <p className="schoolYear">{`SY ${titleSY}`}</p>
+          <p>{`${titleGrade ? titleGrade + ' - ' : ''}${titleSection} - MASTERLIST`}</p>
+          <p>{`Department: ${teacherDept}`}</p>
+          <p>{`Room: ${roomLabel}`}</p>
         </div>
 
         <div className="studentList">
@@ -197,35 +212,47 @@ export const MasterList = ({
               <p>{errMsg}</p>
             </div>
           ) : (
-            <>
-              <div className="maleStudents">
-                <h2>BOYS</h2>
-                {boys.length === 0 ? (
-                  <p>—</p>
-                ) : (
-                  boys.map((s, i) => (
-                    <p key={`b-${s.student_id}`}>
-                      {i + 1}. {s.last_name ? s.last_name.toUpperCase() : ''},{' '}
-                      {s.first_name || ''}
-                    </p>
-                  ))
-                )}
-              </div>
+            <table className="masterlist-table">
+              <colgroup>
+                <col className="col-num" />
+                <col className="col-name" />
+                <col className="col-num" />
+                <col className="col-name" />
+              </colgroup>
 
-              <div className="femaleStudents">
-                <h2>GIRLS</h2>
-                {girls.length === 0 ? (
-                  <p>—</p>
-                ) : (
-                  girls.map((s, i) => (
-                    <p key={`g-${s.student_id}`}>
-                      {i + 1}. {s.last_name ? s.last_name.toUpperCase() : ''},{' '}
-                      {s.first_name || ''}
-                    </p>
-                  ))
-                )}
-              </div>
-            </>
+              <thead>
+                <tr>
+                  <th colSpan="2">BOYS</th>
+                  <th colSpan="2">GIRLS</th>
+                </tr>
+                <tr>
+                  <th className="column1">#</th>
+                  <th>NAME</th>
+                  <th className="column1">#</th>
+                  <th>NAME</th>
+                </tr>
+              </thead>
+              <tbody>
+                {Array.from({
+                  length: Math.max(boys.length, girls.length),
+                }).map((_, i) => (
+                  <tr key={i}>
+                    <td className="column1">{boys[i] ? i + 1 : ''}</td>
+                    <td>
+                      {boys[i]
+                        ? `${boys[i].last_name?.toUpperCase() || ''}, ${boys[i].first_name || ''}`
+                        : ''}
+                    </td>
+                    <td className="column1">{girls[i] ? i + 1 : ''}</td>
+                    <td>
+                      {girls[i]
+                        ? `${girls[i].last_name?.toUpperCase() || ''}, ${girls[i].first_name || ''}`
+                        : ''}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           )}
         </div>
 

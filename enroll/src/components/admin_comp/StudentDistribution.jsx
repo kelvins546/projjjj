@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { supabase } from '../../supabaseClient';
 import './studentDistribution.css';
-import '../table/table.css'
+import '../table/table.css';
 import {
   BarChart,
   Bar,
@@ -12,6 +12,8 @@ import {
   Legend,
   ResponsiveContainer,
 } from 'recharts';
+import { LoadingPopup } from '../../components/loaders/LoadingPopup';
+import { GridLoader } from 'react-spinners';
 
 const STATIC_SY = '2025-2026';
 
@@ -33,6 +35,9 @@ const StudentDistribution = () => {
   const [minGrade, setMinGrade] = useState(7);
   const [maxGrade, setMaxGrade] = useState(10);
   const [targetClassSize, setTargetClassSize] = useState(40);
+
+  //export
+  const [showExport, setShowExport] = useState(false);
 
   const withinRange = (label) => {
     const n = parseGradeNum(label);
@@ -248,141 +253,192 @@ const StudentDistribution = () => {
   };
 
   return (
-    <div className="studentDistributionContainer">
-      <div>
-        <div className='sorter'
-          style={{
-            display: 'flex',
-            gap: 12,
-            alignItems: 'center',
-            flexWrap: 'wrap',
-            marginBottom: 8,
-          }}
-        >
-          <h3 style={{ margin: 0 }}>Grade Distribution ({STATIC_SY})</h3>
-          {loading && (
-            <span style={{ color: '#64748b', fontSize: 13 }}>Loading…</span>
-          )}
-          {err && <span style={{ color: '#ef4444', fontSize: 13 }}>{err}</span>}
+    <>
+      <LoadingPopup
+        show={loading}
+        message="Loading Please Wait..."
+        Loader={GridLoader}
+        color="#3FB23F"
+      />
+      <div className="studentDistributionContainer">
+        <div>
+          <div className="sorter studentDistrib">
+            <div className="studentDistributionTitle">
+              <h3>Grade Level Distribution SY: ({STATIC_SY})</h3>
+            </div>
 
-          <div
-            style={{
-              marginLeft: 'auto',
-              display: 'flex',
-              gap: 10,
-              alignItems: 'center',
-            }}
-          >
-            <label style={{ fontSize: 12 }}>View:</label>
-            <select
-              value={viewFilter}
-              onChange={(e) => setViewFilter(e.target.value)}
+            {loading && (
+              <span style={{ color: '#64748b', fontSize: 13 }}>Loading…</span>
+            )}
+            {err && (
+              <span style={{ color: '#ef4444', fontSize: 13 }}>{err}</span>
+            )}
+
+            <div
+              style={{
+                marginLeft: 'auto',
+                display: 'flex',
+                gap: 30,
+                alignItems: 'center',
+              }}
             >
-              <option value="all">All</option>
-              <option value="placed">Placed only</option>
-              <option value="unplaced">Unplaced only</option>
-            </select>
-
-            <label style={{ fontSize: 12 }}>Grade range:</label>
-            <input
-              type="number"
-              min={7}
-              max={10}
-              value={minGrade}
-              onChange={(e) => setMinGrade(Number(e.target.value))}
-              style={{ width: 64 }}
-            />
-            <span>–</span>
-            <input
-              type="number"
-              min={7}
-              max={10}
-              value={maxGrade}
-              onChange={(e) => setMaxGrade(Number(e.target.value))}
-              style={{ width: 64 }}
-            />
-
-            <label style={{ fontSize: 12 }}>Target/class:</label>
-            <input
-              type="number"
-              min={10}
-              max={60}
-              step={1}
-              value={targetClassSize}
-              onChange={(e) => setTargetClassSize(Number(e.target.value))}
-              style={{ width: 72 }}
-            />
-
-            <button onClick={exportCSV}>Export CSV</button>
+              <div className="sort">
+                <label>View:</label>
+                <select
+                  value={viewFilter}
+                  onChange={(e) => setViewFilter(e.target.value)}
+                >
+                  <option value="all">All</option>
+                  <option value="placed">Placed only</option>
+                  <option value="unplaced">Unplaced only</option>
+                </select>
+              </div>
+              <div className="sort">
+                <label>Grade range:</label>
+                <div
+                  style={{ display: 'flex', alignItems: 'center', gap: '10px' }}
+                >
+                  <input
+                    type="number"
+                    min={7}
+                    max={10}
+                    value={minGrade}
+                    onChange={(e) => setMinGrade(Number(e.target.value))}
+                    style={{ width: 64 }}
+                  />
+                  <span>–</span>
+                  <input
+                    type="number"
+                    min={7}
+                    max={10}
+                    value={maxGrade}
+                    onChange={(e) => setMaxGrade(Number(e.target.value))}
+                    style={{ width: 64 }}
+                  />
+                </div>
+              </div>
+              <div className="sort">
+                <label>Target/Class:</label>
+                <input
+                  type="number"
+                  min={10}
+                  max={60}
+                  step={1}
+                  value={targetClassSize}
+                  onChange={(e) => setTargetClassSize(Number(e.target.value))}
+                  style={{ width: 110 }}
+                />
+              </div>
+            </div>
           </div>
-        </div>
+          <div className="studentDistributionP1">
+            {/* Existing Male/Female per grade */}
+            <div className="genderDistribution card1">
+              <div className="chartTitle">
+                <h2>Gender Distribution</h2>
+              </div>
+              <div style={{ width: '100%', height: 320 }}>
+                <ResponsiveContainer>
+                  <BarChart
+                    data={sortedData}
+                    margin={{ top: 20, right: 20, left: -30 }}
+                  >
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="grade" />
+                    <YAxis allowDecimals={false} />
+                    <Tooltip />
+                    <Legend />
+                    <Bar dataKey="male" fill="#3B82F6" name="Male" />
+                    <Bar dataKey="female" fill="#F472B6" name="Female" />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
 
-        {/* Existing Male/Female per grade */}
-        <div style={{ width: '100%', height: 320 }}>
-          <ResponsiveContainer>
-            <BarChart
-              data={sortedData}
-              margin={{ top: 20, right: 20, left: 4 }}
-            >
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="grade" />
-              <YAxis allowDecimals={false} />
-              <Tooltip />
-              <Legend />
-              <Bar dataKey="male" fill="#6366f1" name="Male" />
-              <Bar dataKey="female" fill="#10b981" name="Female" />
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
+            {/* Placed vs Unplaced per grade */}
+            <div className="genderDistribution card1">
+              <div className="chartTitle">
+                <h2>Placement Distribution</h2>
+              </div>
+              <div style={{ width: '100%', height: 320 }}>
+                <ResponsiveContainer>
+                  <BarChart
+                    data={sortedData}
+                    margin={{ top: 20, right: 20, left: -30 }}
+                  >
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="grade" />
+                    <YAxis allowDecimals={false} />
+                    <Tooltip />
+                    <Legend />
+                    <Bar
+                      dataKey="placed"
+                      stackId="A"
+                      fill="#22C55E"
+                      name="Placed"
+                    />
+                    <Bar
+                      dataKey="unplaced"
+                      stackId="A"
+                      fill="#EF4444"
+                      name="Unplaced"
+                    />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
 
-        {/* Placed vs Unplaced per grade */}
-        <div style={{ width: '100%', height: 320, marginTop: 16 }}>
-          <ResponsiveContainer>
-            <BarChart
-              data={sortedData}
-              margin={{ top: 20, right: 20, left: 4 }}
-            >
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="grade" />
-              <YAxis allowDecimals={false} />
-              <Tooltip />
-              <Legend />
-              <Bar dataKey="placed" stackId="A" fill="#22c55e" name="Placed" />
-              <Bar
-                dataKey="unplaced"
-                stackId="A"
-                fill="#ef4444"
-                name="Unplaced"
-              />
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
+            {/* Average per section and sections count */}
+            <div className="genderDistribution card1">
+              <div className="chartTitle">
+                <h2>Sections Distribution</h2>
+              </div>
+              <div style={{ width: '100%', height: 320 }}>
+                <ResponsiveContainer>
+                  <BarChart
+                    data={sortedData}
+                    margin={{ top: 20, right: 20, left: -30 }}
+                  >
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="grade" />
+                    <YAxis allowDecimals={false} />
+                    <Tooltip />
+                    <Legend />
+                    <Bar
+                      dataKey="avgPerSection"
+                      fill="#f59e0b"
+                      name="Avg per Section"
+                    />
+                    <Bar
+                      dataKey="sectionsCount"
+                      fill="#3b82f6"
+                      name="Sections"
+                    />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+          </div>
 
-        {/* Average per section and sections count */}
-        <div style={{ width: '100%', height: 320, marginTop: 16 }}>
-          <ResponsiveContainer>
-            <BarChart
-              data={sortedData}
-              margin={{ top: 20, right: 20, left: 4 }}
-            >
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="grade" />
-              <YAxis allowDecimals={false} />
-              <Tooltip />
-              <Legend />
-              <Bar
-                dataKey="avgPerSection"
-                fill="#f59e0b"
-                name="Avg per Section"
-              />
-              <Bar dataKey="sectionsCount" fill="#3b82f6" name="Sections" />
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
-
-        <div className="gradeDistributionContainer" style={{ marginTop: 18 }}>
-          <table className="gradeDistributionTable">
-            <thead>
+          <div className="gradeDistributionContainer" style={{ marginTop: 18 }}>
+            <h3 style={{ color: '#334155' }}>Distribution Summary</h3>
+            <div className="export">
+              <i
+                className="fa fa-ellipsis-h exportElipse"
+                aria-hidden="true"
+                onClick={() => setShowExport((prev) => !prev)}
+              ></i>
+              {showExport && (
+                <div className="exportDropdown">
+                  <button className="dropdownItem" onClick={exportCSV}>
+                    <i className="fa-solid fa-file-export"></i>
+                    Export CSV
+                  </button>
+                </div>
+              )}
+            </div>
+            <table className="gradeDistributionTable">
+              <thead>
                 <th>Grade Level</th>
                 <th
                   onClick={() => setSortAscending((v) => !v)}
@@ -400,47 +456,48 @@ const StudentDistribution = () => {
                 <th>Gap</th>
                 <th>Male</th>
                 <th>Female</th>
-            </thead>
-            <tbody>
-              {sortedData.map((r) => {
-                const capacity = r.sectionsCount * targetClassSize;
-                const gap = capacity - r.totalEnrolled;
-                const unplacedPct = r.totalEnrolled
-                  ? ((r.unplaced / r.totalEnrolled) * 100).toFixed(1)
-                  : '0.0';
-                return (
-                  <tr key={r.grade}>
-                    <td>{r.grade}</td>
-                    <td>{r.sectionsCount}</td>
-                    <td>{r.totalEnrolled}</td>
-                    <td>{r.placed}</td>
-                    <td>{r.unplaced}</td>
-                    <td>{unplacedPct}%</td>
-                    <td>{r.avgPerSection}</td>
-                    <td>{capacity}</td>
-                    <td style={{ color: gap < 0 ? '#ef4444' : '#10b981' }}>
-                      {gap}
+              </thead>
+              <tbody>
+                {sortedData.map((r) => {
+                  const capacity = r.sectionsCount * targetClassSize;
+                  const gap = capacity - r.totalEnrolled;
+                  const unplacedPct = r.totalEnrolled
+                    ? ((r.unplaced / r.totalEnrolled) * 100).toFixed(1)
+                    : '0.0';
+                  return (
+                    <tr key={r.grade}>
+                      <td>{r.grade}</td>
+                      <td>{r.sectionsCount}</td>
+                      <td>{r.totalEnrolled}</td>
+                      <td>{r.placed}</td>
+                      <td>{r.unplaced}</td>
+                      <td>{unplacedPct}%</td>
+                      <td>{r.avgPerSection}</td>
+                      <td>{capacity}</td>
+                      <td style={{ color: gap < 0 ? '#ef4444' : '#10b981' }}>
+                        {gap}
+                      </td>
+                      <td>{r.male}</td>
+                      <td>{r.female}</td>
+                    </tr>
+                  );
+                })}
+                {sortedData.length === 0 && (
+                  <tr>
+                    <td
+                      colSpan={11}
+                      style={{ color: '#64748b', textAlign: 'center' }}
+                    >
+                      No data for {STATIC_SY}.
                     </td>
-                    <td>{r.male}</td>
-                    <td>{r.female}</td>
                   </tr>
-                );
-              })}
-              {sortedData.length === 0 && (
-                <tr>
-                  <td
-                    colSpan={11}
-                    style={{ color: '#64748b', textAlign: 'center' }}
-                  >
-                    No data for {STATIC_SY}.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
+                )}
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
-    </div>
+    </>
   );
 };
 

@@ -8,26 +8,26 @@ import { supabase } from '../supabaseClient';
 import { useSession } from '../context/SessionContext';
 import { GridLoader } from 'react-spinners';
 import { LoadingPopup } from '../components/loaders/LoadingPopup';
-import ForgotPasswordModal from '../components/modals/ForgotPasswordModal'; // modal that calls resetPasswordForEmail [web:317]
+import ForgotPasswordModal from '../components/modals/ForgotPasswordModal'; // modal that calls resetPasswordForEmail
 
 export const Landing_page = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [form, setForm] = useState({ id: '', password: '' });
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
-  const navigate = useNavigate(); // programmatic navigation after login [web:241]
+  const [inactiveOpen, setInactiveOpen] = useState(false); // NEW
+  const navigate = useNavigate(); // programmatic navigation after login
   const { setSession } = useSession();
 
   // Forgot Password modal
-  const [forgotOpen, setForgotOpen] = useState(false); // controls the modal [web:255]
+  const [forgotOpen, setForgotOpen] = useState(false); // controls the modal
 
   const handleInputChange = (e) =>
     setForm({ ...form, [e.target.name]: e.target.value });
 
   const looksLikeEmail = (v) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
-  const looksNumeric = (v) => /^\d+$/.test(v);
 
-  // EXISTING LOGIN (unchanged)
+  // LOGIN with unified lookup + inactive guard
   const handleLogin = async (e) => {
     e.preventDefault();
     setError('');
@@ -45,42 +45,18 @@ export const Landing_page = () => {
     try {
       setBusy(true);
 
-      let query = supabase.from('users').select('*').limit(1);
-      let userRow = null;
+      // Build an OR filter across columns; maybeSingle() returns null on no match (no 406)
+      // If it's an email, check only email; otherwise check applicant_id or student_id
+      const { data: userRow, error: fErr } = await (
+        looksLikeEmail(id)
+          ? supabase.from('users').select('*').eq('email', id)
+          : supabase
+              .from('users')
+              .select('*')
+              .or(`applicant_id.eq.${id},student_id.eq.${id}`)
+      ).maybeSingle();
 
-      if (looksLikeEmail(id)) {
-        query = query.eq('email', id);
-      } else if (looksNumeric(id)) {
-        const { data: byApplicant, error: aErr } = await supabase
-          .from('users')
-          .select('*')
-          .eq('applicant_id', id)
-          .limit(1);
-        if (aErr) throw aErr;
-        if (byApplicant && byApplicant.length) {
-          userRow = byApplicant[0];
-          query = null;
-        } else {
-          query = supabase
-            .from('users')
-            .select('*')
-            .eq('student_id', id)
-            .limit(1);
-        }
-      } else {
-        query = supabase
-          .from('users')
-          .select('*')
-          .eq('applicant_id', id)
-          .limit(1);
-      }
-
-      if (!userRow && query) {
-        const { data: found, error: fErr } = await query;
-        if (fErr) throw fErr;
-        userRow = found && found.length ? found[0] : null;
-      }
-
+      if (fErr) throw fErr;
       if (!userRow) {
         setError('No account found for the provided identifier.');
         return;
@@ -90,28 +66,36 @@ export const Landing_page = () => {
         return;
       }
 
+      // Strict inactive gate: only block when explicitly false
+      if (userRow.is_active === false) {
+        setInactiveOpen(true);
+        setForm((f) => ({ ...f, password: '' })); // clear password
+        return; // do NOT setSession or navigate
+      }
+
+      // Active -> proceed
       setSession(userRow.user_id, userRow.role);
 
       switch (userRow.role) {
         case 'applicant':
           navigate('/Applicant_Homepage');
-          break; // [web:241]
+          break; // route
         case 'student':
           navigate('/Student_Homepage');
-          break; // [web:241]
+          break; // route
         case 'adviser':
         case 'teacher':
           navigate('/Teacher_Homepage');
-          break; // [web:241]
+          break; // route
         case 'dept_head':
           navigate('/DeptHead_Dashboard');
-          break; // [web:241]
+          break; // route
         case 'principal':
           navigate('/Dashboard');
-          break; // [web:241]
+          break; // route
         case 'super_admin':
           navigate('/Admin_Dashboard');
-          break; // [web:241]
+          break; // route
         default:
           setError('Unknown user role. Please contact support.');
           break;
@@ -172,18 +156,21 @@ export const Landing_page = () => {
               <div className="login_Form_Box">
                 <form onSubmit={handleLogin}>
                   <div className="input_Box">
+                    <label>Login ID</label>
                     <input
+                      placeholder="Enter Applicant ID / Student ID / Email"
                       name="id"
                       value={form.id}
                       onChange={handleInputChange}
                       required
                       autoComplete="username"
                     />
-                    <label>Applicant ID / Student ID / Email</label>
                   </div>
 
                   <div className="input_Box">
+                    <label>Password</label>
                     <input
+                      placeholder="Enter Password"
                       type={showPassword ? 'text' : 'password'}
                       name="password"
                       value={form.password}
@@ -191,7 +178,7 @@ export const Landing_page = () => {
                       required
                       autoComplete="current-password"
                     />
-                    <label>Password</label>
+
                     <i
                       className={`fa ${showPassword ? 'fa-eye' : 'fa-eye-slash'}`}
                       aria-hidden="true"
@@ -208,21 +195,7 @@ export const Landing_page = () => {
                   </div>
 
                   <div className="passoption">
-                    <p>
-                      <button
-                        type="button"
-                        onClick={() => setForgotOpen(true)}
-                        style={{
-                          background: 'none',
-                          border: 'none',
-                          color: '#0b73ff',
-                          cursor: 'pointer',
-                          padding: 0,
-                        }}
-                      >
-                        Forgot Password?
-                      </button>
-                    </p>
+                    <p onClick={() => setForgotOpen(true)}>Forgot Password?</p>
                   </div>
 
                   <button type="submit" className="btn" disabled={busy}>
@@ -239,6 +212,42 @@ export const Landing_page = () => {
               </div>
             </div>
           </div>
+
+          {/* Inactive account modal */}
+          {inactiveOpen && (
+            <div
+              role="dialog"
+              aria-modal="true"
+              className="modal-backdrop"
+              style={{
+                position: 'fixed',
+                inset: 0,
+                background: 'rgba(0,0,0,0.4)',
+                display: 'grid',
+                placeItems: 'center',
+                zIndex: 1000,
+              }}
+            >
+              <div
+                className="modal"
+                style={{
+                  background: '#fff',
+                  borderRadius: 8,
+                  padding: 20,
+                  maxWidth: 420,
+                  width: '90%',
+                  textAlign: 'center',
+                }}
+              >
+                <h3 style={{ marginBottom: 8 }}>Account inactive</h3>
+                <p style={{ color: '#444', marginBottom: 16 }}>
+                  Your account is currently deactivated. Please contact the
+                  administrator for assistance.
+                </p>
+                <button onClick={() => setInactiveOpen(false)}>OK</button>
+              </div>
+            </div>
+          )}
 
           {/* Forgot Password Modal: sends Supabase reset email and redirects back to /reset-password */}
           <ForgotPasswordModal

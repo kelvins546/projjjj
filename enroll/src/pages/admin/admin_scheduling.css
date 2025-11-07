@@ -1,8 +1,8 @@
 .adminSchedulesContainer {
   display: flex;
   flex-direction: column;
-  gap: 20px;
-  padding: 80px 20px;
+  gap: 0px;
+  padding: 60px 20px;
 }
 
 .adminSchedulesSorter {
@@ -259,7 +259,6 @@
   text-align: center;
   cursor: pointer;
   transition: all 0.25s ease;
-  border: 1px solid #e5e7eb;
 }
 
 .folder-card:hover {
@@ -309,4 +308,52 @@
     opacity: 1;
     transform: translateY(0);
   }
+}
+
+.scheduleContainer {
+  padding: 0px 0px 0px 0px;
+}
+
+.renderAreaContainer i {
+  font-size: 18px;
+  transition:
+    transform 0.2s ease,
+    color 0.2s ease;
+}
+
+.renderAreaContainer i:hover {
+  color: #2e7946;
+  cursor: pointer;
+  transform: scale(1.2);
+}
+
+.renderArea {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.scheduleContainer {
+  width: 100%;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.renderAreaContainer {
+  display: flex;
+  align-items: center;
+  padding: 10px 20px;
+}
+
+.gradeSchedulesContainer {
+  width: 100%;
+  flex: 1;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 20px;
+  box-sizing: border-box;
 }

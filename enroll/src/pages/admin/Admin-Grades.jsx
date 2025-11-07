@@ -1,4 +1,3 @@
-// src/pages/admin/Admin_Grades.jsx
 import './admin_grades.css';
 import { Header } from '../../components/Header';
 import { Navigation_Bar } from '../../components/NavigationBar';
@@ -431,7 +430,7 @@ export const Admin_Grades = () => {
           </div>
         </div>
         <div className="gradingSorter">
-          <div className="sort">
+          <div className="gradingSorter-quarter">
             <label>Quarter</label>
             <select
               value={quarter}
@@ -444,7 +443,7 @@ export const Admin_Grades = () => {
               <option value="4">4th</option>
             </select>
           </div>
-          <div className="sort">
+          <div className="gradingSorter-grade">
             <label>Grade Level</label>
             <select
               value={gradeFilter}
@@ -457,7 +456,7 @@ export const Admin_Grades = () => {
               ))}
             </select>
           </div>
-          <div className="sort">
+          <div className="gradingSorter-section">
             <label>Section</label>
             <select
               value={sectionFilter}
@@ -472,7 +471,7 @@ export const Admin_Grades = () => {
               ))}
             </select>
           </div>
-          <div className="sort">
+          <div className="gradingSorter-subject">
             <label>Faculty/Subject</label>
             <select
               value={subjectFilter}
@@ -487,7 +486,7 @@ export const Admin_Grades = () => {
               ))}
             </select>
           </div>
-          <div className="sort">
+          <div className="gradingSorter-status">
             <label>Status</label>
             <select
               value={statusFilter}
@@ -530,7 +529,7 @@ export const Admin_Grades = () => {
                 onClick={() => setShowRemoveConfirm(true)}
                 disabled={loading || visible.length === 0}
               >
-                Remove All Grades
+                Debug
               </button>
             </div>
           </div>
@@ -992,11 +991,7 @@ export const Admin_Grades = () => {
       >
         <div className="unlockConfirmation">
           <div className="unlockConfirmationTitle">
-            <h2>Remove All Grades for Quarter {quarter}?</h2>
-            <p style={{ color: '#d9534f', fontWeight: 'bold' }}>
-              ⚠️ WARNING: This will permanently delete all grades for{' '}
-              {STATIC_SY} Quarter {quarter}. This action cannot be undone!
-            </p>
+            <h2>Debug All Grades for Quarter {quarter}?</h2>
           </div>
           <div className="buttonContainer">
             <button
@@ -1015,7 +1010,7 @@ export const Admin_Grades = () => {
               disabled={removing}
               style={{ backgroundColor: '#d9534f' }}
             >
-              {removing ? 'Removing...' : 'Remove All'}
+              {removing ? 'Debugging...' : 'Debug'}
             </button>
           </div>
         </div>

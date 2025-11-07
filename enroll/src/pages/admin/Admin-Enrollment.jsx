@@ -7,7 +7,8 @@ import { supabase } from '../../supabaseClient';
 import emailjs from 'emailjs-com';
 import { ImageModal } from '../../components/modals/ImageModal';
 import EnrollmentSuccessModal from '../../components/modals/EnrollmentSuccessModal';
-
+import { GridLoader } from 'react-spinners';
+import { LoadingPopup } from '../../components/loaders/LoadingPopup';
 const GRADES = ['Grade 7', 'Grade 8', 'Grade 9', 'Grade 10'];
 const normalizeSY = (s) => (s || '').replace(/[–—−]/g, '-').trim();
 
@@ -866,6 +867,12 @@ export const Admin_Enrollment = () => {
   };
   return (
     <>
+      <LoadingPopup
+        show={loading}
+        message="Loading Please Wait..."
+        Loader={GridLoader}
+        color="#3FB23F"
+      />
       <Header userRole="admin" />
       <Navigation_Bar userRole="super_admin" activeSection="enrollment" />
 
@@ -1302,7 +1309,10 @@ export const Admin_Enrollment = () => {
             </div>
 
             {/* Enrollment Window for selected year */}
-            <div style={{ marginTop: 12, display: 'grid', gap: 12 }}>
+            <div
+              className="sort"
+              style={{ marginTop: 12, display: 'grid', gap: 12 }}
+            >
               <label style={{ display: 'grid', gap: 6 }}>
                 <span>Enrollment Start</span>
                 <input

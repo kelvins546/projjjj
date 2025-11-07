@@ -9,6 +9,8 @@ import { Teacher_Scheduling_Card } from '../../components/admin_comp/Teacher_Sch
 import { Section_Scheduling_Card } from '../../components/admin_comp/Section_Scheduling_Card';
 import { TeacherLoadConfig } from '../../components/admin_comp/TeacherLoadConfig';
 import { supabase } from '../../supabaseClient';
+import { GridLoader } from 'react-spinners';
+import { LoadingPopup } from '../../components/loaders/LoadingPopup';
 
 // Teaching slots by grade (recess excluded)
 const TEACHING_SLOTS_BY_GRADE = {
@@ -67,6 +69,8 @@ export const Admin_Scheduling = () => {
   const [selectedDept, setSelectedDept] = useState('all');
   const [facultyType, setFacultyType] = useState('advisory');
 
+  const [selectedGrade, setSelectedGrade] = useState(null);
+
   const [subjects, setSubjects] = useState([]);
   const [sections, setSections] = useState([]);
   const [departments, setDepartments] = useState([]);
@@ -90,6 +94,19 @@ export const Admin_Scheduling = () => {
     loading: false,
     err: '',
   });
+  useEffect(() => {
+    setSelectedGrade(null);
+  }, [viewMode]);
+
+  const handleFolderClick = (g) => {
+    setSelectedGrade(g);
+    setGrade(String(g));
+  };
+
+  const handleBack = () => {
+    setSelectedGrade(null);
+    setGrade('all');
+  };
 
   // Meta load
   useEffect(() => {
@@ -495,11 +512,11 @@ export const Admin_Scheduling = () => {
             (s) => s.section_id === section.section_id
           )?.adviser_id
             ? allTeachers.find(
-                (t) =>
-                  t.teacher_id ===
-                  sections.find((s) => s.section_id === section.section_id)
-                    ?.adviser_id
-              )?.department_id
+              (t) =>
+                t.teacher_id ===
+                sections.find((s) => s.section_id === section.section_id)
+                  ?.adviser_id
+            )?.department_id
             : null;
 
           const requiredSubjectIds = buildRequiredSubjectsForSection(
@@ -921,17 +938,42 @@ export const Admin_Scheduling = () => {
   }, [search, sections, filteredSections, facultyType]);
 
   const renderCards = () => {
-    const g = Number(grade) || 7;
     if (viewMode === 'sectionSchedules') {
+      if (grade === 'all') {
+        return [7, 8, 9, 10].map((g) => (
+          <Section_Scheduling_Card
+            key={`sec-${g}-${sectionId || 'all'}-${reloadKey}`}
+            gradeLevel={g}
+            sectionId={sectionId}
+            search={search}
+          />
+        ));
+      }
+
       return (
         <Section_Scheduling_Card
           key={`sec-${grade || 'all'}-${sectionId || 'all'}-${reloadKey}`}
-          gradeLevel={grade === 'all' ? 'all' : grade ? Number(grade) : null}
+          gradeLevel={grade === 'all' ? 'all' : grade ? Number(grade) : 7}
           sectionId={sectionId}
           search={search}
         />
       );
     }
+
+    if (grade === 'all') {
+      return [7, 8, 9, 10].map((g) => (
+        <Teacher_Scheduling_Card
+          key={`g-${g}-${reloadKey}`}
+          gradeLevel={g}
+          search={search}
+          subjectId={subjectId}
+          sectionId={sectionId}
+          selectedDept={selectedDept}
+        />
+      ));
+    }
+
+    const g = Number(grade) || 7;
     return (
       <Teacher_Scheduling_Card
         key={`g-${g}-${reloadKey}`}
@@ -944,8 +986,39 @@ export const Admin_Scheduling = () => {
     );
   };
 
+  /*const renderCards = () => {
+      const g = Number(grade) || 7;
+      if (viewMode === 'sectionSchedules') {
+        return (
+          <Section_Scheduling_Card
+            key={`sec-${grade || 'all'}-${sectionId || 'all'}-${reloadKey}`}
+            gradeLevel={grade === 'all' ? 'all' : grade ? Number(grade) : null}
+            sectionId={sectionId}
+            search={search}
+          />
+        );
+      }
+      return (
+        <Teacher_Scheduling_Card
+          key={`g-${g}-${reloadKey}`}
+          gradeLevel={g}
+          search={search}
+          subjectId={subjectId}
+          sectionId={sectionId}
+          selectedDept={selectedDept}
+        />
+      );
+    }; */
+
+
   return (
     <>
+      <LoadingPopup
+        show={loadingMeta}
+        message="Loading Please Wait..."
+        Loader={GridLoader}
+        color="#3FB23F"
+      />
       <Header userRole="admin" />
       <Navigation_Bar userRole="super_admin" />
 
@@ -963,11 +1036,10 @@ export const Admin_Scheduling = () => {
 
         <div className="analytics-grid">
           <div
-            className={`analytics-card ${
-              analytics.incompleteSections > 0
-                ? 'analytics-card--warning'
-                : 'analytics-card--success'
-            }`}
+            className={`analytics-card ${analytics.incompleteSections > 0
+              ? 'analytics-card--warning'
+              : 'analytics-card--success'
+              }`}
           >
             <div className="analytics-card__label">
               Sections Missing Teachers
@@ -981,11 +1053,10 @@ export const Admin_Scheduling = () => {
           </div>
 
           <div
-            className={`analytics-card ${
-              analytics.scheduleConflicts > 0
-                ? 'analytics-card--error'
-                : 'analytics-card--success'
-            }`}
+            className={`analytics-card ${analytics.scheduleConflicts > 0
+              ? 'analytics-card--error'
+              : 'analytics-card--success'
+              }`}
           >
             <div className="analytics-card__label">Schedule Conflicts</div>
             <div className="analytics-card__value">
@@ -1017,156 +1088,190 @@ export const Admin_Scheduling = () => {
           </div>
         </div>
 
-        <div className="adminSchedulesSorter">
-          <div className="adminScheduleSearch">
-            <i className="fa fa-search" aria-hidden="true"></i>
-            <input
-              className="adminScheduleSearchBar"
-              placeholder="Search teacher or section..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              disabled={loadingMeta}
-            />
-          </div>
+        <div className="renderArea">
 
-          <div className="adminScheduleSortType">
-            <label>Faculty Type</label>
-            <select
-              value={facultyType}
-              onChange={(e) => setFacultyType(e.target.value)}
-              disabled={loadingMeta || viewMode === 'sectionSchedules'}
-              title={
-                viewMode === 'sectionSchedules'
-                  ? 'Not used in Section view'
-                  : ''
-              }
-            >
-              <option value="advisory">Advisers</option>
-              <option value="noAdvisory">Non-Advisers</option>
-            </select>
-          </div>
+          {/* FOLDER VIEW */}
+          {!selectedGrade && (
+            <div className="folderSelect">
+              <div className="folder-grid">
+                <div
+                  className="folder-card all"
+                  onClick={() => handleFolderClick('all')}
+                >
+                  <i style={{ color: "#7C3AED" }} className="fas fa-folder folder-icon"></i>
+                  <h3>All</h3>
+                </div>
 
-          <div className="adminScheduleSortSubject">
-            <label>Department</label>
-            <select
-              value={selectedDept}
-              onChange={(e) => setSelectedDept(e.target.value)}
-              disabled={loadingMeta || viewMode === 'sectionSchedules'}
-              title={
-                viewMode === 'sectionSchedules'
-                  ? 'Filter by Grade/Section instead'
-                  : ''
-              }
-            >
-              <option value="all">All Departments</option>
-              {departments.map((d) => (
-                <option key={d.department_id} value={d.department_id}>
-                  {d.name}
-                </option>
-              ))}
-            </select>
-          </div>
+                <div className="folder-card grade7" onClick={() => handleFolderClick(7)}>
+                  <i className="fas fa-folder folder-icon"></i>
+                  <h3>Grade 7</h3>
+                </div>
+                <div className="folder-card grade8" onClick={() => handleFolderClick(8)}>
+                  <i className="fas fa-folder folder-icon"></i>
+                  <h3>Grade 8</h3>
+                </div>
+                <div className="folder-card grade9" onClick={() => handleFolderClick(9)}>
+                  <i className="fas fa-folder folder-icon"></i>
+                  <h3>Grade 9</h3>
+                </div>
+                <div className="folder-card grade10" onClick={() => handleFolderClick(10)}>
+                  <i className="fas fa-folder folder-icon"></i>
+                  <h3>Grade 10</h3>
+                </div>
+              </div>
+            </div>
+          )}
 
-          <div className="adminScheduleSortGrade">
-            <label>Grade Level</label>
-            <select
-              value={grade}
-              onChange={(e) => setGrade(e.target.value)}
-              disabled={loadingMeta}
-            >
-              <option value="all">All grades</option>
-              <option value="7">Grade 7</option>
-              <option value="8">Grade 8</option>
-              <option value="9">Grade 9</option>
-              <option value="10">Grade 10</option>
-            </select>
-          </div>
+          {selectedGrade && (
+            <div className="scheduleContainer">
+              <div className="renderAreaContainer">
+                <i className="fa fa-chevron-left" onClick={handleBack} aria-hidden="true"></i>
+              </div>
+            </div>
+          )}
 
-          <div className="adminScheduleSortSection">
-            <label>Section</label>
-            <select
-              value={sectionId}
-              onChange={(e) => setSectionId(e.target.value)}
-              disabled={
-                loadingMeta ||
-                (viewMode === 'teacherSchedules' &&
-                  facultyType === 'advisory' &&
-                  filteredSections.length === 0)
-              }
-            >
-              <option value="">All Sections</option>
-              {(viewMode === 'sectionSchedules'
-                ? filteredSections
-                : facultyType === 'advisory'
-                  ? filteredSections
-                  : sections
-              ).map((sec) => (
-                <option
-                  key={sec.section_id}
-                  value={sec.section_id}
-                >{`G${sec.grade_level} - ${sec.name}`}</option>
-              ))}
-            </select>
-          </div>
+          {selectedGrade && (
+            <div className="adminSchedulesSorter">
+              <div className="adminScheduleSearch">
+                <i className="fa fa-search" aria-hidden="true"></i>
+                <input
+                  className="adminScheduleSearchBar"
+                  placeholder="Search teacher or section..."
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  disabled={loadingMeta}
+                />
+              </div>
 
-          <div
-            className="adminScheduleActions"
-            style={{ marginLeft: 'auto', display: 'flex', gap: 8 }}
-          >
-            <button
-              className="update-btn"
-              onClick={handleAutoSchedule}
-              disabled={running || loadingMeta || facultyType !== 'advisory'}
-              title="Auto-schedule selected grade(s) or section"
-            >
-              {running ? 'Running...' : 'Auto-schedule'}
-            </button>
+              <div className="adminScheduleSortType">
+                <label>Faculty Type</label>
+                <select
+                  value={facultyType}
+                  onChange={(e) => setFacultyType(e.target.value)}
+                  disabled={loadingMeta || viewMode === 'sectionSchedules'}
+                  title={
+                    viewMode === 'sectionSchedules'
+                      ? 'Not used in Section view'
+                      : ''
+                  }
+                >
+                  <option value="advisory">Advisers</option>
+                  <option value="noAdvisory">Non-Advisers</option>
+                </select>
+              </div>
 
-            <button
-              className="update-btn"
-              onClick={handleClearAutoSchedule}
-              disabled={running || loadingMeta || facultyType !== 'advisory'}
-              title="Remove auto-scheduled slots for selected scope"
-            >
-              {running ? 'Running...' : 'Remove'}
-            </button>
-          </div>
+              <div className="adminScheduleSortSubject">
+                <label>Department</label>
+                <select
+                  value={selectedDept}
+                  onChange={(e) => setSelectedDept(e.target.value)}
+                  disabled={loadingMeta || viewMode === 'sectionSchedules'}
+                  title={
+                    viewMode === 'sectionSchedules'
+                      ? 'Filter by Grade/Section instead'
+                      : ''
+                  }
+                >
+                  <option value="all">All Departments</option>
+                  {departments.map((d) => (
+                    <option key={d.department_id} value={d.department_id}>
+                      {d.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="adminScheduleSortGrade">
+                <label>Grade Level</label>
+                <select
+                  value={grade}
+                  onChange={(e) => {
+                    const selected = e.target.value;
+                    setGrade(selected);
+                    setSelectedGrade(selected);
+                  }}
+                  disabled={loadingMeta}
+                >
+                  <option value="all">All grades</option>
+                  <option value="7">Grade 7</option>
+                  <option value="8">Grade 8</option>
+                  <option value="9">Grade 9</option>
+                  <option value="10">Grade 10</option>
+                </select>
+              </div>
+
+              <div className="adminScheduleSortSection">
+                <label>Section</label>
+                <select
+                  value={sectionId}
+                  onChange={(e) => setSectionId(e.target.value)}
+                  disabled={
+                    loadingMeta ||
+                    (viewMode === 'teacherSchedules' &&
+                      facultyType === 'advisory' &&
+                      filteredSections.length === 0)
+                  }
+                >
+                  <option value="">All Sections</option>
+                  {(viewMode === 'sectionSchedules'
+                    ? filteredSections
+                    : facultyType === 'advisory'
+                      ? filteredSections
+                      : sections
+                  ).map((sec) => (
+                    <option
+                      key={sec.section_id}
+                      value={sec.section_id}
+                    >{`G${sec.grade_level} - ${sec.name}`}</option>
+                  ))}
+                </select>
+              </div>
+
+              {selectedGrade === 'all' && (
+                <div
+                  className="adminScheduleActions"
+                  style={{ marginLeft: 'auto', display: 'flex', gap: 8 }}
+                >
+                  <button
+                    className="update-btn"
+                    onClick={handleAutoSchedule}
+                    disabled={running || loadingMeta || facultyType !== 'advisory'}
+                    title="Auto-schedule selected grade(s) or section"
+                  >
+                    {running ? 'Running...' : 'Auto-schedule'}
+                  </button>
+
+                  <button
+                    className="update-btn"
+                    onClick={handleClearAutoSchedule}
+                    disabled={running || loadingMeta || facultyType !== 'advisory'}
+                    title="Remove auto-scheduled slots for selected scope"
+                  >
+                    {running ? 'Running...' : 'Remove'}
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
+
+          {actionMsg && (
+            <div style={{ margin: '10px 0', color: '#2b7fed', fontSize: 13 }}>
+              {actionMsg}
+            </div>
+          )}
+
+
+
         </div>
 
-        {actionMsg && (
-          <div style={{ margin: '10px 0', color: '#2b7fed', fontSize: 13 }}>
-            {actionMsg}
+        {/* CARDS AREA (outside conditional for proper layout) */}
+        {selectedGrade && (
+          <div className="gradeSchedulesContainer">
+            {renderCards()}
           </div>
         )}
 
-        <div className="gradeSchedulesContainer">{renderCards()}</div>
       </div>
-      <div className="folderSelect">
-        <h2 className="folder-title">Grade Level Folders</h2>
-
-        <div className="folder-grid">
-          <div className="folder-card grade7">
-            <i className="fas fa-folder folder-icon"></i>
-            <h3>Grade 7</h3>
-          </div>
-
-          <div className="folder-card grade8">
-            <i className="fas fa-folder folder-icon"></i>
-            <h3>Grade 8</h3>
-          </div>
-
-          <div className="folder-card grade9">
-            <i className="fas fa-folder folder-icon"></i>
-            <h3>Grade 9</h3>
-          </div>
-
-          <div className="folder-card grade10">
-            <i className="fas fa-folder folder-icon"></i>
-            <h3>Grade 10</h3>
-          </div>
-        </div>
-      </div>
-
       <TeacherLoadConfig
         show={showLoadConfig}
         onClose={() => {

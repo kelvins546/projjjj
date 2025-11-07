@@ -40,7 +40,6 @@ export const Sub_Nav = ({ activeSection, onSectionChange, items }) => {
     sections = [
       { id: 'enrollmentForecast', label: 'Enrollment Forecast' },
       { id: 'dropoutTrend', label: 'Dropout Trend' },
-      { id: 'gradePerformance', label: 'Grade Performance' },
     ];
   } else if (path === '/placement') {
     sections = [

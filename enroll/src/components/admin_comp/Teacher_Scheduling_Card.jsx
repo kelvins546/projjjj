@@ -104,6 +104,8 @@ export const Teacher_Scheduling_Card = ({
 
   // Per-teacher per-slot room text
   const [roomsByTeacher, setRoomsByTeacher] = useState({});
+  // Per-teacher per-slot section_id
+  const [idsByTeacherSlot, setIdsByTeacherSlot] = useState({});
 
   const [showEditModal, setShowEditModal] = useState(false);
   const [showSuccessNotif, setShowSuccessNotif] = useState(false);
@@ -127,6 +129,8 @@ export const Teacher_Scheduling_Card = ({
     event.preventDefault();
     const dragKey = event.dataTransfer.getData('sectionKey');
     if (!dragKey || dragKey === dropKey || !activeTeacherId) return;
+
+    // swap names
     setSectionsPerTeacher((prev) => {
       const map = { ...prev };
       const current = map[activeTeacherId] || {};
@@ -135,6 +139,28 @@ export const Teacher_Scheduling_Card = ({
       copy[dragKey] = copy[dropKey] || '';
       copy[dropKey] = temp;
       map[activeTeacherId] = copy;
+      return map;
+    });
+
+    // swap section_id
+    setIdsByTeacherSlot((prev) => {
+      const map = { ...prev };
+      const cur = { ...(map[activeTeacherId] || {}) };
+      const tempId = cur[dragKey] ?? null;
+      cur[dragKey] = cur[dropKey] ?? null;
+      cur[dropKey] = tempId;
+      map[activeTeacherId] = cur;
+      return map;
+    });
+
+    // swap room text
+    setRoomsByTeacher((prev) => {
+      const map = { ...prev };
+      const cur = { ...(map[activeTeacherId] || {}) };
+      const tempRoom = cur[dragKey] || '';
+      cur[dragKey] = cur[dropKey] || '';
+      cur[dropKey] = tempRoom;
+      map[activeTeacherId] = cur;
       return map;
     });
   };
@@ -182,6 +208,7 @@ export const Teacher_Scheduling_Card = ({
       });
 
       const roomsByT = {};
+      const idsMapBuild = {};
 
       if (teacherIds.length) {
         // 1) Load all schedules for these teachers
@@ -244,7 +271,7 @@ export const Teacher_Scheduling_Card = ({
 
         const allowedKeys = new Set(activeRows.map(([, , k]) => k));
 
-        // 4) Hydrate visible cells + rooms across the combined grid
+        // 4) Hydrate visible cells + rooms + ids across the combined grid
         (schedRows || []).forEach(
           ({ teacher_id, slot_key, section_id, section_name }) => {
             if (!seeded[teacher_id]) seeded[teacher_id] = blankWeekly();
@@ -254,6 +281,13 @@ export const Teacher_Scheduling_Card = ({
               const rmap = roomsByT[teacher_id] || {};
               rmap[slot_key] = secRoomMap.get(section_id) || '';
               roomsByT[teacher_id] = rmap;
+            }
+
+            // Id capture
+            {
+              const imap = idsMapBuild[teacher_id] || {};
+              imap[slot_key] = section_id ?? null;
+              idsMapBuild[teacher_id] = imap;
             }
 
             if (allowedKeys.has(slot_key)) {
@@ -282,6 +316,7 @@ export const Teacher_Scheduling_Card = ({
       setTeachers(tRows || []);
       setSectionsPerTeacher(seeded);
       setRoomsByTeacher(roomsByT);
+      setIdsByTeacherSlot(idsMapBuild);
     } catch (e) {
       console.error('load error:', e);
       setErrMsg(`Failed to load Grade ${gradeLevel} teachers.`);
@@ -347,7 +382,9 @@ export const Teacher_Scheduling_Card = ({
   const handleUpdate = async () => {
     try {
       const current = sectionsPerTeacher[activeTeacherId] || {};
-      // Filter out pseudo rows (Recess) and HGP labels (display-only)
+      const idMap = idsByTeacherSlot[activeTeacherId] || {};
+
+      // rows to upsert
       const rows = Object.entries(current)
         .filter(([key, section]) => {
           const isRecess = allRecessKeys.has(key) || section === 'Recess';
@@ -359,13 +396,33 @@ export const Teacher_Scheduling_Card = ({
           slot_key,
           section_name,
           teacher_subject_id: null,
-          section_id: null,
+          section_id: idMap[slot_key] ?? null,
         }));
 
-      const { error } = await supabase
-        .from('teacher_schedules')
-        .upsert(rows, { onConflict: 'teacher_id,slot_key' });
-      if (error) throw error;
+      // slots to delete (now empty / recess / HGP label)
+      const empties = Object.entries(current)
+        .filter(([key, section]) => {
+          const isRecess = allRecessKeys.has(key) || section === 'Recess';
+          const isHgpLabel = String(section).startsWith('HGP');
+          return !section || isRecess || isHgpLabel;
+        })
+        .map(([slot_key]) => slot_key);
+
+      if (rows.length) {
+        const { error } = await supabase
+          .from('teacher_schedules')
+          .upsert(rows, { onConflict: 'teacher_id,slot_key' });
+        if (error) throw error;
+      }
+
+      if (empties.length) {
+        const { error: delErr } = await supabase
+          .from('teacher_schedules')
+          .delete()
+          .eq('teacher_id', activeTeacherId)
+          .in('slot_key', empties);
+        if (delErr) throw delErr;
+      }
 
       didSaveRef.current = true;
       setShowSuccessNotif(true);

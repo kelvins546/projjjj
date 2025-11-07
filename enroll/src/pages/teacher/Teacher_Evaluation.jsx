@@ -199,8 +199,8 @@ export const Teacher_Evaluation = () => {
       setShowViewGrade(false);
       setShowApproveNotif(true);
     } catch (e) {
-      console.error('Error approving grades:', e);
-      alert('Failed to approve grades: ' + e.message);
+      console.error('Error deploying grades:', e);
+      alert('Failed to Deploy grades: ' + e.message);
     }
   };
 
@@ -270,7 +270,7 @@ export const Teacher_Evaluation = () => {
               onChange={(e) => setStatusFilter(e.target.value)}
             >
               <option value="">All</option>
-              <option value="approved">Approved</option>
+              <option value="approved">Deployed</option>
               <option value="pending">Pending</option>
             </select>
           </div>
@@ -334,8 +334,8 @@ export const Teacher_Evaluation = () => {
                     }}
                   >
                     {isApproved(st.teacher_subject_id)
-                      ? 'Already Approved'
-                      : 'Approve Grades'}
+                      ? 'Already Deployed'
+                      : 'Deploy Grades'}
                   </button>
                 </div>
               </div>
@@ -407,6 +407,7 @@ export const Teacher_Evaluation = () => {
                   background: 'white',
                   borderRadius: '4px',
                   cursor: 'pointer',
+                  color: '#111',
                 }}
               >
                 Close
@@ -431,8 +432,8 @@ export const Teacher_Evaluation = () => {
                 }}
               >
                 {isApproved(selectedSubject?.teacher_subject_id)
-                  ? 'Already Approved'
-                  : 'Approve Grades'}
+                  ? 'Already Deployed'
+                  : 'Deploy Grades'}
               </button>
             </div>
           </div>
@@ -444,7 +445,7 @@ export const Teacher_Evaluation = () => {
         >
           <div className="confirmSubmit">
             <p>
-              You're about to approve the grades for{' '}
+              You're about to Deploy the grades for{' '}
               {selectedSubject?.subject_name}. Proceed?
             </p>
             <div className="btnContainer">

@@ -3,7 +3,7 @@ import { Header } from '../../components/Header';
 import { Navigation_Bar } from '../../components/NavigationBar';
 import './teacher_grading.css';
 import { ReusableModalBox } from '../../components/modals/Reusable_Modal';
-import { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { supabase } from '../../supabaseClient';
 import { GridLoader } from 'react-spinners';
 import { LoadingPopup } from '../../components/loaders/LoadingPopup';
@@ -67,6 +67,9 @@ export const Teacher_Grading = () => {
   const [roster, setRoster] = useState([]);
   const [gradeMap, setGradeMap] = useState({});
   const [encodingAllowed, setEncodingAllowed] = useState({});
+
+  // CSV import
+  const fileInputRef = useRef(null);
 
   useEffect(() => {
     let mounted = true;
@@ -419,30 +422,187 @@ export const Teacher_Grading = () => {
     }
   };
 
-  const removeAllGrades = async () => {
-    if (!selectedClass?.teacher_subject_id) {
-      alert('No class selected');
-      return;
+  // CSV helpers
+  const parseCsv = (text) => {
+    const rows = [];
+    let i = 0,
+      field = '',
+      row = [],
+      inQuotes = false;
+    const flush = () => {
+      row.push(field);
+      field = '';
+    };
+    const pushRow = () => {
+      rows.push(row);
+      row = [];
+    };
+    while (i < text.length) {
+      const c = text[i];
+      if (inQuotes) {
+        if (c === '"') {
+          if (text[i + 1] === '"') {
+            field += '"';
+            i += 2;
+            continue;
+          }
+          inQuotes = false;
+          i++;
+          continue;
+        } else {
+          field += c;
+          i++;
+          continue;
+        }
+      } else {
+        if (c === '"') {
+          inQuotes = true;
+          i++;
+          continue;
+        }
+        if (c === ',') {
+          flush();
+          i++;
+          continue;
+        }
+        if (c === '\r') {
+          i++;
+          continue;
+        }
+        if (c === '\n') {
+          flush();
+          pushRow();
+          i++;
+          continue;
+        }
+        field += c;
+        i++;
+      }
     }
-    const confirmDelete = window.confirm(
-      `WARNING: This will DELETE ALL grades for this class!\n\nSection: ${selectedClass.section_name}\nSubject: ${selectedClass.subject_name}\n\nAre you sure?`
-    );
-    if (!confirmDelete) return;
+    flush();
+    if (row.length > 1 || rows.length === 0) pushRow();
+    return rows.filter((r) => r.some((x) => String(x).trim() !== ''));
+  };
+  const norm = (s) =>
+    String(s || '')
+      .toLowerCase()
+      .replace(/[^a-z0-9]/g, '');
+  const headerIndex = (headers, keys) => {
+    const H = headers.map(norm);
+    for (const k of keys) {
+      const idx = H.indexOf(norm(k));
+      if (idx !== -1) return idx;
+    }
+    return -1;
+  };
+  const handleImportClick = () => fileInputRef.current?.click();
+  const handleFileSelected = async (e) => {
+    const file = e.target.files?.[0];
+    e.target.value = '';
+    if (!file) return;
     try {
-      const studentIds = roster.map((r) => r.student_id);
-      const { error } = await supabase
-        .from('grades')
-        .delete()
-        .eq('teacher_subject_id', selectedClass.teacher_subject_id)
-        .eq('school_year', STATIC_SY)
-        .in('student_id', studentIds);
-      if (error) throw error;
-      setGradeMap({});
-      alert('All grades removed successfully!');
-      await loadRosterAndGrades(selectedClass);
-    } catch (e) {
-      console.error('Remove grades error:', e);
-      alert('Failed to remove grades: ' + e.message);
+      const text = await file.text(); // modern File API [MDN]
+      const rows = parseCsv(text);
+      if (!rows.length) {
+        alert('CSV is empty.');
+        return;
+      }
+
+      const headers = rows[0];
+      const lrnIdx = headerIndex(headers, ['lrn']);
+      const q1Idx = headerIndex(headers, [
+        'q1',
+        '1st',
+        'first',
+        'firstquarter',
+        'quarter1',
+        'q_1',
+      ]);
+      const q2Idx = headerIndex(headers, [
+        'q2',
+        '2nd',
+        'second',
+        'secondquarter',
+        'quarter2',
+        'q_2',
+      ]);
+      const q3Idx = headerIndex(headers, [
+        'q3',
+        '3rd',
+        'third',
+        'thirdquarter',
+        'quarter3',
+        'q_3',
+      ]);
+      const q4Idx = headerIndex(headers, [
+        'q4',
+        '4th',
+        'fourth',
+        'fourthquarter',
+        'quarter4',
+        'q_4',
+      ]);
+      if (lrnIdx === -1) {
+        alert('CSV must include an LRN column.');
+        return;
+      }
+
+      const byLrn = new Map(
+        roster.map((s) => [String(s.lrn || '').trim(), s.student_id])
+      );
+      let matched = 0,
+        updated = 0,
+        skipped = 0;
+
+      setGradeMap((prev) => {
+        const next = { ...prev };
+        for (let r = 1; r < rows.length; r++) {
+          const cols = rows[r];
+          if (!cols || !cols.length) continue;
+          const lrn = String(cols[lrnIdx] ?? '').trim();
+          if (!lrn) {
+            skipped++;
+            continue;
+          }
+          const sid = byLrn.get(lrn);
+          if (!sid) {
+            skipped++;
+            continue;
+          }
+
+          const quarters = [
+            [1, q1Idx],
+            [2, q2Idx],
+            [3, q3Idx],
+            [4, q4Idx],
+          ];
+          let row = { ...(next[sid] || {}) };
+          let changed = 0;
+          for (const [q, idx] of quarters) {
+            if (idx === -1) continue;
+            const raw = String(cols[idx] ?? '').trim();
+            if (raw === '') continue;
+            const n = Number(raw);
+            if (Number.isFinite(n) && n >= 0 && n <= 100) {
+              row[q] = n;
+              changed++;
+            }
+          }
+          if (changed > 0) {
+            next[sid] = row;
+            matched++;
+            updated += changed;
+          }
+        }
+        return next;
+      });
+
+      alert(
+        `Import complete.\nMatched students: ${matched}\nQuarter cells updated: ${updated}\nRows skipped: ${skipped}`
+      );
+    } catch (err) {
+      console.error(err);
+      alert('Failed to import CSV: ' + (err?.message || String(err)));
     }
   };
 
@@ -456,6 +616,7 @@ export const Teacher_Grading = () => {
         color="#3FB23F"
       />
       <Navigation_Bar userRole="teacher" />
+
       <div className="teacherGradingContainer">
         <div className="sorters">
           <div className="search">
@@ -564,6 +725,7 @@ export const Teacher_Grading = () => {
             ))}
         </div>
 
+        {/* View modal */}
         <ReusableModalBox
           show={showViewCard}
           onClose={() => setShowviewCard(false)}
@@ -624,6 +786,7 @@ export const Teacher_Grading = () => {
           </div>
         </ReusableModalBox>
 
+        {/* Encode modal */}
         <ReusableModalBox
           show={showEncodeGrade}
           onClose={() => setShowEncodeGrade(false)}
@@ -725,23 +888,26 @@ export const Teacher_Grading = () => {
                 </tbody>
               </table>
             </div>
+
             <div className="encodeBtns">
-              <button className="import">Import CSV</button>
-              <button
-                onClick={removeAllGrades}
-                style={{
-                  backgroundColor: '#dc3545',
-                  color: 'white',
-                  border: 'none',
-                }}
-              >
-                Remove All Grades
+              {/* CSV controls */}
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept=".csv,text/csv"
+                style={{ display: 'none' }}
+                onChange={handleFileSelected}
+              />
+              <button className="import" onClick={handleImportClick}>
+                Import CSV
               </button>
+
               <button onClick={() => setShowSubmitConfirm(true)}>Submit</button>
             </div>
           </div>
         </ReusableModalBox>
 
+        {/* Confirm submit */}
         <ReusableModalBox
           show={showSubmitConfirm}
           onClose={() => setShowSubmitConfirm(false)}
@@ -760,6 +926,7 @@ export const Teacher_Grading = () => {
           </div>
         </ReusableModalBox>
 
+        {/* Success notif */}
         <ReusableModalBox
           show={showSubmitNotif}
           onClose={() => setShowSubmitNotif(false)}
@@ -779,3 +946,5 @@ export const Teacher_Grading = () => {
     </>
   );
 };
+
+export default Teacher_Grading;

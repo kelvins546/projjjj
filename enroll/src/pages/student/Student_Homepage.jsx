@@ -393,7 +393,7 @@ export const Student_Homepage = () => {
                     </p>
                   )}
                 </div>
-                <div className="buttonContainer">
+                <div className="buttonContainerCard">
                   {canApply ? (
                     <button onClick={onProceed}>Proceed to enrollment</button>
                   ) : (

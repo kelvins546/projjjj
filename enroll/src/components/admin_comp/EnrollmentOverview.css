@@ -1,263 +1,264 @@
 .enrollment-overview-wrapper {
-    display: flex;
-    flex-direction: column;
-    width: 100%;
-    justify-content: center;
-    padding: 30px 30px;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  justify-content: center;
+  padding: 30px 30px;
 }
 
 .sorter {
-    display: flex !important;
-    flex-direction: row !important;
-    margin-top: 24px;
-    width: 100% !important;
-    gap: 20px;
-    font-weight: 600;
+  display: flex !important;
+  flex-direction: row !important;
+  margin-top: 24px;
+  width: 100% !important;
+  gap: 20px;
+  font-weight: 600;
 }
 
 .sort {
-    display: flex;
-    flex-direction: column;
+  display: flex;
+  flex-direction: column;
 }
 
 .sort label {
-    display: block;
-    font-size: 0.85rem;
-    color: #444;
-    margin-bottom: 5px;
+  display: block;
+  font-size: 0.85rem;
+  color: #444;
+  margin-bottom: 5px;
 }
 
 .enrollment-overview-wrapper select {
-    height: 40px;
-    width: 250px;
-    background-color: #fff;
-    border: none !important;
-    border-radius: 5px;
-    padding: 10px;
-    font-size: 14px;
-    font-family: inherit;
-    color: #333;
-    cursor: pointer;
-    outline: none;
-    transition: all 0.2s ease;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  height: 40px;
+  width: 250px;
+  background-color: #fff;
+  border: none !important;
+  border-radius: 5px;
+  padding: 10px;
+  font-size: 14px;
+  font-family: inherit;
+  color: #333;
+  cursor: pointer;
+  outline: none;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
 }
 
 .enrollmentOverviewContent {
-    display: flex;
-    flex-direction: column;
+  display: flex;
+  flex-direction: column;
 }
 
 .sort-SY {
-    display: flex;
-    flex-direction: column;
-    padding: 50px 20px 20px 20px;
+  display: flex;
+  flex-direction: column;
+  padding: 50px 20px 20px 20px;
 }
 
 .sort-SY select:hover,
 .sort-Grade select:hover {
-    border-color: #FBC84F;
-    box-shadow: 0 0 0 1px rgba(251, 200, 79, 0.3);
+  border-color: #fbc84f;
+  box-shadow: 0 0 0 1px rgba(251, 200, 79, 0.3);
 }
 
 .sort-SY option,
 .sort-Grade option {
-    padding: 10px;
-    border-radius: 5px;
+  padding: 10px;
+  border-radius: 5px;
 }
 
 .sort-Grade {
-    display: flex;
-    flex-direction: row;
-    gap: 100px;
+  display: flex;
+  flex-direction: row;
+  gap: 100px;
 }
 
 .sort-Grade h1 {
-    font-size: 25px;
-    height: 100%;
-    padding-top: 15px;
+  font-size: 25px;
+  height: 100%;
+  padding-top: 15px;
 }
 
 .sorter-Grade {
-    display: flex;
-    flex-direction: column;
+  display: flex;
+  flex-direction: column;
 }
 
 .enrollmentStats {
-    display: flex;
-    gap: 16;
+  display: flex;
+  gap: 16;
 }
 
-
 .enrollment_Stat_Cards {
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
 }
 
 .barChartContainer {
-    width: 100%;
-    max-width: 700px;
-    background-color: #F5F6F6;
-    border-radius: 12px;
-    padding: 20px;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    position: relative;
+  width: 100%;
+  max-width: 700px;
+  background-color: #f5f6f6;
+  border-radius: 12px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  position: relative;
 }
 
 .chart_Section {
-    width: 100%;
-    display: flex;
-    gap: 16px;
-    padding-left: 16px;
+  width: 100%;
+  display: flex;
+  gap: 16px;
+  padding-left: 16px;
 }
 
 .chart_Section h2 {
-    font-size: 16px;
-    font-family: 'Poppins', sans-serif;
-    color: #334155;
-    font-weight: 600;
+  font-size: 16px;
+  font-family: 'Poppins', sans-serif;
+  color: #334155;
+  font-weight: 600;
 }
 
 .chartTitle {
-    top: 0;
-    position: absolute;
-    padding: 10px;
-
+  top: 0;
+  position: absolute;
+  padding: 10px;
+  text-align: center;
 }
 
 .card {
-    width: 300px !important;
-    text-align: center;
-    padding: 30px;
-    background-color: #F5F6F6 !important;
-    border-radius: 10px;
-    box-shadow: inset 0 4px 8px rgba(0, 0, 0, 0.15);
-    transition: 0.5s ease;
+  width: 300px !important;
+  text-align: center;
+  padding: 30px;
+  background-color: #f5f6f6 !important;
+  border-radius: 10px;
+  box-shadow: inset 0 4px 8px rgba(0, 0, 0, 0.15);
+  transition: 0.5s ease;
 }
 
 .card1 {
-    width: 300px !important;
-    text-align: center;
-    padding: 30px;
-    background-color: #F5F6F6 !important;
-    border-radius: 10px;
-    transition: 0.5s ease;
+  width: 300px !important;
+  text-align: center;
+  padding: 30px;
+  background-color: #f5f6f6 !important;
+  border-radius: 10px;
+  transition: 0.5s ease;
 }
 
 .cardPending {
-    color: #f59e0b;
+  color: #f59e0b;
 }
 
 .cardEnrolled {
-    color: #22c55e;
+  color: #22c55e;
 }
 
 .cardConversionRate {
-    color: #3b82f6;
+  color: #3b82f6;
 }
 
 .card:hover {
-    transform: scale(1.05);
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+  transform: scale(1.05);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
 }
 
 .tableContainer {
-    width: 100%;
-    max-width: 700px;
-    background-color: #F5F6F6;
-    border-radius: 12px;
-    padding: 20px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    margin: 0 auto;
+  width: 100%;
+  max-width: 700px;
+  background-color: #f5f6f6;
+  border-radius: 12px;
+  padding: 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 0 auto;
 }
 
 .gradeStatsContainer {
-    background: #F5F6F6;
-    border-radius: 10px;
-    padding: 20px 25px;
-    margin-top: 20px;
-    width: 100%;
-    box-sizing: border-box;
-    position: relative;
+  background: #f5f6f6;
+  border-radius: 10px;
+  padding: 20px 25px;
+  margin-top: 20px;
+  width: 100%;
+  box-sizing: border-box;
+  position: relative;
 }
 
 .gradeStatsContainer h3 {
-    font-size: 18px;
-    font-weight: 600;
-    color: #334155;
-    margin-bottom: 15px;
+  font-size: 18px;
+  font-weight: 600;
+  color: #334155;
+  margin-bottom: 15px;
 }
 
 .facultyAssignmentTable table {
-    width: 100%;
-    border-collapse: collapse;
-    background-color: #ffffff;
-    table-layout: fixed;
-    box-shadow: 0 5px 10px rgba(0, 0, 0, 0.05);
-    font-family: 'Mukta', sans-serif;
+  width: 100%;
+  border-collapse: collapse;
+  background-color: #ffffff;
+  table-layout: fixed;
+  box-shadow: 0 5px 10px rgba(0, 0, 0, 0.05);
+  font-family: 'Mukta', sans-serif;
 }
 
 /* Header row */
 .facultyAssignmentTable thead {
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.08);
 }
 
 .facultyAssignmentTable th,
 .facultyAssignmentTable td {
-    padding: 0.8rem 1.5rem;
-    text-align: left;
-    vertical-align: middle;
-    /* ⬅️ keeps "Grade 7" in one line */
+  padding: 0.8rem 1.5rem;
+  text-align: left;
+  vertical-align: middle;
+  /* ⬅️ keeps "Grade 7" in one line */
 }
 
 /* Header cells */
 .facultyAssignmentTable th {
-    letter-spacing: 0.05rem;
-    font-size: 0.85rem;
-    font-weight: 700;
-    color: #334155;
-    background-color: #f9fafb;
-    text-transform: uppercase;
+  letter-spacing: 0.05rem;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #334155;
+  background-color: #f9fafb;
+  text-transform: uppercase;
 }
 
 .export {
-    position: absolute;
-    top: 10px;
-    right: 15px;
-    display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-    z-index: 20;
+  position: absolute;
+  top: 10px;
+  right: 15px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  z-index: 20;
 }
 
 .exportDropdown {
-    margin-top: 8px;
-    background: #ffffff;
-    border-radius: 10px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-    overflow: hidden;
-    animation: dropdownFade 0.25s ease forwards;
+  margin-top: 8px;
+  background: #ffffff;
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  overflow: hidden;
+  animation: dropdownFade 0.25s ease forwards;
 }
 
 .exportDropdown button {
-    font-size: 14px;
-    font-family: 'Poppins';
+  font-size: 14px;
+  font-family: 'Poppins';
 }
 
 .exportElipse {
-    font-size: 24px;
-    color: #2b7029;
-    cursor: pointer;
-    transition: transform 0.2s ease, color 0.2s ease;
+  font-size: 24px;
+  color: #2b7029;
+  cursor: pointer;
+  transition:
+    transform 0.2s ease,
+    color 0.2s ease;
 }
 
 .exportElipse:hover {
-    transform: scale(1.2);
+  transform: scale(1.2);
   color: #3ba63b;
 }

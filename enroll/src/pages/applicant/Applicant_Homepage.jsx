@@ -359,16 +359,7 @@ export const Applicant_Homepage = () => {
                   </div>
                 </div>
 
-                <div className="enroll-actions">
-                  <button
-                    onClick={() => {
-                      setDetailsId(enrollment.enrollment_id);
-                      setDetailsOpen(true);
-                    }}
-                  >
-                    View Application
-                  </button>
-                </div>
+                <div className="enroll-actions"></div>
               </div>
 
               {/* Bottom row: Next Step */}
@@ -379,8 +370,17 @@ export const Applicant_Homepage = () => {
                     ? 'Please resubmit your details and re‑upload the required documents.'
                     : 'Please wait for verification. You will receive an email once reviewed.'}
                 </div>
-                {enrollment.status === 'resubmit' && (
-                  <div className="enroll-actions" style={{ marginTop: 8 }}>
+
+                <div className="enroll-actions" style={{ marginTop: 8 }}>
+                  <button
+                    onClick={() => {
+                      setDetailsId(enrollment.enrollment_id);
+                      setDetailsOpen(true);
+                    }}
+                  >
+                    View Application
+                  </button>
+                  {enrollment.status === 'resubmit' && (
                     <button
                       onClick={() => {
                         if (!canApply) {
@@ -397,8 +397,8 @@ export const Applicant_Homepage = () => {
                     >
                       Resubmit now
                     </button>
-                  </div>
-                )}
+                  )}
+                </div>
               </div>
             </div>
           )}

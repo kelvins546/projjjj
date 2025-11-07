@@ -4,6 +4,8 @@ import './admin_manage.css';
 import { useEffect, useMemo, useState } from 'react';
 import { ReusableModalBox } from '../../components/modals/Reusable_Modal';
 import { supabase } from '../../supabaseClient';
+import { GridLoader } from 'react-spinners';
+import { LoadingPopup } from '../../components/loaders/LoadingPopup';
 
 export const Admin_Manage = () => {
   // Filters and sort
@@ -265,6 +267,12 @@ export const Admin_Manage = () => {
 
   return (
     <>
+      <LoadingPopup
+        show={loading}
+        message="Loading Please Wait..."
+        Loader={GridLoader}
+        color="#3FB23F"
+      />
       <Header userRole="admin" />
       <Navigation_Bar userRole="super_admin" />
       <div className="userManagementContainer">
