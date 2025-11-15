@@ -4,6 +4,8 @@ import { Navigation_Bar } from '../../components/NavigationBar';
 import { useEffect, useMemo, useState } from 'react';
 import { ReusableModalBox } from '../../components/modals/Reusable_Modal';
 import { supabase } from '../../supabaseClient';
+import { GridLoader } from 'react-spinners';
+import { LoadingPopup } from '../../components/loaders/LoadingPopup';
 
 const STATIC_SY = '2025-2026';
 
@@ -414,6 +416,12 @@ export const Admin_Grades = () => {
 
   return (
     <>
+      <LoadingPopup
+        show={loading}
+        message="Loading Please Wait..."
+        Loader={GridLoader}
+        color="#3FB23F"
+      />
       <Header userRole="admin" />
       <Navigation_Bar userRole="super_admin" />
       <div className="gradingContainer">

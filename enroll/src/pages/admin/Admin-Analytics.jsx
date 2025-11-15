@@ -36,6 +36,7 @@ export const Admin_Analytics = () => {
   const [loading, setLoading] = useState(true);
   const [errorMsg, setErrorMsg] = useState('');
   const [schemaName, setSchemaName] = useState('analytics');
+  const [showExport, setShowExport] = useState(false);
 
   useEffect(() => {
     let mounted = true;
@@ -193,6 +194,13 @@ export const Admin_Analytics = () => {
               style={{ width: '100%', minWidth: 0 }}
             >
               <div className="enrollmentForecastP1">
+                <div
+                  style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '16px',
+                  }}
+                ></div>
                 {/* BOSY by Gender (All Grades) */}
                 <div
                   className="enrollmentForecastGraph card1"
@@ -321,6 +329,25 @@ export const Admin_Analytics = () => {
                     </p>
                   )}
                 </div>
+                <div className="cardSection">
+                  <div className="enrollmentForecastCard">
+                    <div className="chartTitle">
+                      <p className="yearStat">
+                        {forecast.labelYear} Projected Total Enrollees:
+                      </p>
+                    </div>
+                    <h2>
+                      {forecast.hasHistory
+                        ? forecast.projected.toLocaleString()
+                        : '—'}
+                    </h2>
+                    <p>
+                      {forecast.hasHistory
+                        ? `${forecast.pct >= 0 ? '+' : ''}${forecast.pct}% vs last year`
+                        : 'No data'}
+                    </p>
+                  </div>
+                </div>
               </div>
 
               <div className="enrollmentForecastP2">
@@ -329,6 +356,21 @@ export const Admin_Analytics = () => {
                   <h3 style={{ color: '#334155' }}>
                     Overall BOSY by School Year
                   </h3>
+                  <div className="export">
+                    <i
+                      className="fa fa-ellipsis-h exportElipse"
+                      aria-hidden="true"
+                      onClick={() => setShowExport((prev) => !prev)}
+                    ></i>
+                    {showExport && (
+                      <div className="exportDropdown">
+                        <button className="dropdownItem">
+                          <i className="fa-solid fa-file-export"></i>
+                          Export CSV
+                        </button>
+                      </div>
+                    )}
+                  </div>
                   <table className="gradeStatsTable" style={{ width: '100%' }}>
                     <thead>
                       <tr>
@@ -359,25 +401,6 @@ export const Admin_Analytics = () => {
                       )}
                     </tbody>
                   </table>
-                </div>
-
-                {/* Projection card – always SY 2025–2026 */}
-                <div className="cardSection">
-                  <div className="enrollmentForecastCard">
-                    <p className="yearStat">
-                      {forecast.labelYear} Projected Total Enrollees:
-                    </p>
-                    <h2>
-                      {forecast.hasHistory
-                        ? forecast.projected.toLocaleString()
-                        : '—'}
-                    </h2>
-                    <p>
-                      {forecast.hasHistory
-                        ? `${forecast.pct >= 0 ? '+' : ''}${forecast.pct}% vs last year`
-                        : 'No data'}
-                    </p>
-                  </div>
                 </div>
               </div>
             </div>

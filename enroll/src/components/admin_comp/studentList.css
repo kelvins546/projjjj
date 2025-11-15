@@ -6,7 +6,7 @@
   padding: 80px 40px;
   background-color: #fff;
   display: flex;
-  flex-direction: column;
+  flex-direction: column !important;
 }
 
 .studentList h2 {
@@ -222,7 +222,7 @@
 .studentList .studentListTableContainer {
   width: 100%;
   overflow-x: auto;
-  background-color: #F5F6F6;
+  background-color: #f5f6f6;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.08);
   border-radius: 8px;
   margin-bottom: 20px;

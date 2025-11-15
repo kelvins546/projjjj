@@ -1,9 +1,8 @@
-// SectionList.jsx
+// StudentList.jsx
 import { useState, useEffect, useMemo } from 'react';
 import { ReusableModalBox } from '../modals/Reusable_Modal';
-import { ReusableConfirmationModalBox } from '../modals/Reusable_Confirmation_Modal';
 import { supabase } from '../../supabaseClient';
-import './sectionList.css';
+import './studentList.css';
 
 const GRADES = [
   { label: 'Grade 7', value: 7 },
@@ -12,466 +11,548 @@ const GRADES = [
   { label: 'Grade 10', value: 10 },
 ];
 
-const SectionList = () => {
+const STATIC_SY = '2025-2026';
+
+const StudentList = () => {
+  const [students, setStudents] = useState([]);
   const [sections, setSections] = useState([]);
-  const [teachers, setTeachers] = useState([]);
-  const [loadingSections, setLoadingSections] = useState(false);
-  const [loadingTeachers, setLoadingTeachers] = useState(false);
-  const [showRemoveTeachersConfirm, setShowRemoveTeachersConfirm] =
-    useState(false);
-  const [removingTeachers, setRemovingTeachers] = useState(false);
-  const [teachersWithAssignments, setTeachersWithAssignments] = useState(0);
-
-  const [sectionSearch, setSectionSearch] = useState('');
-  const [sectionListGrade, setSectionListGrade] = useState('');
-  const [sectionStarFilter, setSectionStarFilter] = useState('');
-
-  const [showModal, setShowModal] = useState(false);
-  const [showOverrideSection, setShowOverrideSection] = useState(false);
-  const [showApplySection, setShowApplySection] = useState(false);
-  const [showConfirm, setShowConfirm] = useState(false);
-  const [showAddNotif, setShowAddNotif] = useState(false);
+  const [loadingStudents, setLoadingStudents] = useState(false);
+  const [studentSearch, setStudentSearch] = useState('');
+  const [studentListGrade, setStudentListGrade] = useState('');
+  const [studentListSection, setStudentListSection] = useState('');
+  const [showOverrideStudent, setShowOverrideStudent] = useState(false);
+  const [showApplyStudent, setShowApplyStudent] = useState(false);
   const [showApplyNotif, setShowApplyNotif] = useState(false);
   const [notifMessage, setNotifMessage] = useState(
     'Changes Applied Successfully!'
   );
+  const [overrideStudentId, setOverrideStudentId] = useState(null);
+  const [overrideStudentGrade, setOverrideStudentGrade] = useState(null);
+  const [overrideTargetSectionId, setOverrideTargetSectionId] = useState('');
+  const [pageStu, setPageStu] = useState(1);
+  const [pageSizeStu, setPageSizeStu] = useState(10);
 
-  const [overrideSectionId, setOverrideSectionId] = useState(null);
-  const [overrideTeacherId, setOverrideTeacherId] = useState('');
+  const overrideSectionsForGrade = useMemo(() => {
+    if (overrideStudentGrade == null) return [];
+    return (sections || [])
+      .filter((s) => Number(s.grade_level) === Number(overrideStudentGrade))
+      .sort((a, b) => String(a.name).localeCompare(String(b.name)));
+  }, [sections, overrideStudentGrade]);
 
-  const [pageSec, setPageSec] = useState(1);
-  const [pageSizeSec, setPageSizeSec] = useState(10);
-
-  // Load count of teachers with section assignments
-  const loadTeachersWithAssignments = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('teacher_subjects')
-        .select('teacher_id')
-        .eq('school_year', '2025-2026');
-
-      if (error) throw error;
-
-      const uniqueTeachers = new Set((data || []).map((t) => t.teacher_id));
-      setTeachersWithAssignments(uniqueTeachers.size);
-    } catch (e) {
-      console.error('Failed to load teachers with assignments:', e);
-      setTeachersWithAssignments(0);
-    }
-  };
-
-  const removeAllTeacherAssignments = async () => {
-    setRemovingTeachers(true);
-    try {
-      const { error } = await supabase
-        .from('teacher_subjects')
-        .delete()
-        .eq('school_year', '2025-2026');
-
-      if (error) throw error;
-
-      await loadTeachersWithAssignments();
-
-      setShowRemoveTeachersConfirm(false);
-      setNotifMessage('All teacher assignments removed for 2025-2026.');
-      setShowApplyNotif(true);
-    } catch (e) {
-      console.error(e);
-      setShowRemoveTeachersConfirm(false);
-      setNotifMessage('Failed to remove teacher assignments.');
-      setShowApplyNotif(true);
-    } finally {
-      setRemovingTeachers(false);
-    }
-  };
-  const SY = '2025-2026';
   const loadSections = async () => {
-    setLoadingSections(true);
     try {
       const { data, error } = await supabase
         .from('sections')
-        .select(
-          `
-        section_id,
-        name,
-        grade_level,
-        is_star,
-        adviser_id,
-        adviser:teachers!sections_adviser_id_fkey(
-          teacher_id,
-          user:users!teachers_user_id_fkey(first_name,last_name)
-        ),
-        students_count:student_sections!left(count)
-      `
-        )
-        .eq('student_sections.school_year', SY) // filter only the child rows counted
+        .select('section_id, name, grade_level, is_star, adviser_id')
         .order('name', { ascending: true });
       if (error) throw error;
-
-      const withCounts = (data || []).map((s) => ({
-        ...s,
-        num_students: s.students_count?.[0]?.count ?? 0, // flatten aggregate
-      }));
-
-      setSections(withCounts);
+      setSections(data || []);
     } catch (e) {
-      console.error('Failed to load sections:', e?.message);
+      console.error('Failed to load sections:', e);
       setSections([]);
-    } finally {
-      setLoadingSections(false);
     }
-  };
-  const loadAvailableTeachers = async () => {
-    setLoadingTeachers(true);
-    try {
-      const { data, error } = await supabase
-        .from('teachers')
-        .select('teacher_id, user_id, is_active, advisory_section_id')
-        .is('advisory_section_id', null)
-        .eq('is_active', true);
-      if (error) throw error;
+  }; // [web:430][web:474]
 
-      const teacherUserIds = (data || []).map((t) => t.user_id);
-      let nameByUser = new Map();
-      if (teacherUserIds.length) {
-        const { data: users } = await supabase
+  const loadStudents = async () => {
+    setLoadingStudents(true);
+    try {
+      const { data: stuRows, error: eS } = await supabase
+        .from('students')
+        .select('student_id, user_id, gender, applicant_id, enrollment_id');
+      if (eS) throw eS;
+      if (!stuRows?.length) {
+        setStudents([]);
+        return;
+      }
+
+      const studentIds = stuRows.map((s) => s.student_id);
+      const userIds = [
+        ...new Set(stuRows.map((s) => s.user_id).filter(Boolean)),
+      ];
+      const applicantIds = [
+        ...new Set(stuRows.map((s) => s.applicant_id).filter(Boolean)),
+      ];
+
+      const { data: userRows, error: eU } = await supabase
+        .from('users')
+        .select('user_id, first_name, last_name')
+        .in('user_id', userIds);
+      if (eU) throw eU;
+      const usersById = new Map((userRows || []).map((u) => [u.user_id, u]));
+
+      const { data: secRel, error: eSec } = await supabase
+        .from('student_sections')
+        .select(
+          `student_id, school_year, section:sections(section_id, name, grade_level, is_star, adviser_id)`
+        )
+        .in('student_id', studentIds);
+      if (eSec) throw eSec;
+
+      const sectionsByStudent = new Map();
+      const adviserIds = new Set();
+      for (const rel of secRel || []) {
+        const list = sectionsByStudent.get(rel.student_id) || [];
+        list.push(rel);
+        sectionsByStudent.set(rel.student_id, list);
+        const advId = rel?.section?.adviser_id;
+        if (advId) adviserIds.add(advId);
+      }
+
+      let teacherRows = [];
+      if (adviserIds.size) {
+        const { data: tRows, error: tErr } = await supabase
+          .from('teachers')
+          .select('teacher_id, user_id')
+          .in('teacher_id', Array.from(adviserIds));
+        if (tErr) throw tErr;
+        teacherRows = tRows || [];
+      }
+
+      const adviserUserIds = Array.from(
+        new Set(teacherRows.map((t) => t.user_id).filter(Boolean))
+      );
+      let adviserUsers = [];
+      if (adviserUserIds.length) {
+        const { data: uRows, error: uErr } = await supabase
           .from('users')
           .select('user_id, first_name, last_name')
-          .in('user_id', teacherUserIds);
-        nameByUser = new Map(
-          (users || []).map((u) => [
-            u.user_id,
-            `${u.first_name || ''} ${u.last_name || ''}`.trim(),
-          ])
-        );
+          .in('user_id', adviserUserIds);
+        if (uErr) throw uErr;
+        adviserUsers = uRows || [];
       }
-      const withNames = (data || []).map((t) => ({
-        ...t,
-        display_name: nameByUser.get(t.user_id) || `Teacher ${t.teacher_id}`,
-      }));
-      setTeachers(withNames);
-    } catch (e) {
-      console.error('Failed to load teachers:', e);
-      setTeachers([]);
-    } finally {
-      setLoadingTeachers(false);
-    }
-  };
-
-  const applyOverrideAdviser = async () => {
-    try {
-      if (!overrideSectionId || !overrideTeacherId) return;
-
-      const { data: sec, error: secErr } = await supabase
-        .from('sections')
-        .select('section_id, adviser_id')
-        .eq('section_id', overrideSectionId)
-        .single();
-      if (secErr) throw secErr;
-
-      const prevAdviserId = sec?.adviser_id || null;
-      const newAdviserId = Number(overrideTeacherId);
-
-      const { data: newTeacher } = await supabase
-        .from('teachers')
-        .select('advisory_section_id')
-        .eq('teacher_id', newAdviserId)
-        .single();
-
-      const ops = [];
-
-      if (prevAdviserId && prevAdviserId !== newAdviserId) {
-        ops.push(
-          supabase
-            .from('teachers')
-            .update({ advisory_section_id: null })
-            .eq('teacher_id', prevAdviserId)
-        );
-      }
-
-      if (
-        newTeacher?.advisory_section_id &&
-        newTeacher.advisory_section_id !== overrideSectionId
-      ) {
-        ops.push(
-          supabase
-            .from('sections')
-            .update({ adviser_id: null })
-            .eq('section_id', newTeacher.advisory_section_id)
-        );
-        ops.push(
-          supabase
-            .from('teachers')
-            .update({ advisory_section_id: null })
-            .eq('teacher_id', newAdviserId)
-        );
-      }
-
-      ops.push(
-        supabase
-          .from('sections')
-          .update({ adviser_id: newAdviserId })
-          .eq('section_id', overrideSectionId)
-      );
-      ops.push(
-        supabase
-          .from('teachers')
-          .update({ advisory_section_id: overrideSectionId })
-          .eq('teacher_id', newAdviserId)
+      const usersByUserId = new Map(adviserUsers.map((u) => [u.user_id, u]));
+      const teacherNameById = new Map(
+        teacherRows.map((t) => {
+          const u = usersByUserId.get(t.user_id);
+          return [
+            t.teacher_id,
+            u ? `${u.first_name || ''} ${u.last_name || ''}`.trim() : '',
+          ];
+        })
       );
 
-      const results = await Promise.all(ops);
-      const failed = results.find((r) => r?.error);
-      if (failed?.error) throw failed.error;
+      let enrByApplicant = new Map();
+      if (applicantIds.length) {
+        const { data: enrRows, error: eE } = await supabase
+          .from('enrollments')
+          .select('applicant_id, school_year, grade_level, status')
+          .in('applicant_id', applicantIds);
+        if (eE) throw eE;
 
-      await Promise.all([loadSections(), loadAvailableTeachers()]);
-
-      setShowOverrideSection(false);
-      setShowApplySection(false);
-      setNotifMessage('Changes Applied Successfully!');
-      setShowApplyNotif(true);
-    } catch (e) {
-      console.error(e);
-      setShowOverrideSection(false);
-      setShowApplySection(false);
-      setNotifMessage('Failed to apply adviser override.');
-      setShowApplyNotif(true);
-    }
-  };
-
-  const shuffle = (arr) => {
-    const a = arr.slice();
-    for (let i = a.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [a[i], a[j]] = [a[j], a[i]];
-    }
-    return a;
-  };
-
-  const automateSectioning = async () => {
-    try {
-      const targetSections = sections.filter((s) => !s.adviser_id);
-      if (targetSections.length === 0) {
-        setNotifMessage('No sections need advisers.');
-        setShowApplyNotif(true);
-        return;
+        const latest = new Map();
+        for (const e of enrRows || []) {
+          const key = e.applicant_id;
+          const prev = latest.get(key);
+          if (!prev) latest.set(key, e);
+          else {
+            const curSY = String(e.school_year || '');
+            const prevSY = String(prev.school_year || '');
+            if (curSY.localeCompare(prevSY) > 0) latest.set(key, e);
+          }
+        }
+        enrByApplicant = latest;
       }
-      const available = teachers.slice();
-      if (available.length === 0) {
-        setNotifMessage('No available teachers to assign.');
-        setShowApplyNotif(true);
-        return;
-      }
-      const shuffled = shuffle(available);
-      const ops = [];
-      for (let i = 0; i < targetSections.length; i++) {
-        const section = targetSections[i];
-        const teacher = shuffled[i % shuffled.length];
-        ops.push(
-          supabase
-            .from('sections')
-            .update({ adviser_id: teacher.teacher_id })
-            .eq('section_id', section.section_id)
+
+      const normalized = (stuRows || []).map((s) => {
+        const user = usersById.get(s.user_id) || {};
+        const rels = (sectionsByStudent.get(s.student_id) || []).sort((a, b) =>
+          String(b?.school_year || '').localeCompare(
+            String(a?.school_year || '')
+          )
         );
-        ops.push(
-          supabase
-            .from('teachers')
-            .update({ advisory_section_id: section.section_id })
-            .eq('teacher_id', teacher.teacher_id)
-        );
-      }
-      const res = await Promise.all(ops);
-      const err = res.find((r) => r?.error);
-      if (err) throw err.error;
+        const rel = rels[0] || null;
+        const sec = rel?.section || null;
 
-      await loadSections();
-      await loadAvailableTeachers();
+        const fromSection = Number(sec?.grade_level);
+        const enrRaw = s.applicant_id
+          ? enrByApplicant.get(s.applicant_id)?.grade_level
+          : null;
+        const enrNum = (() => {
+          const m = String(enrRaw ?? '').match(/\d+/);
+          return m ? Number(m[0]) : NaN;
+        })();
+        const grade_level = Number.isFinite(fromSection)
+          ? fromSection
+          : Number.isFinite(enrNum)
+            ? enrNum
+            : '';
+        const adviser_full_name = sec?.adviser_id
+          ? teacherNameById.get(sec.adviser_id) || ''
+          : '';
 
-      setNotifMessage('Automated sectioning completed.');
-      setShowApplyNotif(true);
-    } catch (e) {
-      console.error(e);
-      setNotifMessage('Failed to automate sectioning.');
-      setShowApplyNotif(true);
-    }
-  };
-
-  const randomizeSectionAdvisers = async () => {
-    try {
-      const { data: allTeachers, error: tErr } = await supabase
-        .from('teachers')
-        .select('teacher_id')
-        .eq('is_active', true);
-      if (tErr) throw tErr;
-
-      if (!allTeachers?.length || !sections.length) {
-        setNotifMessage('No teachers or sections to randomize.');
-        setShowApplyNotif(true);
-        return;
-      }
-
-      const teacherIds = allTeachers.map((t) => t.teacher_id);
-      const clearTeachers = teacherIds.length
-        ? await supabase
-            .from('teachers')
-            .update({ advisory_section_id: null })
-            .in('teacher_id', teacherIds)
-        : { error: null };
-      if (clearTeachers.error) throw clearTeachers.error;
-
-      const sectionIds = sections.map((s) => s.section_id);
-      const clearSections = sectionIds.length
-        ? await supabase
-            .from('sections')
-            .update({ adviser_id: null })
-            .in('section_id', sectionIds)
-        : { error: null };
-      if (clearSections.error) throw clearSections.error;
-
-      const shuffled = [...allTeachers];
-      for (let i = shuffled.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
-      }
-
-      const assignCount = Math.min(sections.length, shuffled.length);
-      const pairs = sections.slice(0, assignCount).map((sec, idx) => ({
-        section_id: sec.section_id,
-        teacher_id: shuffled[idx].teacher_id,
-      }));
-
-      const sectionOps = pairs.map((p) =>
-        supabase
-          .from('sections')
-          .update({ adviser_id: p.teacher_id })
-          .eq('section_id', p.section_id)
-      );
-      const sectionRes = await Promise.all(sectionOps);
-      const sectionErr = sectionRes.find((r) => r?.error);
-      if (sectionErr) throw sectionErr.error;
-
-      const teacherOps = pairs.map((p) =>
-        supabase
-          .from('teachers')
-          .update({ advisory_section_id: p.section_id })
-          .eq('teacher_id', p.teacher_id)
-      );
-      const teacherRes = await Promise.all(teacherOps);
-      const teacherErr = teacherRes.find((r) => r?.error);
-      if (teacherErr) throw teacherErr.error;
-
-      await loadSections();
-      await loadAvailableTeachers();
-
-      setNotifMessage('Randomized adviser assignments across sections.');
-      setShowApplyNotif(true);
-    } catch (e) {
-      console.error(e);
-      setNotifMessage('Failed to randomize adviser assignments.');
-      setShowApplyNotif(true);
-    }
-  };
-
-  const removeAllAdvisers = async () => {
-    try {
-      const ops = [];
-      if (sections.length) {
-        const sectionIds = sections.map((s) => s.section_id);
-        ops.push(
-          supabase
-            .from('sections')
-            .update({ adviser_id: null })
-            .in('section_id', sectionIds)
-        );
-      }
-      const { data: assignedTeachers, error: tErr } = await supabase
-        .from('teachers')
-        .select('teacher_id')
-        .not('advisory_section_id', 'is', null);
-      if (tErr) throw tErr;
-      if (assignedTeachers?.length) {
-        const tids = assignedTeachers.map((t) => t.teacher_id);
-        ops.push(
-          supabase
-            .from('teachers')
-            .update({ advisory_section_id: null })
-            .in('teacher_id', tids)
-        );
-      }
-      if (ops.length) {
-        const res = await Promise.all(ops);
-        const err = res.find((r) => r?.error);
-        if (err) throw err.error;
-      }
-      await loadSections();
-      await loadAvailableTeachers();
-      setNotifMessage('All advisers removed from sections.');
-      setShowApplyNotif(true);
-    } catch (e) {
-      console.error(e);
-      setNotifMessage('Failed to remove advisers.');
-      setShowApplyNotif(true);
-    }
-  };
-
-  const openOverrideSection = (sectionId) => {
-    setOverrideSectionId(sectionId);
-    setOverrideTeacherId('');
-    setShowOverrideSection(true);
-  };
-
-  const filteredSections = useMemo(() => {
-    const q = sectionSearch.trim().toLowerCase();
-    return sections.filter((s) => {
-      const matchesText = !q || s.name.toLowerCase().includes(q);
-      const matchesGrade =
-        !sectionListGrade || Number(s.grade_level) === Number(sectionListGrade);
-      const matchesStar =
-        sectionStarFilter === ''
-          ? true
-          : sectionStarFilter === 'yes'
-            ? !!s.is_star
-            : !s.is_star;
-      return matchesText && matchesGrade && matchesStar;
-    });
-  }, [sections, sectionSearch, sectionListGrade, sectionStarFilter]);
-
-  const assignedSectionsCount = sections.filter((s) => s.adviser_id).length;
-  const unassignedSectionsCount = sections.filter((s) => !s.adviser_id).length;
-
-  const overlappingSectionIds = (() => {
-    const map = new Map();
-    teachers
-      .filter((t) => t.is_active && t.advisory_section_id)
-      .forEach((t) => {
-        const sid = t.advisory_section_id;
-        map.set(sid, (map.get(sid) || 0) + 1);
+        return {
+          student_id: s.student_id,
+          first_name: user.first_name || '',
+          last_name: user.last_name || '',
+          gender: s.gender || '—',
+          grade_level,
+          section: sec?.name || '',
+          adviser_full_name,
+          is_star: !!sec?.is_star,
+        };
       });
-    return new Set(
-      Array.from(map.entries())
-        .filter(([, c]) => c > 1)
-        .map(([sid]) => sid)
-    );
-  })();
-  const overlappingSectionsCount = overlappingSectionIds.size;
 
-  const totalRowsSec = filteredSections.length;
-  const totalPagesSec = Math.max(1, Math.ceil(totalRowsSec / pageSizeSec));
-  const startIdxSec = (pageSec - 1) * pageSizeSec;
-  const endIdxSec = Math.min(startIdxSec + pageSizeSec, totalRowsSec);
-  const pageRowsSec = filteredSections.slice(startIdxSec, endIdxSec);
+      setStudents(normalized);
+    } catch (e) {
+      console.error('Failed to load students:', e?.message);
+      setStudents([]);
+    } finally {
+      setLoadingStudents(false);
+    }
+  }; // [web:430]
+
+  // Helper: run the existing per-grade logic, return summary
+  const runForGrade = async (g) => {
+    const { data: secRows, error: secErr } = await supabase
+      .from('sections')
+      .select('section_id, name, grade_level, is_star')
+      .eq('grade_level', g)
+      .order('name', { ascending: true });
+    if (secErr) throw secErr;
+    if (!secRows?.length) return { grade: g, rowsInserted: 0, starPlaced: 0 };
+
+    const starSection = secRows.find((s) => s.is_star === true);
+    const nonStarSections = secRows.filter((s) => s.is_star !== true);
+    if (!starSection && !nonStarSections.length)
+      return { grade: g, rowsInserted: 0, starPlaced: 0 };
+
+    const STAR_CAP = 65;
+    const NONSTAR_CAP = 45;
+
+    const { data: enrRows, error: enrErr } = await supabase
+      .from('enrollments')
+      .select('applicant_id')
+      .eq('grade_level', `Grade ${g}`)
+      .eq('school_year', STATIC_SY);
+    if (enrErr) throw enrErr;
+    const applicantIds = (enrRows || [])
+      .map((e) => e.applicant_id)
+      .filter(Boolean);
+    if (!applicantIds.length)
+      return { grade: g, rowsInserted: 0, starPlaced: 0 };
+
+    const { data: stuIdRows, error: mapErr } = await supabase
+      .from('students')
+      .select('student_id, applicant_id, gender')
+      .in('applicant_id', applicantIds);
+    if (mapErr) throw mapErr;
+    const studentIdsForGrade = (stuIdRows || [])
+      .map((r) => r.student_id)
+      .filter(Boolean);
+    if (!studentIdsForGrade.length)
+      return { grade: g, rowsInserted: 0, starPlaced: 0 };
+    const genderByStudent = new Map(
+      stuIdRows.map((r) => [r.student_id, r.gender])
+    );
+
+    const { data: academicRows, error: acadErr } = await supabase
+      .from('academic_history')
+      .select('student_id, general_average')
+      .in('student_id', studentIdsForGrade);
+    if (acadErr) throw acadErr;
+    const gaByStudent = new Map(
+      (academicRows || []).map((a) => [
+        a.student_id,
+        Number(a.general_average || 0),
+      ])
+    );
+
+    const studentsForAlgo = studentIdsForGrade.map((id) => ({
+      student_id: id,
+      gender: genderByStudent.get(id) || '',
+      general_average: gaByStudent.get(id) || 0,
+    }));
+    if (!studentsForAlgo.length)
+      return { grade: g, rowsInserted: 0, starPlaced: 0 };
+
+    const isStarEligible = (s) => Number(s.general_average || 0) >= 95;
+    const starQueue = studentsForAlgo.filter(isStarEligible);
+    const nonStarQueue = studentsForAlgo.filter((s) => !isStarEligible(s));
+
+    let starAssigned = [];
+    if (starSection) {
+      const starBoys = starQueue.filter((s) =>
+        String(s.gender || '')
+          .toLowerCase()
+          .startsWith('m')
+      );
+      const starGirls = starQueue.filter((s) =>
+        String(s.gender || '')
+          .toLowerCase()
+          .startsWith('f')
+      );
+      let sb = 0,
+        sg = 0;
+      while (
+        starAssigned.length < STAR_CAP &&
+        (sb < starBoys.length || sg < starGirls.length)
+      ) {
+        if (sb < starBoys.length && (sb <= sg || sg >= starGirls.length))
+          starAssigned.push(starBoys[sb++]);
+        else if (sg < starGirls.length) starAssigned.push(starGirls[sg++]);
+        else break;
+      }
+    }
+    const starAssignedIds = new Set(starAssigned.map((s) => s.student_id));
+    const starOverflow = starQueue.filter(
+      (s) => !starAssignedIds.has(s.student_id)
+    );
+
+    const nonStarPool = [...starOverflow, ...nonStarQueue];
+    const boys = nonStarPool.filter((s) =>
+      String(s.gender || '')
+        .toLowerCase()
+        .startsWith('m')
+    );
+    const girls = nonStarPool.filter((s) =>
+      String(s.gender || '')
+        .toLowerCase()
+        .startsWith('f')
+    );
+    let bi = 0,
+      gi = 0;
+    const nonStarAssignments = [];
+    for (const sec of nonStarSections) {
+      let count = 0,
+        bCount = 0,
+        gCount = 0;
+      while (count < NONSTAR_CAP && (bi < boys.length || gi < girls.length)) {
+        const needBoy = bCount <= gCount;
+        if (needBoy && bi < boys.length) {
+          nonStarAssignments.push({
+            student: boys[bi++],
+            section_id: sec.section_id,
+          });
+          bCount++;
+          count++;
+        } else if (gi < girls.length) {
+          nonStarAssignments.push({
+            student: girls[gi++],
+            section_id: sec.section_id,
+          });
+          gCount++;
+          count++;
+        } else if (bi < boys.length) {
+          nonStarAssignments.push({
+            student: boys[bi++],
+            section_id: sec.section_id,
+          });
+          bCount++;
+          count++;
+        } else break;
+      }
+    }
+
+    const sectionIds = secRows.map((s) => s.section_id);
+    const { error: delErr } = await supabase
+      .from('student_sections')
+      .delete()
+      .eq('school_year', STATIC_SY)
+      .in('section_id', sectionIds);
+    if (delErr) throw delErr;
+
+    const rows = [];
+    if (starSection) {
+      for (const s of starAssigned) {
+        rows.push({
+          student_id: s.student_id,
+          section_id: starSection.section_id,
+          school_year: STATIC_SY,
+        });
+      }
+    }
+    for (const a of nonStarAssignments) {
+      rows.push({
+        student_id: a.student.student_id,
+        section_id: a.section_id,
+        school_year: STATIC_SY,
+      });
+    }
+    if (rows.length) {
+      const { error: insErr } = await supabase
+        .from('student_sections')
+        .insert(rows);
+      if (insErr) throw insErr;
+    }
+
+    return {
+      grade: g,
+      rowsInserted: rows.length,
+      starPlaced: starAssigned.length,
+    };
+  }; // [web:430][web:468]
+
+  // Wrapper: run for one grade or all grades when gradeLevel is 0/empty
+  const automateStudentSectioning = async (gradeLevel) => {
+    try {
+      let summaries = [];
+      if (!gradeLevel) {
+        for (const g of GRADES.map((x) => x.value)) {
+          const s = await runForGrade(g);
+          summaries.push(s);
+        }
+      } else {
+        const s = await runForGrade(gradeLevel);
+        summaries = [s];
+      }
+
+      await Promise.all([loadStudents(), loadSections()]);
+      const total = summaries.reduce(
+        (t, s) => ({
+          rows: t.rows + s.rowsInserted,
+          star: t.star + s.starPlaced,
+        }),
+        { rows: 0, star: 0 }
+      );
+      const detail = summaries
+        .map((s) => `G${s.grade}: ${s.rowsInserted} (${s.star} STAR)`)
+        .join(', ');
+      setNotifMessage(
+        `Automated sectioning complete: ${total.rows} assigned across ${summaries.length} grade(s); ${total.star} to STAR. ${detail}`
+      );
+      setShowApplyNotif(true);
+    } catch (e) {
+      console.error('Automate sectioning error:', e);
+      setNotifMessage(e.message || 'Failed to automate sectioning.');
+      setShowApplyNotif(true);
+    }
+  }; // [web:430]
+
+  // Remove sectioning for one grade, or all if gradeLevel is 0/empty
+  const removeStudentSectioning = async (gradeLevel) => {
+    try {
+      let secRows = [];
+      if (!gradeLevel) {
+        const { data, error } = await supabase
+          .from('sections')
+          .select('section_id, grade_level');
+        if (error) throw error;
+        secRows = data || [];
+      } else {
+        const { data, error } = await supabase
+          .from('sections')
+          .select('section_id, grade_level')
+          .eq('grade_level', gradeLevel);
+        if (error) throw error;
+        secRows = data || [];
+      }
+      if (!secRows.length) {
+        setNotifMessage(
+          !gradeLevel
+            ? 'No sections found.'
+            : `No sections found for Grade ${gradeLevel}.`
+        );
+        setShowApplyNotif(true);
+        return;
+      }
+
+      const sectionIds = secRows.map((s) => s.section_id);
+      const { error: delErr, count } = await supabase
+        .from('student_sections')
+        .delete({ count: 'exact' })
+        .eq('school_year', STATIC_SY)
+        .in('section_id', sectionIds);
+      if (delErr) throw delErr;
+
+      await Promise.all([loadStudents(), loadSections()]);
+      setNotifMessage(
+        !gradeLevel
+          ? `All section assignments removed across all grades. ${count || 0} assignments deleted.`
+          : `All section assignments removed for Grade ${gradeLevel}. ${count || 0} assignments deleted.`
+      );
+      setShowApplyNotif(true);
+    } catch (e) {
+      console.error('Remove sectioning error:', e);
+      setNotifMessage(e.message || 'Failed to remove sectioning.');
+      setShowApplyNotif(true);
+    }
+  }; // [web:468][web:430]
+
+  const applyOverrideStudent = async () => {
+    try {
+      if (!overrideStudentId || !overrideTargetSectionId) return;
+
+      const targetSection = sections.find(
+        (s) => Number(s.section_id) === Number(overrideTargetSectionId)
+      );
+      if (!targetSection) throw new Error('Section not found');
+      if (Number(targetSection.grade_level) !== Number(overrideStudentGrade)) {
+        throw new Error(
+          `Please choose a Grade ${overrideStudentGrade} section only`
+        );
+      }
+
+      await supabase
+        .from('student_sections')
+        .delete()
+        .eq('student_id', overrideStudentId)
+        .eq('school_year', STATIC_SY);
+
+      const { error: insErr } = await supabase.from('student_sections').insert({
+        student_id: overrideStudentId,
+        section_id: targetSection.section_id,
+        school_year: STATIC_SY,
+      });
+      if (insErr) throw insErr;
+
+      await loadStudents();
+      setShowOverrideStudent(false);
+      setShowApplyStudent(false);
+      setNotifMessage('Student section updated successfully!');
+      setShowApplyNotif(true);
+    } catch (e) {
+      console.error(e);
+      setShowOverrideStudent(false);
+      setShowApplyStudent(false);
+      setNotifMessage('Failed to update student section.');
+      setShowApplyNotif(true);
+    }
+  }; // [web:430]
+
+  const openOverrideStudent = (studentId) => {
+    setOverrideStudentId(studentId);
+    setOverrideTargetSectionId('');
+    const stu = (students || []).find((s) => s.student_id === studentId);
+    const g = Number(stu?.grade_level);
+    setOverrideStudentGrade(Number.isFinite(g) ? g : null);
+    setShowOverrideStudent(true);
+  }; // [web:239]
+
+  const filteredStudents = useMemo(() => {
+    const q = studentSearch.trim().toLowerCase();
+    return students.filter((s) => {
+      const full = `${s.first_name} ${s.last_name}`.trim().toLowerCase();
+      const matchesText = !q || full.includes(q);
+      const matchesGrade =
+        !studentListGrade || Number(s.grade_level) === Number(studentListGrade);
+      const matchesSection =
+        !studentListSection || s.section === studentListSection;
+      return matchesText && matchesGrade && matchesSection;
+    });
+  }, [students, studentSearch, studentListGrade, studentListSection]); // [web:239]
+
+  const totalRowsStu = filteredStudents.length;
+  const totalPagesStu = Math.max(1, Math.ceil(totalRowsStu / pageSizeStu));
+  const startIdxStu = (pageStu - 1) * pageSizeStu;
+  const endIdxStu = Math.min(startIdxStu + pageSizeStu, totalRowsStu);
+  const pageRowsStu = filteredStudents.slice(startIdxStu, endIdxStu); // [web:239]
 
   useEffect(() => {
-    setPageSec((p) => Math.min(Math.max(1, p), totalPagesSec));
-  }, [totalPagesSec]);
+    setPageStu((p) => Math.min(Math.max(1, p), totalPagesStu));
+  }, [totalPagesStu]); // [web:239]
+
+  useEffect(() => {
+    loadSections();
+    loadStudents();
+  }, []); // [web:430]
 
   const MAX_PAGES = 5;
-  const getPageNumbersSec = () => {
-    if (totalPagesSec <= MAX_PAGES)
-      return Array.from({ length: totalPagesSec }, (_, i) => i + 1);
+  const getPageNumbersStu = () => {
+    if (totalPagesStu <= MAX_PAGES)
+      return Array.from({ length: totalPagesStu }, (_, i) => i + 1);
     const half = Math.floor(MAX_PAGES / 2);
-    let start = Math.max(1, pageSec - half);
-    let end = Math.min(totalPagesSec, start + MAX_PAGES - 1);
+    let start = Math.max(1, pageStu - half);
+    let end = Math.min(totalPagesStu, start + MAX_PAGES - 1);
     if (end - start + 1 < MAX_PAGES) start = Math.max(1, end - MAX_PAGES + 1);
     const list = [];
     if (start > 1) {
@@ -479,93 +560,58 @@ const SectionList = () => {
       if (start > 2) list.push('…');
     }
     for (let i = start; i <= end; i++) list.push(i);
-    if (end < totalPagesSec) {
-      if (end < totalPagesSec - 1) list.push('…');
-      list.push(totalPagesSec);
+    if (end < totalPagesStu) {
+      if (end < totalPagesStu - 1) list.push('…');
+      list.push(totalPagesStu);
     }
     return list;
-  };
+  }; // [web:239]
 
-  const gotoPageSec = (n) =>
-    setPageSec(Math.min(Math.max(1, n), totalPagesSec));
-  const firstPageSec = () => gotoPageSec(1);
-  const prevPageSec = () => gotoPageSec(pageSec - 1);
-  const nextPageSec = () => gotoPageSec(pageSec + 1);
-  const lastPageSec = () => gotoPageSec(totalPagesSec);
-
-  useEffect(() => {
-    loadSections();
-    loadAvailableTeachers();
-    loadTeachersWithAssignments();
-  }, []);
+  const gotoPageStu = (n) =>
+    setPageStu(Math.min(Math.max(1, n), totalPagesStu)); // [web:239]
+  const firstPageStu = () => gotoPageStu(1); // [web:239]
+  const prevPageStu = () => gotoPageStu(pageStu - 1); // [web:239]
+  const nextPageStu = () => gotoPageStu(pageStu + 1); // [web:239]
+  const lastPageStu = () => gotoPageStu(totalPagesStu); // [web:239]
 
   return (
     <>
-      <div className="sectionList">
-        <h2>Sections List</h2>
+      <div className="studentList">
+        <h2>Student List</h2>
 
-        <div className="sectionListCards">
-          <div className="sectionListCard">
-            <div className="sectionListCardData">
-              <h2>{assignedSectionsCount}</h2>
-              <p>Sections with assigned advisers</p>
-            </div>
-
-            <div className="sectionListCardData">
-              <h2
-                style={{
-                  color: unassignedSectionsCount > 0 ? 'red' : undefined,
-                }}
-              >
-                {unassignedSectionsCount}
+        <div className="studentListCards">
+          {GRADES.map((g) => (
+            <div key={g.value} className={`studentListCard grade${g.value}`}>
+              <p className="gradeLevel">{g.label}</p>
+              <h2>
+                {
+                  students.filter(
+                    (s) =>
+                      Number(s.grade_level) === g.value &&
+                      !(s.section || '').trim()
+                  ).length
+                }
               </h2>
-              <p>Sections without assigned advisers</p>
+              <p>Without Sections</p>
             </div>
-          </div>
-
-          <div className="sectionListCard">
-            <div className="sectionlistCardData">
-              <h2>{loadingTeachers ? '...' : teachers.length}</h2>
-              <p>Available teachers not yet assigned</p>
-            </div>
-          </div>
-
-          <div className="sectionListCard">
-            <div className="sectionlistCardData">
-              <h2>{teachersWithAssignments}</h2>
-              <p>Teachers with section assignments</p>
-            </div>
-          </div>
-
-          <div className="sectionListCard">
-            <div className="sectionlistCardData">
-              <h2
-                style={{
-                  color: overlappingSectionsCount > 0 ? 'red' : undefined,
-                }}
-              >
-                {overlappingSectionsCount}
-              </h2>
-              <p>Sections with overlapping advisers</p>
-            </div>
-          </div>
+          ))}
         </div>
 
-        <div className="sectionListSorter">
-          <div className="sectionListSearch">
+        <div className="studentListSorter">
+          <div className="studentListSearch">
             <i className="fa fa-search" aria-hidden="true"></i>
             <input
-              className="sectionListSearchbar"
-              placeholder="Search section..."
-              value={sectionSearch}
-              onChange={(e) => setSectionSearch(e.target.value)}
+              className="studentListSearchbar"
+              placeholder="Search student name..."
+              value={studentSearch}
+              onChange={(e) => setStudentSearch(e.target.value)}
             />
           </div>
-          <div className="sectionListSort Grade">
+          <div className="studentListSort Grade">
             <label>Grade</label>
             <select
-              value={sectionListGrade}
-              onChange={(e) => setSectionListGrade(e.target.value)}
+              value={studentListGrade}
+              onChange={(e) => setStudentListGrade(e.target.value)}
             >
               <option value="">All Grade</option>
               {GRADES.map((g) => (
@@ -575,61 +621,77 @@ const SectionList = () => {
               ))}
             </select>
           </div>
-          <div className="sectionListSort Section">
-            <label>Star Section</label>
+          <div className="studentListSort Section">
+            <label>Section</label>
             <select
-              value={sectionStarFilter}
-              onChange={(e) => setSectionStarFilter(e.target.value)}
+              value={studentListSection}
+              onChange={(e) => setStudentListSection(e.target.value)}
             >
-              <option value="">All</option>
-              <option value="yes">Yes</option>
-              <option value="no">No</option>
+              <option value="">All Section</option>
+              {sections.map((s) => (
+                <option key={s.section_id} value={s.name}>
+                  {s.name}
+                </option>
+              ))}
             </select>
           </div>
         </div>
 
-        <div className="sectionListTableContainer">
+        <div className="studentActions">
+          <button
+            onClick={() =>
+              automateStudentSectioning(Number(studentListGrade) || 0)
+            }
+          >
+            {studentListGrade ? 'Automate Sectioning' : 'Automate All Grades'}
+          </button>
+          <button
+            onClick={() =>
+              removeStudentSectioning(Number(studentListGrade) || 0)
+            }
+          >
+            {studentListGrade ? 'Remove Sectioning' : 'Remove All Sectioning'}
+          </button>
+        </div>
+
+        <div className="studentListTableContainer">
           <table>
             <thead>
               <tr>
-                <th rowSpan="2">Section</th>
-                <th rowSpan="2">Grade Level</th>
-                <th rowSpan="2">No. of Students</th>
-                <th rowSpan="2">Star Section</th>
-                <th colSpan="2">Assign Advisers</th>
-              </tr>
-              <tr>
+                <th>Name</th>
+                <th>Gender</th>
+                <th>Grade Level</th>
+                <th>Section</th>
+                <th>Star Section</th>
                 <th>Advisers</th>
                 <th>Actions</th>
               </tr>
             </thead>
             <tbody>
-              {loadingSections && (
+              {loadingStudents && (
                 <tr>
-                  <td colSpan={6}>Loading...</td>
+                  <td colSpan={7}>Loading...</td>
                 </tr>
               )}
-              {!loadingSections && pageRowsSec.length === 0 && (
+              {!loadingStudents && pageRowsStu.length === 0 && (
                 <tr>
-                  <td colSpan={6}>No sections found.</td>
+                  <td colSpan={7}>No students found.</td>
                 </tr>
               )}
-              {!loadingSections &&
-                pageRowsSec.map((section) => (
-                  <tr key={section.section_id}>
-                    <td>{section.name}</td>
-                    <td>{section.grade_level}</td>
-                    <td>{section.num_students || '—'}</td>
-                    <td>{section.is_star ? 'Yes' : 'No'}</td>
+              {!loadingStudents &&
+                pageRowsStu.map((student) => (
+                  <tr key={student.student_id}>
                     <td>
-                      {section.adviser
-                        ? `${section.adviser.user?.first_name || ''} ${section.adviser.user?.last_name || ''}`.trim() ||
-                          '—'
-                        : '—'}
+                      {`${student.last_name || ''}, ${student.first_name || ''}`.trim()}
                     </td>
+                    <td>{student.gender}</td>
+                    <td>{student.grade_level || '—'}</td>
+                    <td>{student.section || '—'}</td>
+                    <td>{student.is_star ? 'Yes' : 'No'}</td>
+                    <td>{student.adviser_full_name || '—'}</td>
                     <td>
                       <button
-                        onClick={() => openOverrideSection(section.section_id)}
+                        onClick={() => openOverrideStudent(student.student_id)}
                       >
                         Override
                       </button>
@@ -645,11 +707,10 @@ const SectionList = () => {
             <label className="pager-label">Rows per page</label>
             <select
               className="pager-size"
-              value={pageSizeSec}
+              value={pageSizeStu}
               onChange={(e) => {
-                const newSize = parseInt(e.target.value, 10);
-                setPageSizeSec(newSize);
-                setPageSec(1);
+                setPageSizeStu(parseInt(e.target.value, 10));
+                setPageStu(1);
               }}
             >
               <option value={5}>5</option>
@@ -658,182 +719,88 @@ const SectionList = () => {
               <option value={50}>50</option>
             </select>
           </div>
-
           <div className="pager-info">
-            {totalRowsSec === 0
+            {totalRowsStu === 0
               ? 'Showing 0 of 0'
-              : `Showing ${startIdxSec + 1}–${endIdxSec} of ${totalRowsSec}`}
+              : `Showing ${startIdxStu + 1}–${endIdxStu} of ${totalRowsStu}`}
           </div>
-
           <div className="pager-right">
             <button
               className="pager-btn"
-              onClick={firstPageSec}
-              disabled={pageSec === 1}
-              aria-label="First page"
+              onClick={firstPageStu}
+              disabled={pageStu === 1}
             >
               <ion-icon name="play-back-outline"></ion-icon>
             </button>
             <button
               className="pager-btn"
-              onClick={prevPageSec}
-              disabled={pageSec === 1}
-              aria-label="Previous page"
+              onClick={prevPageStu}
+              disabled={pageStu === 1}
             >
               <ion-icon name="chevron-back-outline"></ion-icon>
             </button>
-
-            {getPageNumbersSec().map((pkey, idx) =>
+            {getPageNumbersStu().map((pkey, idx) =>
               pkey === '…' ? (
-                <span key={`ellipsis-sec-${idx}`} className="pager-ellipsis">
+                <span key={`ellipsis-stu-${idx}`} className="pager-ellipsis">
                   …
                 </span>
               ) : (
                 <button
-                  key={`sec-${pkey}`}
-                  className={`pager-page ${pageSec === pkey ? 'active' : ''}`}
-                  onClick={() => gotoPageSec(pkey)}
-                  aria-current={pageSec === pkey ? 'page' : undefined}
+                  key={`stu-${pkey}`}
+                  className={`pager-page ${pageStu === pkey ? 'active' : ''}`}
+                  onClick={() => gotoPageStu(pkey)}
                 >
                   {pkey}
                 </button>
               )
             )}
-
             <button
               className="pager-btn"
-              onClick={nextPageSec}
-              disabled={pageSec === totalPagesSec}
-              aria-label="Next page"
+              onClick={nextPageStu}
+              disabled={pageStu === totalPagesStu}
             >
               <ion-icon name="chevron-forward-outline"></ion-icon>
             </button>
             <button
               className="pager-btn"
-              onClick={lastPageSec}
-              disabled={pageSec === totalPagesSec}
-              aria-label="Last page"
+              onClick={lastPageStu}
+              disabled={pageStu === totalPagesStu}
             >
               <ion-icon name="play-forward-outline"></ion-icon>
             </button>
           </div>
         </div>
-
-        <div
-          className="button-container"
-          style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 16 }}
-        >
-          <button onClick={() => setShowModal(true)}>Add new section</button>
-          <button onClick={automateSectioning}>Automate sectioning</button>
-          <button onClick={randomizeSectionAdvisers}>Randomize advisers</button>
-          <button onClick={removeAllAdvisers}>Remove all advisers</button>
-          <button
-            onClick={() => setShowRemoveTeachersConfirm(true)}
-            style={{ backgroundColor: '#d9534f', borderColor: '#d9534f' }}
-          >
-            Remove All Teacher Assignments
-          </button>
-        </div>
       </div>
 
-      <ReusableModalBox show={showModal} onClose={() => setShowModal(false)}>
-        <div className="addNewSection">
-          <div
-            className="back"
-            onClick={() => setShowModal(false)}
-            style={{ cursor: 'pointer' }}
-          >
-            <i className="fa fa-chevron-left" aria-hidden="true"></i>
-          </div>
-          <div className="addNewSectionInput">
-            <label>Section Name</label>
-            <input />
-          </div>
-          <div className="addNewSectionInput">
-            <label>Grade Level</label>
-            <input />
-          </div>
-          <div className="addNewSectionInput">
-            <label>Number of Students</label>
-            <input />
-          </div>
-          <div className="addNewSectionInput">
-            <label>Adviser</label>
-            <input />
-          </div>
-          <div className="buttonContainer">
-            <button onClick={() => setShowConfirm(true)}>Add</button>
-            <button
-              style={{
-                backgroundColor: 'transparent',
-                color: 'black',
-                border: '1px solid black',
-                marginLeft: 8,
-              }}
-              onClick={() => setShowModal(false)}
-            >
-              Cancel
-            </button>
-          </div>
-        </div>
-      </ReusableModalBox>
-
-      <ReusableConfirmationModalBox
-        showConfirm={showConfirm}
-        onCloseConfirm={() => setShowConfirm(false)}
-      >
-        <div>
-          <h2>Add new section?</h2>
-          <div className="buttons">
-            <button onClick={() => setShowAddNotif(true)}>Yes</button>
-            <button
-              style={{
-                backgroundColor: 'transparent',
-                color: 'black',
-                border: '1px solid black',
-              }}
-              onClick={() => setShowConfirm(false)}
-            >
-              Cancel
-            </button>
-          </div>
-        </div>
-      </ReusableConfirmationModalBox>
-
+      {/* Override Modal */}
       <ReusableModalBox
-        show={showAddNotif}
-        onClose={() => setShowAddNotif(false)}
+        show={showOverrideStudent}
+        onClose={() => setShowOverrideStudent(false)}
       >
-        <div className="notif">
-          <div className="img" style={{ paddingTop: '10px' }}>
-            <img
-              src="checkImg.png"
-              alt="Success"
-              style={{ height: '50px', width: '50px' }}
-            />
-          </div>
-          <h2>Successfully Updated!</h2>
-        </div>
-      </ReusableModalBox>
-
-      <ReusableModalBox
-        show={showOverrideSection}
-        onClose={() => setShowOverrideSection(false)}
-      >
-        <div className="overrideSection">
-          <div className="overrideSectionHeader">
-            <h2>Override Adviser Assignment</h2>
+        <div className="overrideStudent">
+          <div className="overrideStudentHeader">
+            <h2>Override Section Assignment</h2>
+            <div style={{ fontSize: 12, color: '#667085' }}>
+              {overrideStudentGrade != null
+                ? `Grade ${overrideStudentGrade} sections`
+                : 'Select a student with a valid grade'}
+            </div>
           </div>
           <div className="overrideSelection">
-            <label>Adviser</label>
+            <label>Section</label>
             <select
-              value={overrideTeacherId || ''}
-              onChange={(e) => setOverrideTeacherId(e.target.value)}
+              value={overrideTargetSectionId}
+              onChange={(e) => setOverrideTargetSectionId(e.target.value)}
+              disabled={overrideStudentGrade == null}
             >
-              <option value="">Select adviser</option>
-              {teachers.map((t) => (
-                <option key={t.teacher_id} value={t.teacher_id}>
-                  {t.display_name}
+              <option value="">
+                {overrideStudentGrade == null
+                  ? 'No grade detected'
+                  : 'Select section'}
+              </option>
+              {overrideSectionsForGrade.map((s) => (
+                <option key={s.section_id} value={s.section_id}>
+                  {s.name}
                 </option>
               ))}
             </select>
@@ -845,13 +812,15 @@ const SectionList = () => {
                 border: '1px solid black',
                 color: 'black',
               }}
-              onClick={() => setShowOverrideSection(false)}
+              onClick={() => setShowOverrideStudent(false)}
             >
               Cancel
             </button>
             <button
-              onClick={() => setShowApplySection(true)}
-              disabled={!overrideTeacherId}
+              onClick={() => setShowApplyStudent(true)}
+              disabled={
+                !overrideTargetSectionId || overrideStudentGrade == null
+              }
             >
               Apply
             </button>
@@ -859,28 +828,30 @@ const SectionList = () => {
         </div>
       </ReusableModalBox>
 
+      {/* Confirm Apply */}
       <ReusableModalBox
-        show={showApplySection}
-        onClose={() => setShowApplySection(false)}
+        show={showApplyStudent}
+        onClose={() => setShowApplyStudent(false)}
       >
-        <div className="sectionApply">
+        <div className="studentApply">
           <h2>Apply Changes?</h2>
           <div className="buttons">
+            <button onClick={applyOverrideStudent}>Yes</button>
             <button
-              onClick={() => setShowApplySection(false)}
               style={{
                 backgroundColor: 'transparent',
                 color: 'black',
                 border: '1px solid black',
               }}
+              onClick={() => setShowApplyStudent(false)}
             >
               Cancel
             </button>
-            <button onClick={applyOverrideAdviser}>Yes</button>
           </div>
         </div>
       </ReusableModalBox>
 
+      {/* Notification */}
       <ReusableModalBox
         show={showApplyNotif}
         onClose={() => setShowApplyNotif(false)}
@@ -896,41 +867,8 @@ const SectionList = () => {
           <h2>{notifMessage}</h2>
         </div>
       </ReusableModalBox>
-
-      <ReusableModalBox
-        show={showRemoveTeachersConfirm}
-        onClose={() => setShowRemoveTeachersConfirm(false)}
-      >
-        <div className="sectionApply">
-          <h2>Remove All Teacher Assignments?</h2>
-          <p style={{ color: '#d9534f', fontWeight: 'bold', marginTop: 10 }}>
-            ⚠️ WARNING: This will permanently delete all teacher-subject-section
-            assignments for 2025-2026. This action cannot be undone!
-          </p>
-          <div className="buttons" style={{ marginTop: 20 }}>
-            <button
-              onClick={() => setShowRemoveTeachersConfirm(false)}
-              disabled={removingTeachers}
-              style={{
-                backgroundColor: 'transparent',
-                color: 'black',
-                border: '1px solid black',
-              }}
-            >
-              Cancel
-            </button>
-            <button
-              onClick={removeAllTeacherAssignments}
-              disabled={removingTeachers}
-              style={{ backgroundColor: '#d9534f' }}
-            >
-              {removingTeachers ? 'Removing...' : 'Remove All'}
-            </button>
-          </div>
-        </div>
-      </ReusableModalBox>
     </>
   );
 };
 
-export default SectionList;
+export default StudentList;

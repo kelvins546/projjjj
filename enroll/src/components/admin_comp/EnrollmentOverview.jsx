@@ -17,8 +17,18 @@ import { GridLoader } from 'react-spinners';
 import './EnrollmentOverview.css';
 
 const MONTHS = [
-  'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-  'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+  'Jan',
+  'Feb',
+  'Mar',
+  'Apr',
+  'May',
+  'Jun',
+  'Jul',
+  'Aug',
+  'Sep',
+  'Oct',
+  'Nov',
+  'Dec',
 ];
 
 const EnrollmentOverview = () => {
@@ -28,7 +38,7 @@ const EnrollmentOverview = () => {
   const [minGrade, setMinGrade] = useState(7);
   const [maxGrade, setMaxGrade] = useState(10);
   const [showExport, setShowExport] = useState(false);
-  const [isLoading, setIsLoading] = useState(true); 
+  const [isLoading, setIsLoading] = useState(true);
 
   const [stats, setStats] = useState({
     enrolled: 0,
@@ -59,7 +69,8 @@ const EnrollmentOverview = () => {
         const gradeMap = new Map();
         const monthMap = new Map();
 
-        let total = 0, approved = 0;
+        let total = 0,
+          approved = 0;
 
         for (const row of data || []) {
           total += 1;
@@ -74,10 +85,16 @@ const EnrollmentOverview = () => {
           const gKey = String(row.grade_level || '').trim() || 'Unknown';
           gradeMap.set(gKey, (gradeMap.get(gKey) || 0) + 1);
 
-          const d = row.application_date ? new Date(row.application_date) : null;
+          const d = row.application_date
+            ? new Date(row.application_date)
+            : null;
           const m = d ? d.getMonth() : null;
           if (m != null) {
-            const cur = monthMap.get(m) || { Total: 0, Approved: 0, Pending: 0 };
+            const cur = monthMap.get(m) || {
+              Total: 0,
+              Approved: 0,
+              Pending: 0,
+            };
             cur.Total += 1;
             if (st === 'approved') cur.Approved += 1;
             if (st === 'pending') cur.Pending += 1;
@@ -93,7 +110,9 @@ const EnrollmentOverview = () => {
         const sectionsByGrade = new Map();
         (secs || []).forEach((s) => {
           const g = Number(s.grade_level);
-          const label = Number.isFinite(g) ? `Grade ${g}` : String(s.grade_level);
+          const label = Number.isFinite(g)
+            ? `Grade ${g}`
+            : String(s.grade_level);
           sectionsByGrade.set(label, (sectionsByGrade.get(label) || 0) + 1);
         });
 
@@ -123,7 +142,9 @@ const EnrollmentOverview = () => {
           Pending: monthMap.get(i)?.Pending || 0,
         }));
 
-        const conversionRate = total ? +((approved / total) * 100).toFixed(1) : 0;
+        const conversionRate = total
+          ? +((approved / total) * 100).toFixed(1)
+          : 0;
 
         let filteredGrade = byGrade;
         if (statusFilter !== 'all') {
@@ -183,188 +204,187 @@ const EnrollmentOverview = () => {
 
   return (
     <>
-    <LoadingPopup
+      <LoadingPopup
         show={isLoading}
         message="Loading Please Wait..."
         Loader={GridLoader}
         color="#3FB23F"
       />
-    <div className="enrollment-overview-wrapper">
-      <div
-        className="sorter"
-      >
-        <div className='sort'>
-          <label
-            htmlFor="school-year"
-            style={{ fontWeight: 600 }}
-          >
-            Select School Year:
-          </label>
-          <select
-            id="school-year"
-            value={schoolYear}
-            onChange={(e) => setSchoolYear(e.target.value)}
-          >
-            <option value="">All</option>
-            <option value="2023-2024">2023-2024</option>
-            <option value="2024-2025">2024-2025</option>
-            <option value="2025-2026">2025-2026</option>
-          </select>
-        </div>
-        <div className='sort'>
-          <label>Grade:</label>
-          <select value={grade} onChange={(e) => setGrade(e.target.value)}>
-            <option value="">All</option>
-            <option>Grade 7</option>
-            <option>Grade 8</option>
-            <option>Grade 9</option>
-            <option>Grade 10</option>
-          </select>
-        </div>
-
-        <div className='sort'>
-          <label>Status:</label>
-          <select
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-          >
-            <option value="all">All</option>
-            <option value="approved">Approved</option>
-            <option value="pending">Pending</option>
-            <option value="rejected">Rejected</option>
-            <option value="cancelled">Cancelled</option>
-          </select>
-        </div>
-      </div>
-      <div className="enrollmentOverviewContent">
-        <div className='enrollmentStats'>
-          <div className="enrollment_Stat_Cards">
-            <div className="card1">
-              <h2>{stats.enrolled}</h2>
-              <p className='cardEnrolled'>Enrolled Students</p>
-            </div>
-            <div className="card1">
-              <h2>{stats.pending}</h2>
-              <p className='cardPending'>Pending Applications</p>
-            </div>
-            <div className="card1">
-              <h2>{stats.conversionRate}%</h2>
-              <p className='cardConversionRate'>Conversion Rate</p>
-            </div>
+      <div className="enrollment-overview-wrapper">
+        <div className="sorter">
+          <div className="sort">
+            <label htmlFor="school-year" style={{ fontWeight: 600 }}>
+              Select School Year:
+            </label>
+            <select
+              id="school-year"
+              value={schoolYear}
+              onChange={(e) => setSchoolYear(e.target.value)}
+            >
+              <option value="">All</option>
+              <option value="2023-2024">2023-2024</option>
+              <option value="2024-2025">2024-2025</option>
+              <option value="2025-2026">2025-2026</option>
+            </select>
+          </div>
+          <div className="sort">
+            <label>Grade:</label>
+            <select value={grade} onChange={(e) => setGrade(e.target.value)}>
+              <option value="">All</option>
+              <option>Grade 7</option>
+              <option>Grade 8</option>
+              <option>Grade 9</option>
+              <option>Grade 10</option>
+            </select>
           </div>
 
-          {/* Monthly trend with line on approvals */}
-          <div className="chart_Section">
-            <div className="barChartContainer">
-              <div className='chartTitle'>
-                <h2>
-                  Applications by Month ({schoolYear || 'All'})
-                </h2>
-              </div>
-              <div style={{ width: '100%', height: 350 }}>
-                <ResponsiveContainer>
-                  <BarChart
-                    data={stats.byMonth}
-                    margin={{ top: 10, right: 16, left: -30 }}
-                  >
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="month" />
-                    <YAxis allowDecimals={false} />
-                    <Tooltip />
-                    <Legend />
-                    <Bar dataKey="Total" fill="#64748b" />
-                    <Bar dataKey="Pending" fill="#f59e0b" />
-                    <Line
-                      type="monotone"
-                      dataKey="Approved"
-                      stroke="#22c55e"
-                      strokeWidth={2}
-                    />
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
-            </div>
-
-            <div className="barChartContainer">
-              <div className='chartTitle'>
-                <h2>
-                  Grade Distribution ({schoolYear || 'All'})
-                </h2>
-              </div>
-              <div style={{ width: '100%', height: 350 }}>
-                <ResponsiveContainer>
-                  <BarChart
-                    data={stats.byGrade}
-                    margin={{ top: 10, right: 16, left: -30 }}
-                  >
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="grade" />
-                    <YAxis allowDecimals={false} />
-                    <Tooltip />
-                    <Legend />
-                    <div>
-
-                    </div>
-                    <Bar dataKey="count" fill=" #4CAF50" name="Applications" />
-                    <Bar dataKey="sections" fill="#2196F3" name="Sections" />
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
-            </div>
+          <div className="sort">
+            <label>Status:</label>
+            <select
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+            >
+              <option value="all">All</option>
+              <option value="approved">Approved</option>
+              <option value="pending">Pending</option>
+              <option value="rejected">Rejected</option>
+              <option value="cancelled">Cancelled</option>
+            </select>
           </div>
         </div>
-        <div className="table-section">
-          <div className="gradeStatsContainer">
-            <h3>Grade Level Summary</h3>
-            <div className='export'>
-              <i className='fa fa-ellipsis-h exportElipse' aria-hidden="true" onClick={() => setShowExport((prev) => !prev)}></i>
-              {showExport && (
-                <div className='exportDropdown'>
-                  <button className="dropdownItem" onClick={exportCSV}>
-                    <i className="fa-solid fa-file-export"></i>
-                    Export CSV
-                  </button>
+        <div className="enrollmentOverviewContent">
+          <div className="enrollmentStats">
+            <div className="enrollment_Stat_Cards">
+              <div className="card1">
+                <h2>{stats.enrolled}</h2>
+                <p className="cardEnrolled">Enrolled Students</p>
+              </div>
+              <div className="card1">
+                <h2>{stats.pending}</h2>
+                <p className="cardPending">Pending Applications</p>
+              </div>
+              <div className="card1">
+                <h2>{stats.conversionRate}%</h2>
+                <p className="cardConversionRate">Conversion Rate</p>
+              </div>
+            </div>
+
+            {/* Monthly trend with line on approvals */}
+            <div className="chart_Section">
+              <div className="barChartContainer">
+                <div className="chartTitle">
+                  <h2>Applications by Month ({schoolYear || 'All'})</h2>
                 </div>
-              )}
-            </div>
-            <table className="gradeStatsTable">
-              <thead>
-                <tr>
-                  <th>Grade Level</th>
-                  <th>Applications</th>
-                  <th>Sections</th>
-                  <th>Capacity</th>
-                  <th>Gap</th>
-                </tr>
-              </thead>
-              <tbody>
-                {stats.byGrade.map((row) => (
-                  <tr key={row.grade}>
-                    <td>{row.grade}</td>
-                    <td>{row.count}</td>
-                    <td>{row.sections}</td>
-                    <td>{row.capacity}</td>
-                    <td style={{ color: row.gap < 0 ? '#ef4444' : '#10b981' }}>
-                      {row.gap}
-                    </td>
-                  </tr>
-                ))}
-                {stats.byGrade.length === 0 && (
-                  <tr>
-                    <td
-                      colSpan={5}
-                      style={{ color: '#64748b', textAlign: 'center' }}
+                <div style={{ width: '100%', height: 350 }}>
+                  <ResponsiveContainer>
+                    <BarChart
+                      data={stats.byMonth}
+                      margin={{ top: 10, right: 16, left: -30 }}
                     >
-                      No data.
-                    </td>
-                  </tr>
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis dataKey="month" />
+                      <YAxis allowDecimals={false} />
+                      <Tooltip />
+                      <Legend />
+                      <Bar dataKey="Total" fill="#64748b" />
+                      <Bar dataKey="Pending" fill="#f59e0b" />
+                      <Line
+                        type="monotone"
+                        dataKey="Approved"
+                        stroke="#22c55e"
+                        strokeWidth={2}
+                      />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+              </div>
+
+              <div className="barChartContainer">
+                <div className="chartTitle">
+                  <h2>Grade Distribution ({schoolYear || 'All'})</h2>
+                </div>
+                <div style={{ width: '100%', height: 350 }}>
+                  <ResponsiveContainer>
+                    <BarChart
+                      data={stats.byGrade}
+                      margin={{ top: 10, right: 16, left: -30 }}
+                    >
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis dataKey="grade" />
+                      <YAxis allowDecimals={false} />
+                      <Tooltip />
+                      <Legend />
+                      <div></div>
+                      <Bar
+                        dataKey="count"
+                        fill=" #4CAF50"
+                        name="Applications"
+                      />
+                      <Bar dataKey="sections" fill="#2196F3" name="Sections" />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className="table-section">
+            <div className="gradeStatsContainer">
+              <h3>Grade Level Summary</h3>
+              <div className="export">
+                <i
+                  className="fa fa-ellipsis-h exportElipse"
+                  aria-hidden="true"
+                  onClick={() => setShowExport((prev) => !prev)}
+                ></i>
+                {showExport && (
+                  <div className="exportDropdown">
+                    <button className="dropdownItem" onClick={exportCSV}>
+                      <i className="fa-solid fa-file-export"></i>
+                      Export CSV
+                    </button>
+                  </div>
                 )}
-              </tbody>
-            </table>
+              </div>
+              <table className="gradeStatsTable">
+                <thead>
+                  <tr>
+                    <th>Grade Level</th>
+                    <th>Applications</th>
+                    <th>Sections</th>
+                    <th>Capacity</th>
+                    <th>Gap</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {stats.byGrade.map((row) => (
+                    <tr key={row.grade}>
+                      <td>{row.grade}</td>
+                      <td>{row.count}</td>
+                      <td>{row.sections}</td>
+                      <td>{row.capacity}</td>
+                      <td
+                        style={{ color: row.gap < 0 ? '#ef4444' : '#10b981' }}
+                      >
+                        {row.gap}
+                      </td>
+                    </tr>
+                  ))}
+                  {stats.byGrade.length === 0 && (
+                    <tr>
+                      <td
+                        colSpan={5}
+                        style={{ color: '#64748b', textAlign: 'center' }}
+                      >
+                        No data.
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       </div>
-    </div>
     </>
   );
 };

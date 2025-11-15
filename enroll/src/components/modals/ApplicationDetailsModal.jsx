@@ -195,7 +195,7 @@ const ApplicationDetailsModal = ({
       aria-labelledby="app_view_title"
       aria-describedby="app_view_desc"
     >
-      <div className="modal-content">
+      <div className="applicationDetailsModal">
         <h2 id="app_view_title">Application Details</h2>
         <p id="app_view_desc" style={{ marginTop: 6 }}>
           Review your submitted application information.

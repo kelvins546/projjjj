@@ -9,6 +9,7 @@ import { ImageModal } from '../../components/modals/ImageModal';
 import EnrollmentSuccessModal from '../../components/modals/EnrollmentSuccessModal';
 import { GridLoader } from 'react-spinners';
 import { LoadingPopup } from '../../components/loaders/LoadingPopup';
+
 const GRADES = ['Grade 7', 'Grade 8', 'Grade 9', 'Grade 10'];
 const normalizeSY = (s) => (s || '').replace(/[–—−]/g, '-').trim();
 
@@ -902,18 +903,26 @@ export const Admin_Enrollment = () => {
         <div className="stats-container">
           <div className="stat-card">
             <h2>{pendingCount}</h2>
-            <p>Pending Applications</p>
+            <p className="cardPending">Pending Applications</p>
           </div>
           <div className="stat-card">
             <h2>{totalEnrolled}</h2>
-            <p>Total Enrolled Students</p>
+            <p className="cardEnrolled">Total Enrolled Students</p>
           </div>
-          <div className="stat-card">
+          <div className="enrollment-stat-card">
             <h2 style={{ color: windowRow?.is_open ? '#16a34a' : '#ef4444' }}>
               {loadingWindow ? '…' : windowRow?.is_open ? 'OPEN' : 'CLOSED'}
             </h2>
             <p>Enrollment Status</p>
-            <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
+            <div
+              style={{
+                display: 'flex',
+                gap: 8,
+                marginTop: 8,
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
               <button onClick={openWindowModal}>Open Enrollment</button>
               <button
                 onClick={() => setOpenClosed(!windowRow?.is_open)}
@@ -928,7 +937,7 @@ export const Admin_Enrollment = () => {
           </div>
         </div>
 
-        <div style={{ marginBottom: 12 }}>
+        <div className="sort" style={{ marginBottom: 12 }}>
           <label style={{ marginRight: 8 }}>School Year</label>
           <select
             value={schoolYear}
@@ -936,6 +945,7 @@ export const Admin_Enrollment = () => {
           >
             <option>2024-2025</option>
             <option>2025-2026</option>
+            <option>2026-2027s</option>
           </select>
         </div>
 
@@ -951,7 +961,7 @@ export const Admin_Enrollment = () => {
           </div>
 
           <div className="enrollmentFilters">
-            <div className="filter">
+            <div className="sort">
               <label>Status</label>
               <select
                 value={statusFilter}
@@ -962,7 +972,7 @@ export const Admin_Enrollment = () => {
                 <option value="resubmit">Resubmit</option>
               </select>
             </div>
-            <div className="filter">
+            <div className="sort">
               <label>Application Date</label>
               <select
                 value={dateSort}
@@ -972,7 +982,7 @@ export const Admin_Enrollment = () => {
                 <option>Oldest</option>
               </select>
             </div>
-            <div className="filter">
+            <div className="sort">
               <label>Select Grade Level</label>
               <select
                 value={gradeFilter}
@@ -984,7 +994,7 @@ export const Admin_Enrollment = () => {
                 ))}
               </select>
             </div>
-            <div className="filter">
+            <div className="sort">
               <label>Gender</label>
               <select
                 value={genderFilter}
@@ -1034,18 +1044,22 @@ export const Admin_Enrollment = () => {
           <table className="enrollment-table">
             <thead>
               <tr>
-                <th></th>
-                <th scope="col">#</th>
+                <th className="column1"></th>
+                <th className="column2" scope="col">
+                  #
+                </th>
                 <th scope="col">Application Date</th>
                 <th scope="col">Name</th>
                 <th scope="col">LRN</th>
                 <th scope="col">Student Status</th>
                 <th scope="col">Grade Level</th>
-                <th scope="col">PSA/Birthcert</th>
+                <th scope="col">PSA / Birthcert</th>
                 <th scope="col">Report Card</th>
                 <th scope="col">SF10</th>
                 <th scope="col">Status</th>
-                <th scope="col">Actions</th>
+                <th className="column3" scope="col">
+                  Actions
+                </th>
               </tr>
             </thead>
             <tbody>
@@ -1060,7 +1074,7 @@ export const Admin_Enrollment = () => {
               ) : (
                 pageRows.map((r, index) => (
                   <tr key={r.enrollment_id}>
-                    <td>
+                    <td className="column1">
                       {r.status === 'pending' && (
                         <input
                           type="checkbox"
@@ -1069,7 +1083,7 @@ export const Admin_Enrollment = () => {
                         />
                       )}
                     </td>
-                    <td>{index + 1}</td>
+                    <td className="column2">{index + 1}</td>
                     <td>
                       {r.date ? new Date(r.date).toLocaleDateString() : '—'}
                     </td>
@@ -1163,9 +1177,9 @@ export const Admin_Enrollment = () => {
                     </td>
 
                     <td style={{ textTransform: 'capitalize' }}>{r.status}</td>
-                    <td>
+                    <td className="column3">
                       {r.status === 'pending' ? (
-                        <div style={{ display: 'flex', gap: 8 }}>
+                        <div style={{ display: 'flex', gap: 4 }}>
                           <button
                             className="accept-btn"
                             onClick={() => {
@@ -1292,7 +1306,10 @@ export const Admin_Enrollment = () => {
             </h3>
 
             {/* School Year (year-only, e.g., 2025-2026) */}
-            <div style={{ marginTop: 12, display: 'grid', gap: 12 }}>
+            <div
+              className="sort"
+              style={{ marginTop: 12, display: 'grid', gap: 12 }}
+            >
               <label style={{ display: 'grid', gap: 6 }}>
                 <span>School Year</span>
                 <select
@@ -1316,6 +1333,7 @@ export const Admin_Enrollment = () => {
               <label style={{ display: 'grid', gap: 6 }}>
                 <span>Enrollment Start</span>
                 <input
+                  className="calendar"
                   type="datetime-local"
                   value={winStart}
                   onChange={(e) => setWinStart(e.target.value)}
@@ -1324,6 +1342,7 @@ export const Admin_Enrollment = () => {
               <label style={{ display: 'grid', gap: 6 }}>
                 <span>Enrollment End</span>
                 <input
+                  className="calendar"
                   type="datetime-local"
                   value={winEnd}
                   onChange={(e) => setWinEnd(e.target.value)}
@@ -1353,7 +1372,16 @@ export const Admin_Enrollment = () => {
                 flexWrap: 'wrap',
               }}
             >
-              <button onClick={closeWindowModal}>Cancel</button>
+              <button
+                style={{
+                  border: '1px solid black',
+                  color: 'black',
+                  backgroundColor: '#fff',
+                }}
+                onClick={closeWindowModal}
+              >
+                Cancel
+              </button>
 
               {/* Save + Open now */}
               <button
