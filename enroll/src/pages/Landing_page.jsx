@@ -8,18 +8,17 @@ import { supabase } from '../supabaseClient';
 import { useSession } from '../context/SessionContext';
 import { GridLoader } from 'react-spinners';
 import { LoadingPopup } from '../components/loaders/LoadingPopup';
-import ForgotPasswordModal from '../components/modals/ForgotPasswordModal'; // modal that calls resetPasswordForEmail [web:317]
+import ForgotPasswordModal from '../components/modals/ForgotPasswordModal';
 
 export const Landing_page = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [form, setForm] = useState({ id: '', password: '' });
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
-  const navigate = useNavigate(); // programmatic navigation after login [web:241]
+  const navigate = useNavigate();
   const { setSession } = useSession();
 
-  // Forgot Password modal
-  const [forgotOpen, setForgotOpen] = useState(false); // controls the modal [web:255]
+  const [forgotOpen, setForgotOpen] = useState(false);
 
   const handleInputChange = (e) =>
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -27,7 +26,6 @@ export const Landing_page = () => {
   const looksLikeEmail = (v) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
   const looksNumeric = (v) => /^\d+$/.test(v);
 
-  // EXISTING LOGIN (unchanged)
   const handleLogin = async (e) => {
     e.preventDefault();
     setError('');
@@ -95,23 +93,23 @@ export const Landing_page = () => {
       switch (userRow.role) {
         case 'applicant':
           navigate('/Applicant_Homepage');
-          break; // [web:241]
+          break;
         case 'student':
           navigate('/Student_Homepage');
-          break; // [web:241]
+          break;
         case 'adviser':
         case 'teacher':
           navigate('/Teacher_Homepage');
-          break; // [web:241]
+          break;
         case 'dept_head':
           navigate('/DeptHead_Dashboard');
-          break; // [web:241]
+          break;
         case 'principal':
           navigate('/Dashboard');
-          break; // [web:241]
+          break;
         case 'super_admin':
           navigate('/Admin_Dashboard');
-          break; // [web:241]
+          break;
         default:
           setError('Unknown user role. Please contact support.');
           break;
@@ -130,27 +128,21 @@ export const Landing_page = () => {
         show={busy}
         message="Working..."
         Loader={GridLoader}
-        color="#3FB23F"
+        color="#088F5A"
       />
       <div className="content">
-        <div
-          className="landing_page"
-          style={{
-            backgroundImage:
-              'linear-gradient(rgba(41,112,60,.5), rgba(41,112,60,.5)), url("/school.png")',
-          }}
-        >
+        <div className="landing_page">
           <div className="container">
             <div className="mission_Vision">
               <div className="titleName">
-                <h2>Student Enrollment and Grading Access System</h2>
+                <h2>Student Enrollment & Grading System</h2>
               </div>
               <div className="mission">
                 <h2>Mission</h2>
                 <p>
                   To protect the right of every Filipino to quality, equitable,
                   culture-based, and complete basic education where: Students
-                  learn in a child-friendly, gender sensitive, and safe and
+                  learn in a child-friendly, gender-sensitive, safe, and
                   motivating environment.
                 </p>
               </div>
@@ -160,46 +152,50 @@ export const Landing_page = () => {
                   We dream of Filipinos who passionately love their country and
                   whose competencies and values enable them to realize their
                   full potential and contribute meaningfully to building the
-                  nation. As a learner-centered public institution, the Benigno
-                  Aquino Jr. High School continuously improves itself to better
-                  service its stakeholders.
+                  nation. As a learner-centered public institution, we
+                  continuously improve ourselves to better serve our
+                  stakeholders.
                 </p>
               </div>
             </div>
 
             <div className="login_Form">
-              <h2>User Authentication</h2>
               <div className="login_Form_Box">
+                <h3>Welcome Back</h3>
+                <p className="login_subtitle">Sign in to your account</p>
                 <form onSubmit={handleLogin}>
                   <div className="input_Box">
                     <label>Login ID</label>
-                    <input
-                      placeholder="Enter Applicant ID / Student ID / Email"
-                      name="id"
-                      value={form.id}
-                      onChange={handleInputChange}
-                      required
-                      autoComplete="username"
-                    />
+                    <div className="input_wrapper">
+                      <input
+                        placeholder="Applicant ID / Student ID / Email"
+                        name="id"
+                        value={form.id}
+                        onChange={handleInputChange}
+                        required
+                        autoComplete="username"
+                      />
+                    </div>
                   </div>
 
                   <div className="input_Box">
                     <label>Password</label>
-                    <input
-                      placeholder="Enter Password"
-                      type={showPassword ? 'text' : 'password'}
-                      name="password"
-                      value={form.password}
-                      onChange={handleInputChange}
-                      required
-                      autoComplete="current-password"
-                    />
-
-                    <i
-                      className={`fa ${showPassword ? 'fa-eye' : 'fa-eye-slash'}`}
-                      aria-hidden="true"
-                      onClick={() => setShowPassword(!showPassword)}
-                    />
+                    <div className="input_wrapper">
+                      <input
+                        placeholder="Enter Password"
+                        type={showPassword ? 'text' : 'password'}
+                        name="password"
+                        value={form.password}
+                        onChange={handleInputChange}
+                        required
+                        autoComplete="current-password"
+                      />
+                      <i
+                        className={`fa ${showPassword ? 'fa-eye' : 'fa-eye-slash'}`}
+                        aria-hidden="true"
+                        onClick={() => setShowPassword(!showPassword)}
+                      />
+                    </div>
                   </div>
 
                   <div className="errorShow">
@@ -211,7 +207,9 @@ export const Landing_page = () => {
                   </div>
 
                   <div className="passoption">
-                    <p onClick={() => setForgotOpen(true)}>Forgot Password?</p>
+                    <span onClick={() => setForgotOpen(true)}>
+                      Forgot Password?
+                    </span>
                   </div>
 
                   <button type="submit" className="btn" disabled={busy}>
@@ -228,16 +226,14 @@ export const Landing_page = () => {
               </div>
             </div>
           </div>
-
-          {/* Forgot Password Modal: sends Supabase reset email and redirects back to /reset-password */}
-          <ForgotPasswordModal
-            isOpen={forgotOpen}
-            onClose={() => setForgotOpen(false)}
-            redirectPath="/reset-password"
-          />
         </div>
         <Footer />
       </div>
+      <ForgotPasswordModal
+        isOpen={forgotOpen}
+        onClose={() => setForgotOpen(false)}
+        redirectPath="/reset-password"
+      />
     </>
   );
 };

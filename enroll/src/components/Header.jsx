@@ -12,26 +12,29 @@ export const Header = ({ userRole }) => {
     userRole === 'admin';
 
   return (
-    <div className="header">
-      <div className="logos">
-        <img src="/bagongpilipinaslogo2.png"></img>
-        <img src="/caloocan_logo.png"></img>
-        <img src="/schoollogo.png"></img>
-      </div>
-      <h1 className="desktop">
-        <strong>
-          <span className="line1">BENIGNO AQUINO JR.</span>
+    <header className="header">
+      <div className="header_brand">
+        <div className="logos">
+          <img src="/bagongpilipinaslogo2.png" alt="Bagong Pilipinas" />
+          <img src="/caloocan_logo.png" alt="Caloocan City" />
+          <img src="/schoollogo.png" alt="School Logo" />
+        </div>
+        <h1 className="desktop">
+          <span className="line1">BENIGNO AQUINO JR. </span>
           <span className="line2">HIGH SCHOOL</span>
-        </strong>
-      </h1>
+        </h1>
+      </div>
+
       {hasProfile && (
         <div className="profile" onClick={() => setShowAccountOption(true)}>
+          <span className="profile_initial">U</span>{' '}
+          {/* Adjust dynamically later */}
           <AccountOption
             show={showAccountOption}
             onClose={() => setShowAccountOption(false)}
           />
         </div>
       )}
-    </div>
+    </header>
   );
 };

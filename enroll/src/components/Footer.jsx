@@ -1,19 +1,17 @@
 import './footer.css';
 
 export const Footer = () => {
-    
-    return (
-        <>    
-    <div className='footer'>
-        <div className='text'>
-            <p>
-                © Copyright 2025 Benigno Aquino Junior High School Student Enrollment and Grading Access System 
-            </p>
-            <p>
-                All Rights Reserved.
-            </p>
-        </div> 
-    </div>
-    </>
-    )
-}
+  const currentYear = new Date().getFullYear();
+
+  return (
+    <footer className="footer">
+      <div className="text">
+        <p>
+          &copy; {currentYear} Benigno Aquino Jr. High School Student Enrollment
+          and Grading System.
+        </p>
+        <p>All Rights Reserved.</p>
+      </div>
+    </footer>
+  );
+};
